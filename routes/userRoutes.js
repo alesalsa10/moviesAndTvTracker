@@ -1,0 +1,50 @@
+const express = require('express');
+const router = express.Router();
+const { check, validationResult,oneOf } = require('express-validator');
+
+const userController = require('../controllers/userControllers');
+
+//users/register
+router.post(
+  '/register',
+  [
+    check('email').isEmail().withMessage('Must be a valid email'),
+    check('password')
+      .isLength({ min: 6 })
+      .withMessage('Password must be at lest 6 characters'),
+    check('username').notEmpty().withMessage('Username cannot be emtpy')
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    } else {
+      next();
+    }
+  },
+  userController.register
+);
+
+router.post('/signIn', [
+  oneOf([
+    check('username')
+      .notEmpty()
+      .withMessage('Username cannot be empty'),
+    check('email')
+      .isEmail()
+      .withMessage('Type a valid email')
+  ]),
+  check('password').isLength({min: 6}).withMessage('Password must be at least 6 charcaters long'),
+],
+ (req, res, next) =>{
+   const errors = validationResult(req);
+   if (!errors.isEmpty()) {
+     return res.status(400).json({ errors: errors.array() });
+   } else {
+     next();
+   }
+ },
+ userController.signIn
+);
+
+module.exports = router;

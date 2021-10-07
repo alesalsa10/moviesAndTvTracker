@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
   email: {
     type: String,
     required: true,
@@ -20,10 +16,10 @@ const UserSchema = new mongoose.Schema({
       ref: 'Comment',
     },
   ],
-  userName: {
+  username: {
     type: String,
     required: true,
-    default: defaultUserName(this.email),
+    unique: true,
   },
   favorites:[
     {
@@ -33,10 +29,6 @@ const UserSchema = new mongoose.Schema({
 ]
 });
 
-const defaultUserName = (email) => {
-  //default username if none is given will be whatever it is before @ in the email provided by the user
-  return email.split('@')[0];
-};
 
 const User = mongoose.model('User', UserSchema);
 
