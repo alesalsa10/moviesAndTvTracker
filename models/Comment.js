@@ -20,6 +20,9 @@ const CommentSchema = new mongoose.Schema({
     default: Date.now,
     required: true,
   },
+  movieOrShow:{
+    type: String
+  }
 });
 
 const Comment = mongoose.model('Comment', CommentSchema);

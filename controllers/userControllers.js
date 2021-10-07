@@ -70,7 +70,49 @@ const signIn = async (req, res) => {
   }
 };
 
+const getAnUser = async (req, res) => {
+  const { id } = req.params;
+
+  //check if user is different than the one on req.parms
+  //display info depending on who it is
+  console.log(req.user);
+  let user;
+
+  if (req.user == id) {
+    console.log('can see all info');
+    user = await User.findOne({ _id: id });
+  } else if (req.user !== id) {
+    console.log('only some info is shown');
+    user = await User.findOne({ _id: id }).select('username favorites');
+  }
+
+  // return 404 if no user found, return user otherwise.
+  if (!user) {
+    res.status(404).json({ Msg: 'User not found!' });
+  } else {
+    res.status(302).json(user);
+  }
+};
+
+const editUser = async (req, res) => {
+  const {username, name} = req.body;
+  const { id } = req.params;
+  const user = req.user; //this is set on authentication middleware after decoding user
+  //only a profile owner can edit the page
+  if (id == user) {
+    try {
+      const user = await User.findByIdAndUpdate(req.user);
+
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ Msg: 'Something went wrong' });
+    }
+  }
+};
+
 module.exports = {
   register,
   signIn,
+  getAnUser,
+  editUser,
 };
