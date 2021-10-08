@@ -24,9 +24,15 @@ const UserSchema = new mongoose.Schema({
   favorites:[
     {
     //this will be the id from the external api
-    type: String,   
-  }
-]
+    type: mongoose.Types.ObjectId,
+    ref: "Media" 
+  },
+],
+name:{
+  type: String,
+  required: true,
+  minlength: 4
+}
 });
 
 

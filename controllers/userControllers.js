@@ -4,7 +4,7 @@ var jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const register = async (req, res) => {
-  const { email, password, username } = req.body;
+  const { email, password, username, name } = req.body;
 
   try {
     //check user by username and by email
@@ -24,6 +24,7 @@ const register = async (req, res) => {
         email,
         password: encryptedPassword,
         username,
+        name,
       });
 
       await user.save();
@@ -95,18 +96,35 @@ const getAnUser = async (req, res) => {
 };
 
 const editUser = async (req, res) => {
-  const {username, name} = req.body;
+  //only the username and name can be changed on the profile for now,  password will be able to be changed in later versions
+  const { username, name } = req.body;
   const { id } = req.params;
   const user = req.user; //this is set on authentication middleware after decoding user
   //only a profile owner can edit the page
   if (id == user) {
     try {
-      const user = await User.findByIdAndUpdate(req.user);
+      let fieldsToUpdate = { username, name };
+      const userWithProposedUsername = await User.findOne({ username });
 
+      //check that no user with this username already exists
+      if (!userWithProposedUsername) {
+        const user = await User.findByIdAndUpdate(req.user, fieldsToUpdate, {
+          returnOriginal: false,
+        });
+        console.log(user);
+        res.status(200).json({ Msg: 'User updated' });
+      } else {
+        res.status(409).json({Msg: 'Username already exists'})
+      }
     } catch (error) {
       console.log(error);
       res.status(500).json({ Msg: 'Something went wrong' });
     }
+  } else {
+    console.log('user unathorized');
+    res
+      .status(409)
+      .json({ Msg: 'You are not authorized to change this profile' });
   }
 };
 

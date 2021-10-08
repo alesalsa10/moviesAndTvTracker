@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const CommentSchema = new mongoose.Schema({
   postedBy: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Types.ObjectId,
     required: true,
     ref: 'User',
   },
@@ -10,19 +10,23 @@ const CommentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  replies: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: false,
-    ref: 'Comment',
-  },
+  children: [
+    {
+      type: mongoose.Types.ObjectId,
+      required: false,
+      ref: 'Comment',
+    },
+  ],
   datePosted: {
     type: Date,
     default: Date.now,
     required: true,
   },
-  movieOrShow:{
-    type: String
-  }
+  parentMedia: {
+    //the movie or show is belongs to
+    type: mongoose.Types.ObjectId,
+    ref: 'Media',
+  },
 });
 
 const Comment = mongoose.model('Comment', CommentSchema);
