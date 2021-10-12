@@ -71,7 +71,7 @@ const signIn = async (req, res) => {
   }
 };
 
-const getAnUser = async (req, res) => {
+const getUser = async (req, res) => {
   const { id } = req.params;
 
   //check if user is different than the one on req.parms
@@ -114,7 +114,7 @@ const editUser = async (req, res) => {
         console.log(user);
         res.status(200).json({ Msg: 'User updated' });
       } else {
-        res.status(409).json({Msg: 'Username already exists'})
+        res.status(409).json({ Msg: 'Username already exists' });
       }
     } catch (error) {
       console.log(error);
@@ -128,9 +128,26 @@ const editUser = async (req, res) => {
   }
 };
 
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+  const user = req.user;
+  console.log(id, user)
+  if (id == user) {
+    try {
+      await User.findByIdAndDelete(id);
+      res.status(200).json({ Msg: 'User deleted successfully' });
+    } catch (error) {
+      res.status(500).json({Msg:'Something went wrong'})
+    }
+  } else {
+    res.status(409).json({Msg:'You are not authorized to delete this user'});
+  }
+};
+
 module.exports = {
   register,
   signIn,
-  getAnUser,
+  getUser,
   editUser,
+  deleteUser,
 };

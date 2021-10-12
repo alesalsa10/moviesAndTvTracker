@@ -48,7 +48,7 @@ router.post(
   userController.signIn
 );
 
-router.get('/:id', verifyToken, userController.getAnUser);
+router.get('/:id', verifyToken, userController.getUser);
 
 router.put(
   '/:id',
@@ -69,5 +69,7 @@ router.put(
   },
   userController.editUser
 );
+
+router.delete('/:id', verifyToken, userController.deleteUser)
 
 module.exports = router;
