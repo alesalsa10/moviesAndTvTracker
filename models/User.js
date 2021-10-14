@@ -21,11 +21,12 @@ const UserSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  favorites:[
+  bookmarks:[
     {
     //this will be the id from the external api
     type: mongoose.Types.ObjectId,
-    ref: "Media" 
+    ref: "Media" ,
+    unique: true
   },
 ],
 name:{

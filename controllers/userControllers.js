@@ -81,18 +81,18 @@ const getUser = async (req, res) => {
 
   if (req.user == id) {
     console.log('can see all info');
-    user = await User.findOne({ _id: id });
+    user = await User.findOne({ _id: id })
+      .populate('bookmarks')
+    // return 404 if no user found, return user otherwise.
+    if (!user) {
+      res.status(404).json({ Msg: 'User not found!' });
+    } else {
+      res.status(400).json(user);
+    }
   } else if (req.user !== id) {
     console.log('only some info is shown');
     user = await User.findOne({ _id: id }).select('username favorites');
-  }
-
-  // return 404 if no user found, return user otherwise.
-  if (!user) {
-    res.status(404).json({ Msg: 'User not found!' });
-  } else {
-    res.status(302).json(user);
-  }
+  } 
 };
 
 const editUser = async (req, res) => {

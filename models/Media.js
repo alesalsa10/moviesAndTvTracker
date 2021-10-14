@@ -1,22 +1,27 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const mediaSchema = new mongoose.Schema({
-    mediaType:{
-        type: String,
-        required: true,
+  mediaType: {
+    type: String,
+    required: true,
+  },
+  externalId: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  comments: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'Comment',
     },
-    externalId:{
-        type: String,
-        required: true,
-    },
-    comments:[
-        {
-            type: mongoose.Types.ObjectId,
-            ref: 'Comment'
-        }
-    ]
+  ],
+  user:{
+    type: mongoose.Types.ObjectId,
+    ref: 'User'
+  },
 });
 
 const Media = mongoose.model('Media', mediaSchema);
 
-module.exports = Media
+module.exports = Media;

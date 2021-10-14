@@ -3,7 +3,7 @@ const router = express.Router();
 const { check, validationResult, oneOf } = require('express-validator');
 
 const userController = require('../controllers/userControllers');
-const verifyToken = require('../middlewares/auth');
+const auth = require('../middlewares/auth');
 
 //testing new computer git and github connection
 
@@ -16,6 +16,7 @@ router.post(
       .isLength({ min: 6 })
       .withMessage('Password must be at lest 6 characters'),
     check('username').notEmpty().withMessage('Username cannot be emtpy'),
+    check('name').notEmpty().withMessage('Name cannot be emtpy'),
   ],
   (req, res, next) => {
     const errors = validationResult(req);
@@ -50,11 +51,11 @@ router.post(
   userController.signIn
 );
 
-router.get('/:id', verifyToken, userController.getUser);
+router.get('/:id', auth, userController.getUser);
 
 router.put(
   '/:id',
-  verifyToken,
+  auth,
   [
     oneOf([
       check('username').notEmpty().withMessage('Username cannot be empty'),
@@ -72,6 +73,6 @@ router.put(
   userController.editUser
 );
 
-router.delete('/:id', verifyToken, userController.deleteUser)
+router.delete('/:id', auth, userController.deleteUser)
 
 module.exports = router;
