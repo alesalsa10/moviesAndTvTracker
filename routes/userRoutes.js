@@ -5,6 +5,8 @@ const { check, validationResult, oneOf } = require('express-validator');
 const userController = require('../controllers/userControllers');
 const verifyToken = require('../middlewares/auth');
 
+//testing new computer git and github connection
+
 //users/register
 router.post(
   '/register',
