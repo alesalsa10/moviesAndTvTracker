@@ -19,4 +19,8 @@ router.post('/new/:userId', auth, [
     }
 }, mediaControllers.addBookmark)
 
+router.get('/:userId/all', auth, mediaControllers.getAllBookmarks);
+router.get('/:userId/:mediaType', auth, mediaControllers.getAllBookmarkedByCategory);
+router.delete('/:userId/:bookmarkId', auth, mediaControllers.deleteBookmark)
+
 module.exports = router;

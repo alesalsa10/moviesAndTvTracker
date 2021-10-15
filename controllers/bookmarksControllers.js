@@ -29,8 +29,8 @@ const addBookmark = async (req, res) => {
               await foundUser.bookmarks.push(existingMedia);
               await foundUser.save();
               res.status(201).json({ Msg: 'Bookmark successfully created 1' });
-            }else {
-              res.status(409).json({Msg: 'Already exist'})
+            } else {
+              res.status(409).json({ Msg: 'Already exist' });
             }
           } else {
             let newMedia = new Media({
@@ -63,6 +63,81 @@ const addBookmark = async (req, res) => {
   }
 };
 
+const getAllBookmarks = async (req, res) => {
+  const { userId } = req.params;
+  const loggedInUser = req.user;
+
+  if (userId == loggedInUser) {
+    try {
+      let user = await User.findById(userId)
+        .select('bookmarks')
+        .populate('bookmarks');
+      if (user) {
+        res.status(400).json({ user });
+      } else {
+        res.status(404).json({ Msg: 'This user does not exist' });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ Msg: 'Something went wrong' });
+    }
+  } else {
+    res.status(409).json({ Msg: 'Not authorized' });
+  }
+};
+
+const getAllBookmarkedByCategory = async (req, res) => {
+  const { userId, mediaType } = req.params;
+  const loggedInUser = req.user;
+
+  if (userId == loggedInUser) {
+    try {
+      let user = await User.findById(userId)
+        .select('bookmarks')
+        .populate({
+          path: 'bookmarks',
+          match: { mediaType: mediaType },
+        });
+      if (user) {
+        res.status(400).json(user);
+      } else {
+        res.status(404).json({ Msg: 'This user does not exist' });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ Msg: 'Something went wrong' });
+    }
+  } else {
+    res.status(409).json({ Msg: 'Not authorized' });
+  }
+};
+
+const deleteBookmark = async (req, res) => {
+  const { userId, bookmarkId } = req.params;
+  const loggedInUser = req.user;
+
+  if (userId == loggedInUser) {
+    try {
+      //when i delete the bookmark, i need to delete its reference in the parent user
+      await User.updateOne(
+        { _id: userId },
+        { $pull: { bookmarks: { _id: bookmarkId } } },
+        { multi: true }
+      );
+
+      res.status(200).json({ Msg: 'Bookmark deleted' });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ Msg: 'Something went wrong' });
+    }
+  } else {
+    res.status(409).json({ Msg: 'Not authorized' });
+  }
+};
+
 module.exports = {
   addBookmark,
+  getAllBookmarks,
+  getAllBookmarkedByCategory,
+  deleteBookmark,
 };
