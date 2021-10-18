@@ -10,19 +10,25 @@ const CommentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  children: [
+  replies: [
     {
       type: mongoose.Types.ObjectId,
       required: false,
       ref: 'Comment',
+      default: [],
     },
   ],
+  parentComment: {
+    type: mongoose.Types.ObjectId,
+    ref: 'Comment',
+    default: null,
+  },
   datePosted: {
     type: Date,
     default: Date.now,
     required: true,
   },
-  parentMedia: {
+  parentMediaId: {
     //the movie or show is belongs to
     type: mongoose.Types.ObjectId,
     ref: 'Media',
