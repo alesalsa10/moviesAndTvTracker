@@ -59,10 +59,103 @@ const createComment = async (req, res) => {
 };
 
 const replyToComment = async (req, res) => {
-    //find parentComment by id
-    //create the new comment and add it to the replies inside of comment
+  //find parentComment by id
+  //create the new comment and add it to the replies inside of comment
+  const { text } = req.body;
+  const userId = req.header('userId');
+  const parentCommentId = req.header('parentCommentId');
+  const parentMediaId = req.header('parentMediaId');
+
+  try {
+    let foundUser = await User.findById(userId).select('-password');
+    if (foundUser) {
+      try {
+        let foundMedia = await Media.findById(parentMediaId);
+        if (foundMedia) {
+          try {
+            let foundComment = await Comment.findById(parentCommentId);
+            if (foundComment) {
+              let newComment = new Comment({
+                postedBy: userId,
+                parentMediaId: foundMedia._id,
+                text,
+                parentComment: parentCommentId,
+              });
+              await newComment.save();
+              await foundUser.comments.push(newComment);
+              await foundUser.save();
+              await foundComment.replies.push(newComment);
+              await foundComment.save();
+              res.status(200).json({ Msg: 'Successful reply' });
+            } else {
+              res.status(404).json({ Msg: 'Invalid comment id' });
+            }
+          } catch (error) {
+            console.log(error);
+            res.status(500).json({ Msg: 'Something went wrong' });
+          }
+        } else {
+          res.status(404).json({ Msg: 'Invalid parent media id' });
+        }
+      } catch (error) {
+        console.log(error);
+        res.status(500).json({ Msg: 'Something went wrong' });
+      }
+    } else {
+      res.status(404).json({ Msg: 'Invalid user id' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ Msg: 'Something went wrong' });
+  }
+};
+
+const editComment = async (req, res) => {
+  const commentId = req.header('commentId');
+  const { text } = req.body;
+  try {
+    const update = {
+      text,
+    };
+    let foundComment = await Comment.findByIdAndUpdate(commentId, update, {
+      new: true,
+    });
+    if (foundComment) {
+      res.status(202).json({ foundComment });
+    } else {
+      res.status(404).json({ Msg: 'No comment with given id was found' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ Msg: 'Something went wrong' });
+  }
+};
+
+const deleteComment = async (req, res) => {
+  //to delete the comment, I will onyl delete the content and replace it with ['deleted']
+  //this will be done so the threaded comment can still be looked up, how reddit works
+  const commentId = req.header('commentId');
+  try {
+    const update = {
+      text: '[Deleted]'
+    };
+    let foundComment = await Comment.findByIdAndUpdate(commentId, update, {
+      new: true,
+    });
+    if (foundComment) {
+      res.status(202).json({ foundComment });
+    } else {
+      res.status(404).json({ Msg: 'No comment with given id was found' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ Msg: 'Something went wrong' });
+  }
 };
 
 module.exports = {
   createComment,
+  replyToComment,
+  editComment,
+  deleteComment
 };

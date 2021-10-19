@@ -6,7 +6,7 @@ const connectDb = require('./config/mongooseConnection');
 const userRouter = require('./routes/userRoutes');
 const bookmarkRouter = require('./routes/bookmarkRoutes');
 const commentsRouter = require('./routes/commentsRoutes');
-
+const mediaRouter = require('./routes/mediaRoutes');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -22,7 +22,8 @@ app.get('/', (req, res) => {
 
 app.use('/users', userRouter);
 app.use('/bookmarks', bookmarkRouter);
-app.use('/comments', commentsRouter)
+app.use('/comments', commentsRouter);
+app.use('/media', mediaRouter);
 
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
