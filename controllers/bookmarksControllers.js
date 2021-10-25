@@ -61,7 +61,7 @@ const getAllBookmarks = async (req, res) => {
       .select('bookmarks')
       .populate('bookmarks');
     if (user) {
-      res.status(400).json({ user });
+      res.status(200).json({ user });
     } else {
       res.status(404).json({ Msg: 'This user does not exist' });
     }
@@ -82,7 +82,7 @@ const getAllBookmarkedByCategory = async (req, res) => {
         match: { mediaType: mediaType },
       });
     if (user) {
-      res.status(400).json(user);
+      res.status(200).json(user);
     } else {
       res.status(404).json({ Msg: 'This user does not exist' });
     }

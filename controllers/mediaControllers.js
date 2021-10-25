@@ -13,7 +13,7 @@ const getMediaById = async (req, res) => {
             }
         })
         if(foundMedia){
-            res.status(400).json(foundMedia);
+            res.status(200).json(foundMedia);
         } else {
             res.status(404).json({Msg: 'Media not found'})
         }

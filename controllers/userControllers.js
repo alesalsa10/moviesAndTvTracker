@@ -28,7 +28,7 @@ const register = async (req, res) => {
       });
 
       await user.save();
-      res.status(200).json({ user });
+      res.status(203).json({ user });
       console.log(user);
     }
   } catch (error) {
@@ -58,7 +58,7 @@ const signIn = async (req, res) => {
       let user = foundUserByEmail || foundUserByUsername;
       if (match) {
         var token = jwt.sign({ user: user._id }, process.env.jwtKey);
-        res.status(400).json(token);
+        res.status(201).json(token);
       } else {
         res.status(401).json({ Msg: 'Invalid credentials' });
       }
@@ -87,7 +87,7 @@ const getUser = async (req, res) => {
     if (!user) {
       res.status(404).json({ Msg: 'User not found!' });
     } else {
-      res.status(400).json(user);
+      res.status(200).json(user);
     }
   } else if (req.user !== id) {
     console.log('only some info is shown');
