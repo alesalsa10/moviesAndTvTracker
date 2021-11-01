@@ -5,21 +5,22 @@ const mediaSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  externalId: {
-    type: String,
-    required: true,
-    unique: true
-  },
+  // externalId: {
+  //   type: String,
+  //   required: true,
+  //   unique: true
+  // },
   comments: [
     {
       type: mongoose.Types.ObjectId,
       ref: 'Comment',
     },
   ],
-  user:{
+  user: {
     type: mongoose.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
   },
+  _id: Number,
 });
 
 const Media = mongoose.model('Media', mediaSchema);
