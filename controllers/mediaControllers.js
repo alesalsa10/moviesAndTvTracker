@@ -20,32 +20,29 @@ const getMediaById = async (req, res) => {
         },
       });
     if (foundMedia) {
-      console.log(foundMedia);
-      //res.status(200).json(foundMedia);
-      try {
-        let mediaDetails = await externalGetMediaById(mediaType, id);
-        console.log(foundMedia);
+      let mediaDetails = await externalGetMediaById(mediaType, id);
+      console.log('24', mediaDetails);
+      if (mediaDetails.error) {
+        res
+          .status(mediaDetails.error.status)
+          .json({ Msg: mediaDetails.error.Msg });
+      } else {
         res.status(200).json({ mediaDetails, foundMedia });
-      } catch (err) {
-        console.log(err);
-        res.status(mediaDetails.status).json({ Msg: mediaDetails.Msg });
       }
     } else {
-      //res.status(404).json({ Msg: 'Media not found' });
-      //if media by given by api id is not found create one
-      let newMedia = new Media({
-        mediaType,
-        _id: id,
-      });
-      //save new media
-      await newMedia.save();
-      try {
-        let mediaDetails = await externalGetMediaById(mediaType, id);
-        console.log(mediaDetails);
+      let mediaDetails = await externalGetMediaById(mediaType, id);
+      console.log('35', mediaDetails);
+      if (mediaDetails.error) {
+        res
+          .status(mediaDetails.error.status)
+          .json({ Msg: mediaDetails.error.Msg });
+      } else {
+        let newMedia = new Media({
+          mediaType,
+          _id: id,
+        });
+        await newMedia.save();
         res.status(200).json({ mediaDetails, foundMedia });
-      } catch (err) {
-        console.log(err);
-        res.status(mediaDetails.status).json({ Msg: mediaDetails.Msg });
       }
     }
   } catch (error) {
@@ -93,12 +90,15 @@ const externalGetMediaById = async (mediaType, id) => {
     const response = await axios.get(
       `${process.env.baseURL}/${mediaType}/${id}?api_key=${process.env.apiKey}`
     );
+    response.data.Err = null;
     return response.data;
   } catch (err) {
-    console.log(err);
+    console.log('97', err.response.status);
     return {
-      status: err.response.staus,
-      Msg: err.response.data.status_message,
+      error: {
+        status: err.response.status,
+        Msg: err.response.data.status_message,
+      },
     };
   }
 };

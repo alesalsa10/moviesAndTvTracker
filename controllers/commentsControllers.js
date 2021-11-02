@@ -27,27 +27,6 @@ const createComment = async (req, res) => {
         await existingMedia.save();
 
         res.status(201).json({ Msg: 'Comment created' });
-      } else {
-        let newMedia = new Media({
-          mediaType,
-          externalId,
-        });
-        //save new media
-        await newMedia.save();
-
-        let newComment = new Comment({
-          postedBy: userId,
-          parentMediaId: newMedia._id,
-          text,
-        });
-
-        await newComment.save();
-        await foundUser.comments.push(newComment);
-        await foundUser.save();
-        await existingMedia.comments.push(newComment);
-        await existingMedia.save();
-
-        res.status(201).json({ Msg: 'Comment created' });
       }
     } else {
       res.status(404).json({ Msg: 'User not found' });
@@ -134,16 +113,26 @@ const editComment = async (req, res) => {
 const deleteComment = async (req, res) => {
   //to delete the comment, I will onyl delete the content and replace it with ['deleted']
   //this will be done so the threaded comment can still be looked up, how reddit works
+  //only do the 'deleted' logic if the comment has replies
   const commentId = req.header('commentId');
   try {
     const update = {
-      text: '[Deleted]'
+      text: '[Deleted]',
     };
-    let foundComment = await Comment.findByIdAndUpdate(commentId, update, {
-      new: true,
-    });
-    if (foundComment) {
-      res.status(202).json({ foundComment });
+    //lookup comment
+    //if found look up replies array
+    //if it is empty delete everything about the comment
+    //else change it to [deleted] this is done to keep the nested chain by lookup of parent comment
+    let comment = await Comment.findById(commentId);
+    if (comment) {
+      let repliesLength = comment.replies.length;
+      if (repliesLength > 0) {
+        await Comment.findByIdAndUpdate(commentId, update, { new: true });
+        res.status(202).json({ Msg: 'Comment deleted ' });
+      } else {
+        await Comment.findByIdAndDelete(commentId);
+        res.status(202).json({ Msg: 'Comment deleted 2' });
+      }
     } else {
       res.status(404).json({ Msg: 'No comment with given id was found' });
     }
@@ -157,5 +146,5 @@ module.exports = {
   createComment,
   replyToComment,
   editComment,
-  deleteComment
+  deleteComment,
 };

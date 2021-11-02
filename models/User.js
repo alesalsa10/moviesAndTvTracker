@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
   bookmarks:[
     {
     //this will be the id from the external api
-    type: mongoose.Types.ObjectId,
+    type: Number ,//mongoose.Types.ObjectId,
     ref: "Media" ,
     unique: true
   },

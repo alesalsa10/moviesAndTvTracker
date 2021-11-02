@@ -30,7 +30,7 @@ const CommentSchema = new mongoose.Schema({
   },
   parentMediaId: {
     //the movie or show is belongs to
-    type: mongoose.Types.ObjectId,
+    type: Number,//mongoose.Types.ObjectId,
     ref: 'Media',
   },
 });

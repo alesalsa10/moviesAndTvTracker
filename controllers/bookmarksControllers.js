@@ -5,12 +5,8 @@ const Media = require('../models/Media');
 //private route
 //all routes will take this format /user/userId/media/...
 const addBookmark = async (req, res) => {
-  const { mediaType, externalId } = req.body;
+  const { externalId } = req.body;
   const userId = req.header('userId');
-  //check if no media with given external id exists
-  //if no media exists create a new one
-  //then add it to the bookmakrs
-  //if the media already exists, then just add its id to the bookmarks
   try {
     let foundUser = await User.findById(userId).select('-password');
     console.log(foundUser);
@@ -25,21 +21,10 @@ const addBookmark = async (req, res) => {
           if (!bookmarkExist) {
             await foundUser.bookmarks.push(existingMedia);
             await foundUser.save();
-            res.status(201).json({ Msg: 'Bookmark successfully created 1' });
+            res.status(201).json({ Msg: 'Bookmark successfully created' });
           } else {
             res.status(409).json({ Msg: 'Already exist' });
           }
-        } else {
-          let newMedia = new Media({
-            mediaType,
-            externalId,
-          });
-          //save new media
-          await newMedia.save();
-          //add bookmark to userfound
-          await foundUser.bookmarks.push(newMedia);
-          await foundUser.save();
-          res.status(201).json({ Msg: 'Bookmark successbully created 2' });
         }
       } catch (error) {
         console.log(error);
@@ -55,11 +40,13 @@ const addBookmark = async (req, res) => {
 };
 
 const getAllBookmarks = async (req, res) => {
+  //still needs to call movies api to get movie info inside
+  //this will be done in a loop keeping count it will break onces it gets to the length of bookmarks length array
   const userId = req.header('userId');
   try {
     let user = await User.findById(userId)
       .select('bookmarks')
-      .populate('bookmarks');
+      .populate('bookmarks', '_id mediaType');
     if (user) {
       res.status(200).json({ user });
     } else {
@@ -80,6 +67,7 @@ const getAllBookmarkedByCategory = async (req, res) => {
       .populate({
         path: 'bookmarks',
         match: { mediaType: mediaType },
+        select: '_id mediaType'
       });
     if (user) {
       res.status(200).json(user);
