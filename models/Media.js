@@ -5,11 +5,6 @@ const mediaSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  // externalId: {
-  //   type: String,
-  //   required: true,
-  //   unique: true
-  // },
   comments: [
     {
       type: mongoose.Types.ObjectId,

@@ -2,7 +2,8 @@
 //it is created with the api key when the user goes to click on given media from the movie database api
 
 const Media = require('../models/Media');
-const axios = require('axios').default;
+const externalGetMediaById = require('../externalAPI/apiCalls');
+const { default: axios } = require('axios');
 
 const getMediaById = async (req, res) => {
   //lookup media by id
@@ -37,11 +38,11 @@ const getMediaById = async (req, res) => {
           .status(mediaDetails.error.status)
           .json({ Msg: mediaDetails.error.Msg });
       } else {
-        let newMedia = new Media({
+        let foundMedia = new Media({
           mediaType,
           _id: id,
         });
-        await newMedia.save();
+        await foundMedia.save();
         res.status(200).json({ mediaDetails, foundMedia });
       }
     }
@@ -85,21 +86,89 @@ const searchMedia = async (req, res) => {
   }
 };
 
-const externalGetMediaById = async (mediaType, id) => {
+const getMediaLists = async (req, res) => {
+  const { mediaType, listType } = req.params;
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/${mediaType}/${id}?api_key=${process.env.apiKey}`
+      `${process.env.baseURL}/${mediaType}/${listType}?api_key=${process.env.apiKey}`
     );
-    response.data.Err = null;
-    return response.data;
+    console.log(response);
+    res.status(200).json(response.data);
   } catch (err) {
-    console.log('97', err.response.status);
-    return {
-      error: {
-        status: err.response.status,
-        Msg: err.response.data.status_message,
-      },
-    };
+    console.log(err);
+    res
+      .status(err.response.status)
+      .json({ Msg: err.response.data.status_message });
+  }
+};
+
+const getRecommendations = async (req, res) => {
+  const { mediaType, id } = req.params;
+  try {
+    const response = await axios.get(
+      `${process.env.baseURL}/${mediaType}/${id}/recommendations?api_key=${process.env.apiKey}`
+    );
+    console.log(response);
+    res.status(200).json(response.data);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(err.response.status)
+      .json({ Msg: err.response.data.status_message });
+  }
+};
+
+const getVideos = async (req, res) => {
+  const { mediaType, id } = req.params;
+  try {
+    const response = await axios.get(
+      `${process.env.baseURL}/${mediaType}/${id}/videos?api_key=${process.env.apiKey}`
+    );
+    console.log(response);
+    let trailerVideos = [];
+    for (const video of response.data.results) {
+      if (video.type == 'Trailer') {
+        trailerVideos.push(video);
+      }
+    }
+    res.status(200).json(trailerVideos);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(err.response.status)
+      .json({ Msg: err.response.data.status_message });
+  }
+};
+
+const getSeason = async (req, res) => {
+  const { id, seasonNumber } = req.params;
+  try {
+    const response = await axios.get(
+      `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}`
+    );
+    console.log(response);
+    res.status(200).json(response.data);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(err.response.status)
+      .json({ Msg: err.response.data.status_message });
+  }
+};
+
+const getEpisode = async (req, res) => {
+  const { id, seasonNumber, episodeNumber } = req.params;
+  try {
+    const response = await axios.get(
+      `${process.env.baseURL}/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${process.env.apiKey}&append_to_response=videos`
+    );
+    console.log(response);
+    res.status(200).json(response.data);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(err.response.status)
+      .json({ Msg: err.response.data.status_message });
   }
 };
 
@@ -107,4 +176,9 @@ module.exports = {
   getMediaById,
   getMediaByCategories,
   searchMedia,
+  getMediaLists,
+  getRecommendations,
+  getVideos,
+  getSeason,
+  getEpisode,
 };

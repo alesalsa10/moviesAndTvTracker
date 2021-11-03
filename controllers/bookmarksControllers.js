@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Media = require('../models/Media');
+const externalGetMediaById = require('../externalAPI/apiCalls');
 
 //create a new bookmark;
 //private route
@@ -46,8 +47,15 @@ const getAllBookmarks = async (req, res) => {
   try {
     let user = await User.findById(userId)
       .select('bookmarks')
-      .populate('bookmarks', '_id mediaType');
+      .populate('bookmarks', '_id mediaType').lean();
     if (user) {
+      for (const [i, bookmark] of user.bookmarks.entries()) {
+        let mediaInfo = await externalGetMediaById(
+          bookmark.mediaType,
+          bookmark._id
+        );
+        user.bookmarks[i].mediaInfo = mediaInfo;
+      }
       res.status(200).json({ user });
     } else {
       res.status(404).json({ Msg: 'This user does not exist' });
@@ -67,9 +75,16 @@ const getAllBookmarkedByCategory = async (req, res) => {
       .populate({
         path: 'bookmarks',
         match: { mediaType: mediaType },
-        select: '_id mediaType'
-      });
+        select: '_id mediaType',
+      }).lean();
     if (user) {
+      for (const [i, bookmark] of user.bookmarks.entries()) {
+        let mediaInfo = await externalGetMediaById(
+          bookmark.mediaType,
+          bookmark._id
+        );
+        user.bookmarks[i].mediaInfo = mediaInfo;
+      }
       res.status(200).json(user);
     } else {
       res.status(404).json({ Msg: 'This user does not exist' });

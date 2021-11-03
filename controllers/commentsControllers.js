@@ -131,7 +131,7 @@ const deleteComment = async (req, res) => {
         res.status(202).json({ Msg: 'Comment deleted ' });
       } else {
         await Comment.findByIdAndDelete(commentId);
-        res.status(202).json({ Msg: 'Comment deleted 2' });
+        res.status(202).json({ Msg: 'Comment deleted' });
       }
     } else {
       res.status(404).json({ Msg: 'No comment with given id was found' });
