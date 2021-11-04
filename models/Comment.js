@@ -33,6 +33,14 @@ const CommentSchema = new mongoose.Schema({
     type: Number,//mongoose.Types.ObjectId,
     ref: 'Media',
   },
+  parentSeason:{
+    type: mongoose.Types.ObjectId,
+    ref: 'Season'
+  },
+  parentSeason:{
+    type: mongoose.Types.ObjectId,
+    ref: 'Episode'
+  }
 });
 
 const Comment = mongoose.model('Comment', CommentSchema);

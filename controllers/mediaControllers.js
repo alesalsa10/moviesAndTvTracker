@@ -2,6 +2,10 @@
 //it is created with the api key when the user goes to click on given media from the movie database api
 
 const Media = require('../models/Media');
+const Season = require('../models/Season');
+const Episode = require('../models/Episode');
+const Movie = require('../models/Movie');
+const Tv = require('../models/Tv');
 const externalGetMediaById = require('../externalAPI/apiCalls');
 const { default: axios } = require('axios');
 
@@ -19,7 +23,8 @@ const getMediaById = async (req, res) => {
         populate: {
           path: 'replies',
         },
-      });
+      })
+      .lean();
     if (foundMedia) {
       let mediaDetails = await externalGetMediaById(mediaType, id);
       console.log('24', mediaDetails);
@@ -141,13 +146,70 @@ const getVideos = async (req, res) => {
 };
 
 const getSeason = async (req, res) => {
+  //when an user get a season
+  //check if season exists in array called seasons inside the media document
+  //if it does not create a new season with the seasonNumber and the id from the external api
+  //this is done to be able to track comments
+  //return the season information with merged with the founded season created on my DB
+  //use lean() to be able to merge objects
+
   const { id, seasonNumber } = req.params;
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}`
+      `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}&append_to_response=videos`
     );
     console.log(response);
-    res.status(200).json(response.data);
+    //res.status(200).json(response.data);
+    try {
+      let foundMedia = await Media.findById(id);
+      if (foundMedia) {
+        try {
+          let foundSeason = await Season.findOne({ seasonNumber })
+            .populate('comments')
+            .populate({
+              path: 'comments',
+              populate: {
+                path: 'replies',
+              },
+            })
+            .lean();
+          if (foundSeason) {
+            res.status(200).json({ ...response.data, foundSeason });
+          } else {
+            let foundSeason = new Season({
+              seasonNumber,
+              _id: response.data._id,
+              media: foundMedia._id,
+            });
+            await foundSeason.save();
+            await foundMedia.seasons.push(foundSeason);
+            await foundMedia.save();
+            res.status(200).json({ ...response.data, newSeason: foundSeason });
+          }
+        } catch (err) {
+          console.log(err);
+          res.status(500).json({ Msg: 'Something went wrong' });
+        }
+      } else {
+        let foundMedia = new Media({
+          mediaType: 'tv',
+          _id: id,
+        });
+        await foundMedia.save();
+        let newSeason = new Season({
+          seasonNumber,
+          _id: response.data._id,
+          media: foundMedia._id,
+        });
+        await newSeason.save();
+        await foundMedia.seasons.push(newSeason);
+        await foundMedia.save();
+        res.status(200).json({ ...response.data, newSeason });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ Msg: 'Something went wrong' });
+    }
   } catch (err) {
     console.log(err);
     res
