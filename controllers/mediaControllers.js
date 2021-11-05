@@ -15,46 +15,96 @@ const getMediaById = async (req, res) => {
   //call external api, get response
   //merge response with my own database
   const { mediaType, id } = req.params;
-  try {
-    let foundMedia = await Media.findById(id)
-      .populate('comments')
-      .populate({
-        path: 'comments',
-        populate: {
-          path: 'replies',
-        },
-      })
-      .lean();
-    if (foundMedia) {
-      let mediaDetails = await externalGetMediaById(mediaType, id);
-      console.log('24', mediaDetails);
-      if (mediaDetails.error) {
-        res
-          .status(mediaDetails.error.status)
-          .json({ Msg: mediaDetails.error.Msg });
-      } else {
-        res.status(200).json({ mediaDetails, foundMedia });
-      }
+  //let foundMedina
+  //if mediaType =' tv foundMedian = tv.find else foundmedia = movie.find
+
+  let foundMedia;
+  if (mediaType == 'tv') {
+    try {
+      foundMedia = await Tv.findById(id)
+        .populate('comments')
+        .populate({
+          path: 'comments',
+          populate: {
+            path: 'replies',
+          },
+        })
+        .lean();
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ Msg: 'Something went wrong' });
+    }
+  } else if (mediaType == 'movie') {
+    try {
+      foundMedia = await Movie.findById(id)
+        .populate('comments')
+        .populate({
+          path: 'comments',
+          populate: {
+            path: 'replies',
+          },
+        })
+        .lean();
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ Msg: 'Something went wrong' });
+    }
+  }
+
+  // try {
+  //   let foundMedia = await Media.findById(id)
+  //     .populate('comments')
+  //     .populate({
+  //       path: 'comments',
+  //       populate: {
+  //         path: 'replies',
+  //       },
+  //     })
+  //     .lean();
+  if (foundMedia) {
+    let mediaDetails = await externalGetMediaById(mediaType, id);
+    console.log('24', mediaDetails);
+    if (mediaDetails.error) {
+      res
+        .status(mediaDetails.error.status)
+        .json({ Msg: mediaDetails.error.Msg });
     } else {
-      let mediaDetails = await externalGetMediaById(mediaType, id);
-      console.log('35', mediaDetails);
-      if (mediaDetails.error) {
-        res
-          .status(mediaDetails.error.status)
-          .json({ Msg: mediaDetails.error.Msg });
-      } else {
-        let foundMedia = new Media({
-          mediaType,
+      res.status(200).json({ mediaDetails, foundMedia });
+    }
+  } else {
+    let mediaDetails = await externalGetMediaById(mediaType, id);
+    console.log('35', mediaDetails);
+    if (mediaDetails.error) {
+      res
+        .status(mediaDetails.error.status)
+        .json({ Msg: mediaDetails.error.Msg });
+    } else {
+      // let foundMedia = new Media({
+      //   mediaType,
+      //   _id: id,
+      // });
+      // await foundMedia.save();
+      // res.status(200).json({ mediaDetails, foundMedia });
+      let foundMedia;
+      if (mediaType == 'tv') {
+        foundMedia = new Tv({
+          _id: id,
+        });
+        await foundMedia.save();
+        res.status(200).json({ mediaDetails, foundMedia });
+      } else if (mediaType == 'movie') {
+        foundMedia = new Movie({
           _id: id,
         });
         await foundMedia.save();
         res.status(200).json({ mediaDetails, foundMedia });
       }
     }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ Msg: 'Something went wrong' });
   }
+  // } catch (error) {
+  //   console.log(error);
+  //   res.status(500).json({ Msg: 'Something went wrong' });
+  // }
 };
 
 const getMediaByCategories = async (req, res) => {
@@ -161,7 +211,7 @@ const getSeason = async (req, res) => {
     console.log(response);
     //res.status(200).json(response.data);
     try {
-      let foundMedia = await Media.findById(id);
+      let foundMedia = await Tv.findById(id);
       if (foundMedia) {
         try {
           let foundSeason = await Season.findOne({ seasonNumber })
@@ -184,27 +234,26 @@ const getSeason = async (req, res) => {
             await foundSeason.save();
             await foundMedia.seasons.push(foundSeason);
             await foundMedia.save();
-            res.status(200).json({ ...response.data, newSeason: foundSeason });
+            res.status(200).json({ ...response.data, foundSeason });
           }
         } catch (err) {
           console.log(err);
           res.status(500).json({ Msg: 'Something went wrong' });
         }
       } else {
-        let foundMedia = new Media({
-          mediaType: 'tv',
+        let foundMedia = new Tv({
           _id: id,
         });
         await foundMedia.save();
-        let newSeason = new Season({
+        let foundSeason = new Season({
           seasonNumber,
           _id: response.data._id,
           media: foundMedia._id,
         });
-        await newSeason.save();
-        await foundMedia.seasons.push(newSeason);
+        await foundSeason.save();
+        await foundMedia.seasons.push(foundSeason);
         await foundMedia.save();
-        res.status(200).json({ ...response.data, newSeason });
+        res.status(200).json({ ...response.data, foundSeason });
       }
     } catch (err) {
       console.log(err);

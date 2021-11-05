@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
 
 const TvSchema = new mongoose.Schema({
-  comments: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Comment',
-  },
+  comments: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'Comment',
+    },
+  ],
   seasons: [
     {
       type: String, //this is the id for the season which is the same as the season id from the external api
@@ -13,9 +15,9 @@ const TvSchema = new mongoose.Schema({
   ],
   _id: Number,
   user: {
-      type: mongoose.Types.ObjectId,
-      ref: 'User'
-  }
+    type: mongoose.Types.ObjectId,
+    ref: 'User',
+  },
 });
 
 const Tv = mongoose.model('Tv', TvSchema);

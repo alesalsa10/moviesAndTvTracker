@@ -5,17 +5,13 @@ const { check, validationResult } = require('express-validator');
 const auth = require('../middlewares/auth');
 const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser.js');
 
-const commentControllers = require('../controllers/commentsControllers')
-
+const commentControllers = require('../controllers/commentsControllers');
 
 router.post(
-  '/new',
+  '/:mediaType/new',
   auth,
   isLoggedInSameUser,
-  [
-    check('mediaType').notEmpty().withMessage('Media must exist'),
-    check('text').notEmpty().withMessage('External id must exist'),
-  ],
+  [check('text').notEmpty().withMessage('External id must exist')],
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -28,12 +24,10 @@ router.post(
 );
 
 router.post(
-  '/reply',
+  '/:mediaType/reply',
   auth,
   isLoggedInSameUser,
-  [
-    check('text').notEmpty().withMessage('Text must exist'),
-  ],
+  [check('text').notEmpty().withMessage('Text must exist')],
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -61,7 +55,11 @@ router.put(
   commentControllers.editComment
 );
 
-router.put('/delete', auth, isLoggedInSameUser, commentControllers.deleteComment);
+router.put(
+  '/:mediaType/delete',
+  auth,
+  isLoggedInSameUser,
+  commentControllers.deleteComment
+);
 
-
-module.exports = router
+module.exports = router;
