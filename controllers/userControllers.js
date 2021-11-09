@@ -148,9 +148,26 @@ const deleteUser = async (req, res) => {
 const forgotPassword = async(req, res) =>{
   const {email} = req.body;
   try{
-    let foundUser = await User.findOne({email})
+    let foundUser = await User.findOne({email});
     if(foundUser){
-        sendEmail(email);
+        //before sending the email I have to create a token which gets attached to the resetPasswordToken
+        // sendEmail(email, foundUser._id, 4555);
+        // res.status(200).json({Msg: 'Check your email'})
+      let resetToken = Math.floor(100000 + Math.random() * 900000);
+      let emailResponse = await sendEmail(email, foundUser._id, resetToken);
+
+      if(emailResponse.error){
+        res.status(500).json({Msg: 'Could not sent email. Try again later'})
+      }else {
+        let expiry = Date.now() + 60 * 1000 * 15 //15 minutes
+        foundUser.resetPasswordToken = resetToken;
+        foundUser.resetPasswordTokenExpiration = expiry;
+
+        await foundUser.save();
+
+        res.status(200).json({Msg: 'If the email is found, you should receive a link to reset your password shortly'})
+      }
+
     }else {
       res.status(404).json({Msg: 'No user with that given address'})
     }
@@ -161,7 +178,35 @@ const forgotPassword = async(req, res) =>{
 }
 
 const resetPassword = async(req, res)=>{
-  const{token} = req.params;
+  const{userId, token} = req.params;
+  const {password} = req.body;
+
+  //find the user by id and token
+  //check that token has not expired
+  //get user password
+  //hash it 
+  //set token and expiration back to null
+  //save the user
+
+  const foundUser = await User.findOne({
+    _id: userId,
+    resetPasswordToken: token,
+    resetPasswordTokenExpiration: {$gt: Date.now()}
+  });
+  
+  if(!foundUser){
+    res.send(401).json({Msg: 'Password reset token invalid or has expired'})
+  } else {
+    const salt = await bcrypt.genSalt(10);
+    const encryptedPassword = await bcrypt.hash(password, salt);
+    foundUser.password = encryptedPassword
+    foundUser.resetPasswordToken = null;
+    foundUser.resetPasswordTokenExpiration = null;
+    await foundUser.save();
+
+    res.status(201).json({Msg: 'Password has been changed'})
+  }
+
 }
 
 module.exports = {
@@ -170,5 +215,6 @@ module.exports = {
   getUser,
   editUser,
   deleteUser,
-  forgotPassword
+  forgotPassword,
+  resetPassword
 };

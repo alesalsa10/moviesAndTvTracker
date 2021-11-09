@@ -33,6 +33,14 @@ name:{
   type: String,
   required: true,
   minlength: 4
+},
+resetPasswordToken:{
+  type: String,
+  default:null
+},
+resetPasswordTokenExpiration:{
+  type: Date,
+  default: null
 }
 });
 
