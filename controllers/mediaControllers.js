@@ -8,6 +8,7 @@ const Movie = require('../models/Movie');
 const Tv = require('../models/Tv');
 const externalGetMediaById = require('../externalAPI/apiCalls');
 const { default: axios } = require('axios');
+const { findOne } = require('../models/Media');
 
 const getMediaById = async (req, res) => {
   //lookup media by id
@@ -270,11 +271,109 @@ const getSeason = async (req, res) => {
 const getEpisode = async (req, res) => {
   const { id, seasonNumber, episodeNumber } = req.params;
   try {
-    const response = await axios.get(
+    const episode = await axios.get(
       `${process.env.baseURL}/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${process.env.apiKey}&append_to_response=videos`
     );
-    console.log(response);
-    res.status(200).json(response.data);
+    console.log(episode);
+    //res.status(200).json(response.data);
+    try{
+      const season = await axios.get(
+        `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}&append_to_response=videos`
+      );
+      console.log(season);
+      try {
+        let foundMedia = await Tv.findById(id);
+        if (foundMedia) {
+          try {
+            let foundSeason = await Season.findOne({ seasonNumber })
+            if (foundSeason) {
+              //res.status(200).json({ ...season.data, foundSeason });
+                   try {
+                     let foundEpisode = await Episode.findOne({ episodeNumber })
+                       .populate('comments')
+                       .populate({
+                         path: 'comments',
+                         populate: {
+                           path: 'replies',
+                         },
+                       })
+                       .lean();
+                     if (foundEpisode) {
+                       res.status(200).json({ ...episode.data, foundEpisode });
+                     } else {
+                       let foundEpisode = new Episode({
+                         _id: episode.data.id,
+                         season: foundSeason._id,
+                         episodeNumber: episodeNumber,
+                       });
+                       await foundEpisode.save();
+                       await foundSeason.episodes.push(foundEpisode);
+                       await foundSeason.save();
+                       res.status(200).json({ ...episode.data, foundEpisode });
+                     }
+                   } catch (err) {
+                     console.log(err);
+                     res.status(500).json({ Msg: 'Something went wrong' });
+                   }
+            } else {
+              let foundSeason = new Season({
+                seasonNumber,
+                _id: season.data._id,
+                media: foundMedia._id,
+              });
+              await foundSeason.save();
+              await foundMedia.seasons.push(foundSeason);
+              await foundMedia.save();
+              //res.status(200).json({ ...season.data, foundSeason });
+              //search for episode
+              let foundEpisode = new Episode({
+                _id: episode.data.id,
+                season: foundSeason._id,
+                episodeNumber: episodeNumber,
+              });
+              await foundEpisode.save();
+              await foundSeason.episodes.push(foundEpisode);
+              await foundSeason.save();
+              res.status(200).json({ ...episode.data, foundEpisode });
+         
+            }
+          } catch (err) {
+            console.log(err);
+            res.status(500).json({ Msg: 'Something went wrong' });
+          }
+        } else {
+          let foundMedia = new Tv({
+            _id: id,
+          });
+          await foundMedia.save();
+          let foundSeason = new Season({
+            seasonNumber,
+            _id: season.data._id,
+            media: foundMedia._id,
+          });
+          await foundSeason.save();
+          await foundMedia.seasons.push(foundSeason);
+          await foundMedia.save();
+          let foundEpisode = new Episode({
+            _id: episode.data.id,
+            season: foundSeason._id,
+            episodeNumber: episodeNumber
+          })
+          await foundEpisode.save();
+          await foundSeason.episodes.push(foundEpisode);
+          await foundSeason.save()
+          res.status(200).json({ ...season.data, foundEpisode });
+        }
+      } catch (err) {
+        console.log(err);
+        res.status(500).json({ Msg: 'Something went wrong' });
+      }
+    }catch(err){
+      console.log(err);
+      res.status(err.response.status).json({Msg: err.response.data.status_message})
+    }
+
+
   } catch (err) {
     console.log(err);
     res

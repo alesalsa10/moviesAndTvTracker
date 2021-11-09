@@ -9,6 +9,10 @@ const episodeSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'Season'
     },
+    comments: [{
+        type: mongoose.Types.ObjectId,
+        ref: 'Comment'
+    }],
     _id: Number,
 })
 

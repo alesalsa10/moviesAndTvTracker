@@ -8,7 +8,7 @@ const getMedia = async (
   externalId,
   mediaType,
   update = false,
-  commentId = undefined
+  commentId = undefined,
 ) => {
   let existingMedia;
   if (mediaType == 'tv') {

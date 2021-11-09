@@ -4,6 +4,7 @@ const { check, validationResult, oneOf } = require('express-validator');
 
 const userController = require('../controllers/userControllers');
 const auth = require('../middlewares/auth');
+const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser');
 
 //testing new computer git and github connection
 
@@ -60,6 +61,7 @@ router.get('/:id', auth, userController.getUser);
 router.put(
   '/:id',
   auth,
+  isLoggedInSameUser,
   [
     oneOf([
       check('username').notEmpty().withMessage('Username cannot be empty'),
@@ -77,6 +79,8 @@ router.put(
   userController.editUser
 );
 
-router.delete('/:id', auth, userController.deleteUser);
+router.delete('/:id', auth, isLoggedInSameUser,  userController.deleteUser);
+
+router.post('/forgot', userController.forgotPassword)
 
 module.exports = router;

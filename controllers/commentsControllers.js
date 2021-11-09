@@ -163,6 +163,7 @@ const deleteComment = async (req, res) => {
   const userId = req.header('userId');
   const { mediaType } = req.params;
   const externalId = req.header('externalId');
+  const parentCommentId = req.header('parentCommentId') || undefined;
 
   try {
     const update = {
@@ -179,7 +180,7 @@ const deleteComment = async (req, res) => {
         await Comment.findByIdAndUpdate(commentId, update, { new: true });
         res.status(202).json({ Msg: 'Comment deleted ' });
       } else {
-        //await Comment.findByIdAndDelete(commentId); //IMPORTANT
+        await Comment.findByIdAndDelete(commentId); //IMPORTANT
 
         //res.status(202).json({ Msg: 'Comment deleted' });
         //remove reference from user
@@ -203,7 +204,22 @@ const deleteComment = async (req, res) => {
         }
         let foundMedia = await getMedia(externalId, mediaType, true, commentId);
         if (foundMedia) {
-          res.status(202).json({ Msg: 'Comment deleted' });
+          if(parentCommentId){
+           try{
+             await Comment.findOneAndUpdate(
+               { _id: parentCommentId },
+               {
+                 $pull: {
+                   replies: commentId,
+                 },
+               }
+             );
+             res.status(202).json({ Msg: 'Comment deleted' });
+           }catch(err){
+             console.log(err);
+             res.status(500).json({Msg: 'Something went wrong while deleting your comment'})
+           }
+          }
         } else {
           res.status(404).json({ Msg: 'Media not found' });
         }

@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
+const sendEmail = require('../utils/sendEmail');
 
 const User = require('../models/User');
 
@@ -144,10 +145,30 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const forgotPassword = async(req, res) =>{
+  const {email} = req.body;
+  try{
+    let foundUser = await User.findOne({email})
+    if(foundUser){
+        sendEmail(email);
+    }else {
+      res.status(404).json({Msg: 'No user with that given address'})
+    }
+  }catch(err){
+    console.log(err);
+    res.status(500).json({Msg: 'Something went wrong'})
+  }
+}
+
+const resetPassword = async(req, res)=>{
+  const{token} = req.params;
+}
+
 module.exports = {
   register,
   signIn,
   getUser,
   editUser,
   deleteUser,
+  forgotPassword
 };
