@@ -1,14 +1,12 @@
 //only need to get the media as creating will only happen when the user tries to interact with it
 //it is created with the api key when the user goes to click on given media from the movie database api
 
-const Media = require('../models/Media');
 const Season = require('../models/Season');
 const Episode = require('../models/Episode');
 const Movie = require('../models/Movie');
 const Tv = require('../models/Tv');
 const externalGetMediaById = require('../externalAPI/apiCalls');
 const { default: axios } = require('axios');
-const { findOne } = require('../models/Media');
 
 const getMediaById = async (req, res) => {
   //lookup media by id
@@ -16,9 +14,6 @@ const getMediaById = async (req, res) => {
   //call external api, get response
   //merge response with my own database
   const { mediaType, id } = req.params;
-  //let foundMedina
-  //if mediaType =' tv foundMedian = tv.find else foundmedia = movie.find
-
   let foundMedia;
   if (mediaType == 'tv') {
     try {
@@ -51,17 +46,6 @@ const getMediaById = async (req, res) => {
       res.status(500).json({ Msg: 'Something went wrong' });
     }
   }
-
-  // try {
-  //   let foundMedia = await Media.findById(id)
-  //     .populate('comments')
-  //     .populate({
-  //       path: 'comments',
-  //       populate: {
-  //         path: 'replies',
-  //       },
-  //     })
-  //     .lean();
   if (foundMedia) {
     let mediaDetails = await externalGetMediaById(mediaType, id);
     console.log('24', mediaDetails);
@@ -80,12 +64,6 @@ const getMediaById = async (req, res) => {
         .status(mediaDetails.error.status)
         .json({ Msg: mediaDetails.error.Msg });
     } else {
-      // let foundMedia = new Media({
-      //   mediaType,
-      //   _id: id,
-      // });
-      // await foundMedia.save();
-      // res.status(200).json({ mediaDetails, foundMedia });
       let foundMedia;
       if (mediaType == 'tv') {
         foundMedia = new Tv({
@@ -102,10 +80,6 @@ const getMediaById = async (req, res) => {
       }
     }
   }
-  // } catch (error) {
-  //   console.log(error);
-  //   res.status(500).json({ Msg: 'Something went wrong' });
-  // }
 };
 
 const getMediaByCategories = async (req, res) => {
@@ -276,7 +250,7 @@ const getEpisode = async (req, res) => {
     );
     console.log(episode);
     //res.status(200).json(response.data);
-    try{
+    try {
       const season = await axios.get(
         `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}&append_to_response=videos`
       );
@@ -285,36 +259,36 @@ const getEpisode = async (req, res) => {
         let foundMedia = await Tv.findById(id);
         if (foundMedia) {
           try {
-            let foundSeason = await Season.findOne({ seasonNumber })
+            let foundSeason = await Season.findOne({ seasonNumber });
             if (foundSeason) {
               //res.status(200).json({ ...season.data, foundSeason });
-                   try {
-                     let foundEpisode = await Episode.findOne({ episodeNumber })
-                       .populate('comments')
-                       .populate({
-                         path: 'comments',
-                         populate: {
-                           path: 'replies',
-                         },
-                       })
-                       .lean();
-                     if (foundEpisode) {
-                       res.status(200).json({ ...episode.data, foundEpisode });
-                     } else {
-                       let foundEpisode = new Episode({
-                         _id: episode.data.id,
-                         season: foundSeason._id,
-                         episodeNumber: episodeNumber,
-                       });
-                       await foundEpisode.save();
-                       await foundSeason.episodes.push(foundEpisode);
-                       await foundSeason.save();
-                       res.status(200).json({ ...episode.data, foundEpisode });
-                     }
-                   } catch (err) {
-                     console.log(err);
-                     res.status(500).json({ Msg: 'Something went wrong' });
-                   }
+              try {
+                let foundEpisode = await Episode.findOne({ episodeNumber })
+                  .populate('comments')
+                  .populate({
+                    path: 'comments',
+                    populate: {
+                      path: 'replies',
+                    },
+                  })
+                  .lean();
+                if (foundEpisode) {
+                  res.status(200).json({ ...episode.data, foundEpisode });
+                } else {
+                  let foundEpisode = new Episode({
+                    _id: episode.data.id,
+                    season: foundSeason._id,
+                    episodeNumber: episodeNumber,
+                  });
+                  await foundEpisode.save();
+                  await foundSeason.episodes.push(foundEpisode);
+                  await foundSeason.save();
+                  res.status(200).json({ ...episode.data, foundEpisode });
+                }
+              } catch (err) {
+                console.log(err);
+                res.status(500).json({ Msg: 'Something went wrong' });
+              }
             } else {
               let foundSeason = new Season({
                 seasonNumber,
@@ -335,7 +309,6 @@ const getEpisode = async (req, res) => {
               await foundSeason.episodes.push(foundEpisode);
               await foundSeason.save();
               res.status(200).json({ ...episode.data, foundEpisode });
-         
             }
           } catch (err) {
             console.log(err);
@@ -357,23 +330,23 @@ const getEpisode = async (req, res) => {
           let foundEpisode = new Episode({
             _id: episode.data.id,
             season: foundSeason._id,
-            episodeNumber: episodeNumber
-          })
+            episodeNumber: episodeNumber,
+          });
           await foundEpisode.save();
           await foundSeason.episodes.push(foundEpisode);
-          await foundSeason.save()
+          await foundSeason.save();
           res.status(200).json({ ...season.data, foundEpisode });
         }
       } catch (err) {
         console.log(err);
         res.status(500).json({ Msg: 'Something went wrong' });
       }
-    }catch(err){
+    } catch (err) {
       console.log(err);
-      res.status(err.response.status).json({Msg: err.response.data.status_message})
+      res
+        .status(err.response.status)
+        .json({ Msg: err.response.data.status_message });
     }
-
-
   } catch (err) {
     console.log(err);
     res

@@ -14,11 +14,13 @@ router.post(
   [
     check('email').isEmail().withMessage('Must be a valid email'),
     check('password')
-      .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, 'i')
-      .withMessage(
-        'Password should be combination of one uppercase , one lower case, one special char, one digit and min 8 , max 20 char long'
-      )
-      .isLength({ min: 8, max: 20 }),
+      .isLength({ min: 8, max: 15 })
+      .withMessage("your password should have min and max length between 8-15")
+      .matches(/\d/)
+      .withMessage("your password should have at least one number")
+      .matches(/[!@#$%^&*(),.?":{}|<>]/)
+      .withMessage("your password should have at least one sepcial character"),
+
     //.isLength({ min: 6 })
     //.withMessage('Password must be at lest 6 characters'),
     check('username').notEmpty().withMessage('Username cannot be emtpy'),
@@ -98,14 +100,15 @@ router.post(
 );
 
 router.post(
-  '/resetPassword/:userId/token',
+  '/resetPassword/:userId/:token',
   [
     check('password')
-      .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, 'i')
-      .withMessage(
-        'Password should be combination of one uppercase , one lower case, one special char, one digit and min 8 , max 20 char long'
-      )
-      .isLength({ min: 8, max: 20 }),
+      .isLength({ min: 8, max: 15 })
+      .withMessage('your password should have min and max length between 8-15')
+      .matches(/\d/)
+      .withMessage('your password should have at least one number')
+      .matches(/[!@#$%^&*(),.?":{}|<>]/)
+      .withMessage('your password should have at least one sepcial character'),
   ],
   (req, res, next) => {
     const errors = validationResult(req);

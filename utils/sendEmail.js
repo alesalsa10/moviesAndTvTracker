@@ -22,17 +22,18 @@ const sendEmail = async (email, userId, resetToken) => {
       //   resetToken +
       //   '">here</a> to reset your password</p>',
       html: `
-        <p>Click <a href="http://localhost:3000/resetPassword/${userId}/${resetToken}">Here</a> to reset password</p>
+        <p>Click <a href="http://localhost:3000/users/resetPassword/${userId}/${resetToken}">Here</a> to reset password</p>
       `,
     });
 
     console.log('email sent sucessfully');
+    return { error: false };
   } catch (error) {
     console.log(error, 'email not sent');
     return {
       error: true,
-      message: "Cannot send email"
-    }
+      message: 'Cannot send email',
+    };
   }
 };
 

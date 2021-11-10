@@ -82,8 +82,7 @@ const getUser = async (req, res) => {
 
   if (req.user == id) {
     console.log('can see all info');
-    user = await User.findOne({ _id: id })
-      .populate('bookmarks')
+    user = await User.findOne({ _id: id }).populate('bookmarks');
     // return 404 if no user found, return user otherwise.
     if (!user) {
       res.status(404).json({ Msg: 'User not found!' });
@@ -93,7 +92,7 @@ const getUser = async (req, res) => {
   } else if (req.user !== id) {
     console.log('only some info is shown');
     user = await User.findOne({ _id: id }).select('username favorites');
-  } 
+  }
 };
 
 const editUser = async (req, res) => {
@@ -132,82 +131,83 @@ const editUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   const { id } = req.params;
   const user = req.user;
-  console.log(id, user)
+  console.log(id, user);
   if (id == user) {
     try {
       await User.findByIdAndDelete(id);
       res.status(200).json({ Msg: 'User deleted successfully' });
     } catch (error) {
-      res.status(500).json({Msg:'Something went wrong'})
+      res.status(500).json({ Msg: 'Something went wrong' });
     }
   } else {
-    res.status(409).json({Msg:'You are not authorized to delete this user'});
+    res.status(409).json({ Msg: 'You are not authorized to delete this user' });
   }
 };
 
-const forgotPassword = async(req, res) =>{
-  const {email} = req.body;
-  try{
-    let foundUser = await User.findOne({email});
-    if(foundUser){
-        //before sending the email I have to create a token which gets attached to the resetPasswordToken
-        // sendEmail(email, foundUser._id, 4555);
-        // res.status(200).json({Msg: 'Check your email'})
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    let foundUser = await User.findOne({ email });
+    if (foundUser) {
+      //before sending the email I have to create a token which gets attached to the resetPasswordToken
+      // sendEmail(email, foundUser._id, 4555);
+      // res.status(200).json({Msg: 'Check your email'})
       let resetToken = Math.floor(100000 + Math.random() * 900000);
       let emailResponse = await sendEmail(email, foundUser._id, resetToken);
+      console.log(emailResponse)
 
-      if(emailResponse.error){
-        res.status(500).json({Msg: 'Could not sent email. Try again later'})
-      }else {
-        let expiry = Date.now() + 60 * 1000 * 15 //15 minutes
+      if (!emailResponse.error) {
+        let expiry = Date.now() + 60 * 1000 * 15; //15 minutes
         foundUser.resetPasswordToken = resetToken;
         foundUser.resetPasswordTokenExpiration = expiry;
 
         await foundUser.save();
 
-        res.status(200).json({Msg: 'If the email is found, you should receive a link to reset your password shortly'})
+        res.status(200).json({
+          Msg: 'If the email is found, you should receive a link to reset your password shortly',
+        });
+      } else {
+        res.status(500).json({ Msg: 'Could not sent email. Try again later' });
       }
-
-    }else {
-      res.status(404).json({Msg: 'No user with that given address'})
+    } else {
+      res.status(404).json({ Msg: 'No user with that given address' });
     }
-  }catch(err){
+  } catch (err) {
     console.log(err);
-    res.status(500).json({Msg: 'Something went wrong'})
+    res.status(500).json({ Msg: 'Something went wrong' });
   }
-}
+};
 
-const resetPassword = async(req, res)=>{
-  const{userId, token} = req.params;
-  const {password} = req.body;
+const resetPassword = async (req, res) => {
+  const { userId, token } = req.params;
+  const { password } = req.body;
 
   //find the user by id and token
   //check that token has not expired
   //get user password
-  //hash it 
+  //hash it
   //set token and expiration back to null
   //save the user
 
   const foundUser = await User.findOne({
     _id: userId,
     resetPasswordToken: token,
-    resetPasswordTokenExpiration: {$gt: Date.now()}
+    resetPasswordTokenExpiration: { $gt: Date.now() },
   });
-  
-  if(!foundUser){
-    res.send(401).json({Msg: 'Password reset token invalid or has expired'})
+
+  if (!foundUser) {
+    res.send(401).json({ Msg: 'Password reset token invalid or has expired' });
   } else {
     const salt = await bcrypt.genSalt(10);
     const encryptedPassword = await bcrypt.hash(password, salt);
-    foundUser.password = encryptedPassword
+    foundUser.password = encryptedPassword;
     foundUser.resetPasswordToken = null;
     foundUser.resetPasswordTokenExpiration = null;
     await foundUser.save();
 
-    res.status(201).json({Msg: 'Password has been changed'})
+    res.status(201).json({ Msg: 'Password has been changed' });
   }
-
-}
+};
 
 module.exports = {
   register,
@@ -216,5 +216,5 @@ module.exports = {
   editUser,
   deleteUser,
   forgotPassword,
-  resetPassword
+  resetPassword,
 };
