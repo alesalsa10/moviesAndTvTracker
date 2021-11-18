@@ -1,18 +1,18 @@
 //only need to get the media as creating will only happen when the user tries to interact with it
 //it is created with the api key when the user goes to click on given media from the movie database api
-
 const Season = require('../models/Season');
 const Episode = require('../models/Episode');
 const Movie = require('../models/Movie');
 const Tv = require('../models/Tv');
 const externalGetMediaById = require('../externalAPI/apiCalls');
 const { default: axios } = require('axios');
+const BasedOnBook = require('../models/BasedOnBook');
 
 const getMediaById = async (req, res) => {
   //lookup media by id
   //if media is found
   //call external api, get response
-  //merge response with my own database
+  //merge response with my own database,
   const { mediaType, id } = req.params;
   let foundMedia;
   if (mediaType == 'tv') {
@@ -99,6 +99,7 @@ const getMediaByCategories = async (req, res) => {
 
 const searchMedia = async (req, res) => {
   //   https://api.themoviedb.org/3/search/multi?api_key=f2e1db77c8ae74a5c21ae7b7d5630dfb&language=en-US&query=avengers&page=1&include_adult=false
+  //add books to results
 
   const { searchQuery } = req.params;
   console.log(req.params);
@@ -139,7 +140,48 @@ const getRecommendations = async (req, res) => {
       `${process.env.baseURL}/${mediaType}/${id}/recommendations?api_key=${process.env.apiKey}`
     );
     console.log(response);
-    res.status(200).json(response.data);
+    let mediaDetails = await externalGetMediaById(mediaType, id);
+    if (mediaDetails.error) {
+      res
+        .status(mediaDetails.error.status)
+        .json({ Msg: mediaDetails.error.Msg });
+    } else {
+      let release_year = new Date(mediaDetails.release_date).getFullYear();
+      console.log(release_year);
+      let basedBook;
+      try {
+        basedBook = await BasedOnBook.findOne({
+          media_name: mediaDetails.title,
+          release_year: release_year,
+        }).lean();
+        if (basedBook) {
+          //call google api
+          //if success, save book with volume id as id
+          let author_last_name = basedBook.book_author.split(',')[0];
+          console.log(basedBook.book_name.split(' ').join('+'));
+          const books = await axios.get(
+            `${process.env.googleBookURL}intitle:${basedBook.book_name
+              .split(' ')
+              .join('+')}+inauthor:${author_last_name}&maxResults=1&key=${
+              process.env.googleBooksKey
+            }`
+          );
+          console.log(books.data.items[0]);
+          if (books.data.totalItems > 0) {
+            res.status(200).json({...response.data, ...books.data.items[0]});
+          } else {
+            res.status(200).json(response.data);
+          }
+        } else {
+          res.status(200).json(response.data);
+        }
+      } catch (error) {
+        console.log(error);
+        res.status(500).json({ Msg: 'Something went wrong' });
+      }
+      //res.status(200).json(response.data);
+    }
+    //res.status(200).json(response.data);
   } catch (err) {
     console.log(err);
     res
