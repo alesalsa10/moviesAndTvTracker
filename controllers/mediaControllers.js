@@ -5,6 +5,7 @@ const Episode = require('../models/Episode');
 const Movie = require('../models/Movie');
 const Tv = require('../models/Tv');
 const externalGetMediaById = require('../externalAPI/apiCalls');
+const getBook = require('../externalAPI/apiCalls')
 const { default: axios } = require('axios');
 const BasedOnBook = require('../models/BasedOnBook');
 
@@ -166,11 +167,13 @@ const getRecommendations = async (req, res) => {
               process.env.googleBooksKey
             }`
           );
-          console.log(books.data.items[0]);
           if (books.data.totalItems > 0) {
-            res.status(200).json({...response.data, ...books.data.items[0]});
+            //res.status(200).json({...response.data, ...books.data.items[0]});
+            //call google books api
+            res.status(200).json({...response.data, ...books.data.items[0]})
           } else {
-            res.status(200).json(response.data);
+            let books = {books: null}
+            res.status(200).json({...response.data, books});
           }
         } else {
           res.status(200).json(response.data);

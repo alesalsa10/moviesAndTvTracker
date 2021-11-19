@@ -7,6 +7,8 @@ const userRouter = require('./routes/userRoutes');
 const bookmarkRouter = require('./routes/bookmarkRoutes');
 const commentsRouter = require('./routes/commentsRoutes');
 const mediaRouter = require('./routes/mediaRoutes');
+const favoriteRouter = require('./routes/favoriteRoutes');
+const bookRouter = require('./routes/bookRoutes')
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -24,6 +26,8 @@ app.use('/users', userRouter);
 app.use('/bookmarks', bookmarkRouter);
 app.use('/comments', commentsRouter);
 app.use('/media', mediaRouter);
+app.use('/favorites', favoriteRouter);
+app.use('/book', bookRouter)
 
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

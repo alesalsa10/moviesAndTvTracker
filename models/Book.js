@@ -9,15 +9,15 @@ const bookSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'User'
     },
-    _id: Number,
-    title: {
-        type: String,
-        required: true
-    },
-    author:{
-        type: String,
-        required: true
-    }
+    _id: String,
+    // title: {
+    //     type: String,
+    //     required: true
+    // },
+    // author:{
+    //     type: String,
+    //     required: true
+    // }
 });
 
 const Book = mongoose.model('Book', bookSchema);

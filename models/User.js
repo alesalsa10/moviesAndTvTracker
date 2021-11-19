@@ -21,29 +21,49 @@ const UserSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  bookmarks:[
+  // bookmarks: [
+  //   {
+  //     //this will be the id from the external api
+  //     type: Number, //mongoose.Types.ObjectId,
+  //     ref: 'Media',
+  //     unique: true,
+  //   },
+  // ],
+  favoriteBooks: [
     {
-    //this will be the id from the external api
-    type: Number ,//mongoose.Types.ObjectId,
-    ref: "Media" ,
-    unique: true
+      type: Number,
+      ref: 'Book',
+      unique: true,
+    },
+  ],
+  favoriteMovies: [
+    {
+      type: Number,
+      ref: 'Movie',
+      unique: true,
+    },
+  ],
+  favoriteTv: [
+    {
+      type: Number,
+      ref: 'Tv',
+      unique: true,
+    },
+  ],
+  name: {
+    type: String,
+    required: true,
+    minlength: 4,
   },
-],
-name:{
-  type: String,
-  required: true,
-  minlength: 4
-},
-resetPasswordToken:{
-  type: String,
-  default:null
-},
-resetPasswordTokenExpiration:{
-  type: Date,
-  default: null
-}
+  resetPasswordToken: {
+    type: String,
+    default: null,
+  },
+  resetPasswordTokenExpiration: {
+    type: Date,
+    default: null,
+  },
 });
-
 
 const User = mongoose.model('User', UserSchema);
 

@@ -75,24 +75,6 @@ const replyToComment = async (req, res) => {
       try {
         // let foundMedia = await Media.findById(parentMediaId);
         let foundMedia = await getMedia(parentMediaId, mediaType);
-        // if (mediaType == 'tv') {
-        //   console.log('tv');
-        //   try {
-        //     foundMedia = await Tv.findById(parentMediaId);
-        //   } catch (err) {
-        //     console.log(err);
-        //     res.status(500).json({ Msg: 'Something went wrong' });
-        //   }
-        // } else if (mediaType == 'movie') {
-        //   console.log('movie');
-        //   try {
-        //     foundMedia = await Movie.findById(parentMediaId);
-        //   } catch (err) {
-        //     console.log(err);
-        //     res.status(500).json({ Msg: 'Something went wrong' });
-        //   }
-        // }
-
         if (foundMedia) {
           try {
             let foundComment = await Comment.findById(parentCommentId);
@@ -181,7 +163,6 @@ const deleteComment = async (req, res) => {
         res.status(202).json({ Msg: 'Comment deleted ' });
       } else {
         await Comment.findByIdAndDelete(commentId); //IMPORTANT
-
         //res.status(202).json({ Msg: 'Comment deleted' });
         //remove reference from user
         try {
