@@ -1,4 +1,7 @@
 const Book = require('../models/Book');
+const BasedOnBook = require('../models/BasedOnBook');
+const Movie = require('../models/Movie');
+const Tv = require('../models/Tv');
 const apiCalls = require('../externalAPI/apiCalls');
 
 const getBookById = async(req, res) =>{
@@ -38,7 +41,47 @@ const getBooksByGenre = async(req, res) =>{
     }
 }
 
+const doesBookHaveMedia = async(req, res)=>{
+    //tells if there are any movies or tv shows based on the book
+    let { bookId } = req.params;
+    let bookInfo = await apiCalls.getBook(bookId);
+    console.log(bookInfo)
+      if (bookInfo.error) {
+        res.status(bookInfo.error.status).json({ Msg: bookInfo.error.Msg });
+      } else {
+        //res.status(200).json({ foundBook, bookInfo });
+        //search basedOnBook model for a bookInfo name and author last name
+
+        let authorLastName = bookInfo.volumeInfo.authors[0].split(' ');
+        authorLastName = authorLastName[authorLastName.length -1].replace('"', '');
+        console.log(authorLastName);
+        let basedBook = await BasedOnBook.findOne({
+          book_name: bookInfo.volumeInfo.title,
+          book_author: authorLastName,
+        }).lean();
+        if(basedBook){
+          let mediaType = basedBook.media_type.toLowerCase()
+          let foundMedia;
+          if(mediaType == 'movie'){
+            let mediaDetails = await apiCalls.searchMedia('movie', basedBook.media_name);
+          }else if(mediaType = 'tv'){
+            let mediaDetails = await apiCalls.searchMedia('tv', basedBook.media_name);
+          }
+
+
+          //if one is found call tmbd api for a search with those paraments
+          //if result is found search to make sure it doesn't exist on our db
+          //it it exists, just return the media from tmdb and the model in my db
+          //else create a new media, and return it with the model
+        }else{
+          res.status(404).json({Msg: 'This book has no media associated with it'})
+        }
+      }
+    
+}
+
 module.exports = {
     getBookById,
-    getBooksByGenre
+    getBooksByGenre,
+    doesBookHaveMedia
 }

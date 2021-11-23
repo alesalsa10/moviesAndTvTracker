@@ -37,7 +37,7 @@ const getMediaById = async (req, res) => {
       foundMedia = await Movie.findById(id)
         .populate({
           path: 'comments',
-          options: { sort: [['parentCommentReplyCount', -1]] },
+          options: { sort: [['parentCommentReplyCount', -1]] }, //order by count witht the highest first
         })
         .populate({
           path: 'comments',
@@ -104,6 +104,7 @@ const getMediaByCategories = async (req, res) => {
 
 const searchMedia = async (req, res) => {
   //   https://api.themoviedb.org/3/search/multi?api_key=f2e1db77c8ae74a5c21ae7b7d5630dfb&language=en-US&query=avengers&page=1&include_adult=false
+  
   //add books to results
 
   const { searchQuery } = req.params;

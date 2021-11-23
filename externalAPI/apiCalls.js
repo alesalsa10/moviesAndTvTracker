@@ -55,4 +55,21 @@ const booksByGenre = async (genre) => {
   }
 };
 
-module.exports = { getBook, externalGetMediaById, booksByGenre };
+const searchMedia = async(mediaType, searchQuery) =>{
+  try{
+    const response = await axios.get(
+      `${process.env.baseURL}/search/${mediaType}?api_key=${process.env.apiKey}&query=${searchQuery}&include_adult=false`
+    );
+      response.data.Err = null;
+      return response.data;
+  }catch(err){
+    return{
+      error:{
+        status: err.response.status,
+        Msg: err.response.data.status_message
+      }
+    }
+  }
+}
+
+module.exports = { getBook, externalGetMediaById, booksByGenre, searchMedia };
