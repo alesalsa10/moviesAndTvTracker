@@ -4,7 +4,7 @@ const Season = require('../models/Season');
 const Episode = require('../models/Episode');
 const Movie = require('../models/Movie');
 const Tv = require('../models/Tv');
-const externalGetMediaById = require('../externalAPI/apiCalls');
+const apiCalls = require('../externalAPI/apiCalls');
 const getBook = require('../externalAPI/apiCalls')
 const { default: axios } = require('axios');
 const BasedOnBook = require('../models/BasedOnBook');
@@ -33,8 +33,12 @@ const getMediaById = async (req, res) => {
     }
   } else if (mediaType == 'movie') {
     try {
+      //options: { sort: [['parentCommentReplyCount', -1]] }, //still need to test sorting
       foundMedia = await Movie.findById(id)
-        .populate('comments')
+        .populate({
+          path: 'comments',
+          options: { sort: [['parentCommentReplyCount', -1]] },
+        })
         .populate({
           path: 'comments',
           populate: {
@@ -48,7 +52,7 @@ const getMediaById = async (req, res) => {
     }
   }
   if (foundMedia) {
-    let mediaDetails = await externalGetMediaById(mediaType, id);
+    let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
     console.log('24', mediaDetails);
     if (mediaDetails.error) {
       res
@@ -58,7 +62,7 @@ const getMediaById = async (req, res) => {
       res.status(200).json({ mediaDetails, foundMedia });
     }
   } else {
-    let mediaDetails = await externalGetMediaById(mediaType, id);
+    let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
     console.log('35', mediaDetails);
     if (mediaDetails.error) {
       res
@@ -141,7 +145,7 @@ const getRecommendations = async (req, res) => {
       `${process.env.baseURL}/${mediaType}/${id}/recommendations?api_key=${process.env.apiKey}`
     );
     console.log(response);
-    let mediaDetails = await externalGetMediaById(mediaType, id);
+    let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
     if (mediaDetails.error) {
       res
         .status(mediaDetails.error.status)

@@ -2,13 +2,13 @@ const Movie = require('../models/Movie');
 const Tv = require('../models/Tv');
 const Season = require('../models/Season');
 const Episode = require('../models/Episode');
+const Book = require('../models/Book');
 
-//still need to customze errors, these should not return a status themselves, just the error json, status is going to be sent by whicher ever controller is using it
 const getMedia = async (
   externalId,
   mediaType,
   update = false,
-  commentId = undefined,
+  commentId = undefined
 ) => {
   let existingMedia;
   if (mediaType == 'tv') {
@@ -47,6 +47,33 @@ const getMedia = async (
       } else {
         try {
           await Movie.findByIdAndUpdate(
+            { _id: externalId },
+            {
+              $pull: {
+                comments: commentId,
+              },
+            }
+          );
+          return existingMedia;
+        } catch (err) {
+          console.log(err);
+          existingMedia = undefined;
+          return existingMedia;
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      existingMedia = undefined;
+      return existingMedia;
+    }
+  } else if (mediaType == 'book') {
+    try {
+      existingMedia = await Book.findById(externalId);
+      if (!update && !commentId) {
+        return existingMedia;
+      } else {
+        try {
+          await Book.findByIdAndUpdate(
             { _id: externalId },
             {
               $pull: {

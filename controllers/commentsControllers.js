@@ -16,22 +16,6 @@ const createComment = async (req, res) => {
       //let existingMedia = await Media.findOne({ externalId });
       let existingMedia = await getMedia(externalId, mediaType);
       console.log(existingMedia);
-      // if (mediaType == 'tv') {
-      //   try {
-      //     existingMedia = await Tv.findById(externalId);
-      //   } catch (err) {
-      //     console.log(err);
-      //     res.status(500).json({ Msg: 'Something went wrong' });
-      //   }
-      // } else if (mediaType == 'movie') {
-      //   try {
-      //     existingMedia = await Movie.findById(externalId);
-      //   } catch (err) {
-      //     console.log(err);
-      //     res.status(500).json({ Msg: 'Something went wrong' });
-      //   }
-      // }
-
       //check if the media exist, it doesn't create it
       if (existingMedia) {
         //create comment object with fields: postedBy, text, parentMediaId: externalId
@@ -90,6 +74,13 @@ const replyToComment = async (req, res) => {
               await foundUser.save();
               await foundComment.replies.push(newComment);
               await foundComment.save();
+              await Comment.findByIdAndUpdate(
+                parentCommentId,
+                {
+                  $inc: { parentCommentReplyCount: 1 },
+                },
+                { new: true }
+              );
               res.status(200).json({ Msg: 'Successful reply' });
             } else {
               res.status(404).json({ Msg: 'Invalid comment id' });
@@ -185,21 +176,25 @@ const deleteComment = async (req, res) => {
         }
         let foundMedia = await getMedia(externalId, mediaType, true, commentId);
         if (foundMedia) {
-          if(parentCommentId){
-           try{
-             await Comment.findOneAndUpdate(
-               { _id: parentCommentId },
-               {
-                 $pull: {
-                   replies: commentId,
-                 },
-               }
-             );
-             res.status(202).json({ Msg: 'Comment deleted' });
-           }catch(err){
-             console.log(err);
-             res.status(500).json({Msg: 'Something went wrong while deleting your comment'})
-           }
+          if (parentCommentId) {
+            try {
+              await Comment.findOneAndUpdate(
+                { _id: parentCommentId },
+                {
+                  $pull: {
+                    replies: commentId,
+                  },
+                }
+              );
+              res.status(202).json({ Msg: 'Comment deleted' });
+            } catch (err) {
+              console.log(err);
+              res
+                .status(500)
+                .json({
+                  Msg: 'Something went wrong while deleting your comment',
+                });
+            }
           }
         } else {
           res.status(404).json({ Msg: 'Media not found' });

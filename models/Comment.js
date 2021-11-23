@@ -40,6 +40,10 @@ const CommentSchema = new mongoose.Schema({
   parentSeason:{
     type: mongoose.Types.ObjectId,
     ref: 'Episode'
+  },
+  parentCommentReplyCount:{
+    type: Number,
+    default: 0
   }
 });
 

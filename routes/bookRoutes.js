@@ -6,10 +6,13 @@ const booksControllers = require('../controllers/bookControllers');
 
 router.get(
   '/:bookId',
-  auth,
-  isLoggedInSameUser,
   booksControllers.getBookById
 );
+
+router.get(
+  '/genre/:genre',
+  booksControllers.getBooksByGenre
+)
 
 
 module.exports = router
