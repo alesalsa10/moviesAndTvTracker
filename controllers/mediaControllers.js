@@ -5,7 +5,6 @@ const Episode = require('../models/Episode');
 const Movie = require('../models/Movie');
 const Tv = require('../models/Tv');
 const apiCalls = require('../externalAPI/apiCalls');
-const getBook = require('../externalAPI/apiCalls')
 const { default: axios } = require('axios');
 const BasedOnBook = require('../models/BasedOnBook');
 
@@ -105,7 +104,7 @@ const getMediaByCategories = async (req, res) => {
 const searchMedia = async (req, res) => {
   //   https://api.themoviedb.org/3/search/multi?api_key=f2e1db77c8ae74a5c21ae7b7d5630dfb&language=en-US&query=avengers&page=1&include_adult=false
   
-  //add books to results
+  //STILL NEED TO ADD BOOKS RESULTS TO THIS SEARCH
 
   const { searchQuery } = req.params;
   console.log(req.params);
