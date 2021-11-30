@@ -105,7 +105,6 @@ const searchMedia = async (req, res) => {
   //   https://api.themoviedb.org/3/search/multi?api_key=f2e1db77c8ae74a5c21ae7b7d5630dfb&language=en-US&query=avengers&page=1&include_adult=false
   
   //STILL NEED TO ADD BOOKS RESULTS TO THIS SEARCH
-
   const { searchQuery } = req.params;
   console.log(req.params);
   try {
@@ -121,6 +120,7 @@ const searchMedia = async (req, res) => {
       .json({ Msg: err.response.data.status_message });
   }
 };
+
 
 const getMediaLists = async (req, res) => {
   const { mediaType, listType } = req.params;

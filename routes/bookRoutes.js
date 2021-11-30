@@ -10,4 +10,6 @@ router.get('/genre/:genre', booksControllers.getBooksByGenre);
 
 router.get('/recommendation/:bookId', booksControllers.doesBookHaveMedia);
 
+router.get('/search/:searchQuery', booksControllers.searchBook);
+
 module.exports = router;

@@ -1,7 +1,5 @@
 const Book = require('../models/Book');
 const BasedOnBook = require('../models/BasedOnBook');
-const Movie = require('../models/Movie');
-const Tv = require('../models/Tv');
 const apiCalls = require('../externalAPI/apiCalls');
 
 const getBookById = async (req, res) => {
@@ -90,8 +88,20 @@ const doesBookHaveMedia = async (req, res) => {
   }
 };
 
+const searchBook = async (req, res) => {
+  const { searchQuery } = req.params;
+  let books = await apiCalls.searchBook(searchQuery);
+  if (books.error) {
+    res.status(books.error.status).json(books.error.Msg);
+  }
+  else {
+    res.status(400).json({books})
+  }
+};
+
 module.exports = {
   getBookById,
   getBooksByGenre,
   doesBookHaveMedia,
+  searchBook,
 };
