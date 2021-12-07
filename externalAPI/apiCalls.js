@@ -36,6 +36,22 @@ const getBook = async (id) => {
   }
 };
 
+const getBookByIsbn = async(isbn)=>{
+  try{
+    const response = await axios.get(
+      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&key=${process.env.googleBooksKey}`
+    );
+    return response.data;
+  }catch(err){
+    return{
+      error:{
+        status: err.response.data.error.code,
+        Msg: err.response.data.error.message
+      }
+    }
+  }
+}
+
 const booksByGenre = async (genre) => {
   try {
     const response = await axios.get(
@@ -91,4 +107,4 @@ const searchMedia = async(mediaType, searchQuery) =>{
   }
 }
 
-module.exports = { getBook, externalGetMediaById, booksByGenre, searchMedia, searchBook };
+module.exports = { getBook, externalGetMediaById, booksByGenre, searchMedia, searchBook, getBookByIsbn };

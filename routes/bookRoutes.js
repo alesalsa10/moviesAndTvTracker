@@ -12,4 +12,8 @@ router.get('/recommendation/:bookId', booksControllers.doesBookHaveMedia);
 
 router.get('/search/:searchQuery', booksControllers.searchBook);
 
+router.get('/newYorkTimes/bestSellers', booksControllers.getBestSellers);
+
+router.get('/isbn/:isbn', booksControllers.getBookByIsbn);
+
 module.exports = router;
