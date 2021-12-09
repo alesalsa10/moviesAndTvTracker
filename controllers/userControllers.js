@@ -2,6 +2,18 @@ const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
 
+const aws = require('aws-sdk');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+
+aws.config.update({
+  secretAccessKey: process.env.AWSSecretKey,
+  accessKeyId: process.env.AWSAccessKeyId,
+  region: 'us-east-1',
+});
+
+var s3 = new aws.S3();
+  
 const User = require('../models/User');
 
 const register = async (req, res) => {
@@ -79,7 +91,6 @@ const getUser = async (req, res) => {
   //display info depending on who it is
   console.log(req.user);
   let user;
-
   if (req.user == id) {
     console.log('can see all info');
     user = await User.findOne({ _id: id }).populate('bookmarks');
@@ -154,7 +165,7 @@ const forgotPassword = async (req, res) => {
       // res.status(200).json({Msg: 'Check your email'})
       let resetToken = Math.floor(100000 + Math.random() * 900000);
       let emailResponse = await sendEmail(email, foundUser._id, resetToken);
-      console.log(emailResponse)
+      console.log(emailResponse);
 
       if (!emailResponse.error) {
         let expiry = Date.now() + 60 * 1000 * 15; //15 minutes
@@ -209,6 +220,11 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const uploadProfileImage = async (req, res) => {
+  const { userId } = req.params;
+
+};
+
 module.exports = {
   register,
   signIn,
@@ -217,4 +233,5 @@ module.exports = {
   deleteUser,
   forgotPassword,
   resetPassword,
+  uploadProfileImage,
 };

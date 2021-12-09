@@ -8,7 +8,9 @@ const bookmarkRouter = require('./routes/bookmarkRoutes');
 const commentsRouter = require('./routes/commentsRoutes');
 const mediaRouter = require('./routes/mediaRoutes');
 const favoriteRouter = require('./routes/favoriteRoutes');
-const bookRouter = require('./routes/bookRoutes')
+const bookRouter = require('./routes/bookRoutes');
+const peopleRouter = require('./routes/peopleRoutes');
+const configRouter = require('./routes/mediaApiConfigRoute');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -27,7 +29,9 @@ app.use('/bookmarks', bookmarkRouter);
 app.use('/comments', commentsRouter);
 app.use('/media', mediaRouter);
 app.use('/favorites', favoriteRouter);
-app.use('/book', bookRouter)
+app.use('/book', bookRouter);
+app.use('/people', peopleRouter);
+app.use('/configuration', configRouter);
 
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

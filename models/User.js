@@ -63,6 +63,10 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  profilePhoto:{
+    type: String,
+    default: null
+  }
 });
 
 const User = mongoose.model('User', UserSchema);
