@@ -12,6 +12,10 @@ const movieSchema = new mongoose.Schema({
     ref: 'User',
   },
   _id: Number,
+  commentCount: {
+    type: Number,
+    default: 0,
+  },
 });
 
 

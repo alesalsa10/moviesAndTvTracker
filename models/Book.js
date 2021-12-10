@@ -1,23 +1,29 @@
 const mongoose = require('mongoose');
 
 const bookSchema = new mongoose.Schema({
-    comments:[{
-        type: mongoose.Types.ObjectId,
-        ref:'Comment'
-    }],
-    user: {
-        type: mongoose.Types.ObjectId,
-        ref: 'User'
+  comments: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'Comment',
     },
-    _id: String,
-    // title: {
-    //     type: String,
-    //     required: true
-    // },
-    // author:{
-    //     type: String,
-    //     required: true
-    // }
+  ],
+  user: {
+    type: mongoose.Types.ObjectId,
+    ref: 'User',
+  },
+  _id: String,
+  // title: {
+  //     type: String,
+  //     required: true
+  // },
+  // author:{
+  //     type: String,
+  //     required: true
+  // }
+  commentCount: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const Book = mongoose.model('Book', bookSchema);

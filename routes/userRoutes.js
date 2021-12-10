@@ -121,7 +121,7 @@ router.post(
   userController.resetPassword
 );
 
-router.post('/upload/:userId', auth, isLoggedInSameUser, userController.uploadProfileImage);
+router.put('/upload/:userId', auth, isLoggedInSameUser, userController.uploadProfileImage);
 
 
 

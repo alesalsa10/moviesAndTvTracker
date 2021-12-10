@@ -63,7 +63,7 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
-  profilePhoto:{
+  profilePicture:{
     type: String,
     default: null
   }
