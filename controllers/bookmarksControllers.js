@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const Media = require('../models/Media');
 const externalGetMediaById = require('../externalAPI/apiCalls');
 //need to change media to tv/movie
 
