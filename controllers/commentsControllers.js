@@ -1,7 +1,10 @@
 const User = require('../models/User');
 const Comment = require('../models/Comment');
 const Tv = require('../models/Tv');
+const Season = require('../models/Season');
+const Episode = require('../models/Episode');
 const Movie = require('../models/Movie');
+const Book = require('../models/Book');
 const getMedia = require('../utils/getMedia');
 
 const createComment = async (req, res) => {
@@ -31,6 +34,77 @@ const createComment = async (req, res) => {
         await existingMedia.comments.push(newComment);
         await existingMedia.save();
 
+        if (mediaType == 'movie') {
+          try {
+            await Movie.findByIdAndUpdate(
+              { _id: externalId },
+              {
+                $inc: { commentCount: 1 },
+              }
+            );
+          } catch (error) {
+            console.log(error);
+            res
+              .status(500)
+              .json({ Msg: 'Something went wrong adding your comment' });
+          }
+        } else if (mediaType == 'Tv') {
+          try {
+            await Tv.findByIdAndUpdate(
+              { _id: externalId },
+              {
+                $inc: { commentCount: 1 },
+              }
+            );
+          } catch (error) {
+            console.log(error);
+            res
+              .status(500)
+              .json({ Msg: 'Something went wrong adding your comment' });
+          }
+        } else if (mediaType == 'Season') {
+          try {
+            await Season.findByIdAndUpdate(
+              { _id: externalId },
+              {
+                $inc: { commentCount: 1 },
+              }
+            );
+          } catch (error) {
+            console.log(error);
+            res
+              .status(500)
+              .json({ Msg: 'Something went wrong adding your comment' });
+          }
+        } else if (mediaType == 'Episode') {
+          try {
+            await Episode.findByIdAndUpdate(
+              { _id: externalId },
+              {
+                $inc: { commentCount: 1 },
+              }
+            );
+          } catch (error) {
+            console.log(error);
+            res
+              .status(500)
+              .json({ Msg: 'Something went wrong adding your comment' });
+          }
+        } else if (mediaType == 'Book') {
+          try {
+            await Book.findByIdAndUpdate(
+              { _id: externalId },
+              {
+                $inc: { commentCount: 1 },
+              }
+            );
+          } catch (error) {
+            console.log(error);
+            res
+              .status(500)
+              .json({ Msg: 'Something went wrong adding your comment' });
+          }
+        }
         res.status(201).json({ Msg: 'Comment created' });
       } else {
         res.status(404).json({ Msg: 'Media not found' });
@@ -81,6 +155,85 @@ const replyToComment = async (req, res) => {
                 },
                 { new: true }
               );
+
+              switch (mediaType) {
+                case 'movie':
+                  try {
+                    await Movie.findByIdAndUpdate(
+                      { _id: parentMediaId },
+                      {
+                        $inc: { commentCount: 1 },
+                      }
+                    );
+                  } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({
+                      Msg: 'Something went wrong adding your comment',
+                    });
+                  }
+                  break;
+                case 'Tv':
+                  try {
+                    await Tv.findByIdAndUpdate(
+                      { _id: parentMediaId },
+                      {
+                        $inc: { commentCount: 1 },
+                      }
+                    );
+                  } catch (error) {
+                    console.log(error);
+                   return  res.status(500).json({
+                      Msg: 'Something went wrong adding your comment',
+                    });
+                  }
+                  break;
+                case 'Season':
+                  try {
+                    await Season.findByIdAndUpdate(
+                      { _id: parentMediaId },
+                      {
+                        $inc: { commentCount: 1 },
+                      }
+                    );
+                  } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({
+                      Msg: 'Something went wrong adding your comment',
+                    });
+                  }
+                  break;
+                case 'Episode':
+                  try {
+                    await Episode.findByIdAndUpdate(
+                      { _id: parentMediaId },
+                      {
+                        $inc: { commentCount: 1 },
+                      }
+                    );
+                  } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({
+                      Msg: 'Something went wrong adding your comment',
+                    });
+                  }
+                  break;
+                case 'Book':
+                  try {
+                    await Book.findByIdAndUpdate(
+                      { _id: parentMediaId },
+                      {
+                        $inc: { commentCount: 1 },
+                      }
+                    );
+                  } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({
+                      Msg: 'Something went wrong adding your comment',
+                    });
+                  }
+                  break;
+              }
+
               res.status(200).json({ Msg: 'Successful reply' });
             } else {
               res.status(404).json({ Msg: 'Invalid comment id' });
@@ -189,11 +342,9 @@ const deleteComment = async (req, res) => {
               res.status(202).json({ Msg: 'Comment deleted' });
             } catch (err) {
               console.log(err);
-              res
-                .status(500)
-                .json({
-                  Msg: 'Something went wrong while deleting your comment',
-                });
+              res.status(500).json({
+                Msg: 'Something went wrong while deleting your comment',
+              });
             }
           }
         } else {

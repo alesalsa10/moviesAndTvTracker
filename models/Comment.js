@@ -33,13 +33,25 @@ const CommentSchema = new mongoose.Schema({
     type: Number,//mongoose.Types.ObjectId,
     ref: 'Media',
   },
-  parentSeason:{
-    type: mongoose.Types.ObjectId,
+  parentTv:{
+    type: Number,
     ref: 'Season'
   },
   parentSeason:{
-    type: mongoose.Types.ObjectId,
+    type: String,
     ref: 'Episode'
+  },
+  parentEpisode:{
+    type: Number,
+    ref: 'Episode'
+  },
+  parentMovie:{
+    type: Number,
+    ref: 'Movie'
+  },
+  parentBook:{
+    type: mongoose.Types.ObjectId,
+    ref: 'Book'
   },
   parentCommentReplyCount:{
     type: Number,
