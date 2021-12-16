@@ -7,6 +7,8 @@ const Tv = require('../models/Tv');
 const apiCalls = require('../externalAPI/apiCalls');
 const { default: axios } = require('axios');
 const BasedOnBook = require('../models/BasedOnBook');
+const Book = require('../models/Book');
+const chooseModel = require('../utils/chooseModel');
 
 const getMediaById = async (req, res) => {
   //lookup media by id
@@ -15,44 +17,27 @@ const getMediaById = async (req, res) => {
   //merge response with my own database,
   const { mediaType, id } = req.params;
   let foundMedia;
-  if (mediaType == 'tv') {
-    try {
-      foundMedia = await Tv.findById(id)
-        .populate('comments')
-        .populate({
-          path: 'comments',
-          populate: {
-            path: 'replies',
-          },
-        })
-        .lean();
-    } catch (err) {
-      console.log(err);
-      res.status(500).json({ Msg: 'Something went wrong' });
-    }
-  } else if (mediaType == 'movie') {
-    try {
-      //options: { sort: [['parentCommentReplyCount', -1]] }, //still need to test sorting
-      foundMedia = await Movie.findById(id)
-        .populate({
-          path: 'comments',
-          options: { sort: [['parentCommentReplyCount', -1]] }, //order by count witht the highest first
-        })
-        .populate({
-          path: 'comments',
-          populate: {
-            path: 'replies',
-          },
-        })
-        .lean();
-    } catch (err) {
-      console.log(err);
-      res.status(500).json({ Msg: 'Something went wrong' });
-    }
+  let model = chooseModel(mediaType);
+  if (!model) {
+    return res.status(500).json({ Msg: 'No media by this name' });
+  }
+  try {
+    foundMedia = await model
+      .findById(id)
+      .populate('comments')
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'replies',
+        },
+      })
+      .lean();
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ Msg: 'Something went wrong' });
   }
   if (foundMedia) {
     let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
-    console.log('24', mediaDetails);
     if (mediaDetails.error) {
       res
         .status(mediaDetails.error.status)
@@ -62,26 +47,17 @@ const getMediaById = async (req, res) => {
     }
   } else {
     let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
-    console.log('35', mediaDetails);
     if (mediaDetails.error) {
       res
         .status(mediaDetails.error.status)
         .json({ Msg: mediaDetails.error.Msg });
     } else {
       let foundMedia;
-      if (mediaType == 'tv') {
-        foundMedia = new Tv({
-          _id: id,
-        });
-        await foundMedia.save();
-        res.status(200).json({ mediaDetails, foundMedia });
-      } else if (mediaType == 'movie') {
-        foundMedia = new Movie({
-          _id: id,
-        });
-        await foundMedia.save();
-        res.status(200).json({ mediaDetails, foundMedia });
-      }
+      foundMedia = new model({
+        _id: id,
+      });
+      await foundMedia.save();
+      res.status(200).json({ mediaDetails, foundMedia });
     }
   }
 };
@@ -103,7 +79,7 @@ const getMediaByCategories = async (req, res) => {
 
 const searchMedia = async (req, res) => {
   //   https://api.themoviedb.org/3/search/multi?api_key=f2e1db77c8ae74a5c21ae7b7d5630dfb&language=en-US&query=avengers&page=1&include_adult=false
-  
+
   //STILL NEED TO ADD BOOKS RESULTS TO THIS SEARCH
   const { searchQuery } = req.params;
   console.log(req.params);
@@ -120,7 +96,6 @@ const searchMedia = async (req, res) => {
       .json({ Msg: err.response.data.status_message });
   }
 };
-
 
 const getMediaLists = async (req, res) => {
   const { mediaType, listType } = req.params;
@@ -174,10 +149,10 @@ const getRecommendations = async (req, res) => {
           if (books.data.totalItems > 0) {
             //res.status(200).json({...response.data, ...books.data.items[0]});
             //call google books api
-            res.status(200).json({...response.data, ...books.data.items[0]})
+            res.status(200).json({ ...response.data, ...books.data.items[0] });
           } else {
-            let books = {books: null}
-            res.status(200).json({...response.data, books});
+            let books = { books: null };
+            res.status(200).json({ ...response.data, books });
           }
         } else {
           res.status(200).json(response.data);
@@ -197,28 +172,6 @@ const getRecommendations = async (req, res) => {
   }
 };
 
-const getVideos = async (req, res) => {
-  const { mediaType, id } = req.params;
-  try {
-    const response = await axios.get(
-      `${process.env.baseURL}/${mediaType}/${id}/videos?api_key=${process.env.apiKey}`
-    );
-    console.log(response);
-    let trailerVideos = [];
-    for (const video of response.data.results) {
-      if (video.type == 'Trailer') {
-        trailerVideos.push(video);
-      }
-    }
-    res.status(200).json(trailerVideos);
-  } catch (err) {
-    console.log(err);
-    res
-      .status(err.response.status)
-      .json({ Msg: err.response.data.status_message });
-  }
-};
-
 const getSeason = async (req, res) => {
   //when an user get a season
   //check if season exists in array called seasons inside the media document
@@ -226,7 +179,6 @@ const getSeason = async (req, res) => {
   //this is done to be able to track comments
   //return the season information with merged with the founded season created on my DB
   //use lean() to be able to merge objects
-
   const { id, seasonNumber } = req.params;
   try {
     const response = await axios.get(
@@ -410,7 +362,6 @@ module.exports = {
   searchMedia,
   getMediaLists,
   getRecommendations,
-  getVideos,
   getSeason,
   getEpisode,
 };

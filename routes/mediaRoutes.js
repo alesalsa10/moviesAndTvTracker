@@ -10,7 +10,6 @@ router.get('/:mediaType/:category', mediaControllers.getMediaByCategories);
 router.get('/search/all/:searchQuery', mediaControllers.searchMedia);
 router.get('/lists/:mediaType/:listType', mediaControllers.getMediaLists);
 router.get('/recommendations/:mediaType/:id', mediaControllers.getRecommendations);
-router.get('/videos/:mediaType/:id', mediaControllers.getVideos);
 router.get('/tv/season/:id/:seasonNumber', mediaControllers.getSeason);
 router.get('/tv/:id/season/:seasonNumber/episode/:episodeNumber', mediaControllers.getEpisode);
 
