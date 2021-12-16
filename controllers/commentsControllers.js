@@ -6,6 +6,7 @@ const Episode = require('../models/Episode');
 const Movie = require('../models/Movie');
 const Book = require('../models/Book');
 const getMedia = require('../utils/getMedia');
+const res = require('express/lib/response');
 
 const createComment = async (req, res) => {
   const { text } = req.body;
@@ -182,7 +183,7 @@ const replyToComment = async (req, res) => {
                     );
                   } catch (error) {
                     console.log(error);
-                   return  res.status(500).json({
+                    return res.status(500).json({
                       Msg: 'Something went wrong adding your comment',
                     });
                   }
@@ -288,8 +289,8 @@ const deleteComment = async (req, res) => {
   //need parent mediaId (movie/tv/season/episode) and userId
   const userId = req.header('userId');
   const { mediaType } = req.params;
-  const externalId = req.header('externalId');
   const parentCommentId = req.header('parentCommentId') || undefined;
+  const parentMediaId = req.header('parentMediaId');
 
   try {
     const update = {
@@ -304,7 +305,7 @@ const deleteComment = async (req, res) => {
       let repliesLength = comment.replies.length;
       if (repliesLength > 0) {
         await Comment.findByIdAndUpdate(commentId, update, { new: true });
-        res.status(202).json({ Msg: 'Comment deleted ' });
+        res.status(202).json({ Msg: 'Comment deleted' });
       } else {
         await Comment.findByIdAndDelete(commentId); //IMPORTANT
         //res.status(202).json({ Msg: 'Comment deleted' });
@@ -327,7 +328,12 @@ const deleteComment = async (req, res) => {
             .status(500)
             .json({ Msg: 'Something went wrong while deleting comment' });
         }
-        let foundMedia = await getMedia(externalId, mediaType, true, commentId);
+        let foundMedia = await getMedia(
+          parentMediaId,
+          mediaType,
+          true,
+          commentId
+        );
         if (foundMedia) {
           if (parentCommentId) {
             try {
@@ -339,7 +345,9 @@ const deleteComment = async (req, res) => {
                   },
                 }
               );
-              res.status(202).json({ Msg: 'Comment deleted' });
+              //switch statement with media type $dec
+
+              //return res.status(202).json({ Msg: 'Comment deleted' });
             } catch (err) {
               console.log(err);
               res.status(500).json({
@@ -347,6 +355,85 @@ const deleteComment = async (req, res) => {
               });
             }
           }
+          switch (mediaType) {
+            case 'movie':
+              console.log('movie');
+              try {
+                await Movie.findByIdAndUpdate(
+                  { _id: parentMediaId },
+                  {
+                    $inc: { commentCount: -1 },
+                  }
+                );
+              } catch (error) {
+                console.log(error);
+                return res.status(500).json({
+                  Msg: 'Something went wrong deleting your comment',
+                });
+              }
+              break;
+            case 'Tv':
+              try {
+                await Tv.findByIdAndUpdate(
+                  { _id: parentMediaId },
+                  {
+                    $inc: { commentCount: -1 },
+                  }
+                );
+              } catch (error) {
+                console.log(error);
+                return res.status(500).json({
+                  Msg: 'Something went wrong deleting your comment',
+                });
+              }
+              break;
+            case 'Season':
+              try {
+                await Season.findByIdAndUpdate(
+                  { _id: parentMediaId },
+                  {
+                    $inc: { commentCount: -1 },
+                  }
+                );
+              } catch (error) {
+                console.log(error);
+                return res.status(500).json({
+                  Msg: 'Something went wrong deleting your comment',
+                });
+              }
+              break;
+            case 'Episode':
+              try {
+                await Episode.findByIdAndUpdate(
+                  { _id: parentMediaId },
+                  {
+                    $inc: { commentCount: -1 },
+                  }
+                );
+              } catch (error) {
+                console.log(error);
+                return res.status(500).json({
+                  Msg: 'Something went wrong deleting your comment',
+                });
+              }
+              break;
+            case 'Book':
+              try {
+                await Book.findByIdAndUpdate(
+                  { _id: parentMediaId },
+                  {
+                    $inc: { commentCount: -1 },
+                  }
+                );
+              } catch (error) {
+                console.log(error);
+                return res.status(500).json({
+                  Msg: 'Something went wrong deleting your comment',
+                });
+              }
+              break;
+          }
+          return res.status(202).json({ Msg: 'Comment deleted' });
         } else {
           res.status(404).json({ Msg: 'Media not found' });
         }
@@ -359,6 +446,19 @@ const deleteComment = async (req, res) => {
     res.status(500).json({ Msg: 'Something went wrong' });
   }
 };
+
+const getAllComments = async() =>{
+  const { id, mediaType } = req.params;
+  //look up to make sure media exists
+  //look up all comments with a given parentMediaId
+  let existingMedia = await getMedia(id, mediaType);
+  if(existingMedia){
+    //aggregate with look and sort
+
+  }else{
+    return res.status(404).json({Msg: 'No media with the given id was found'})
+  }
+}
 
 module.exports = {
   createComment,
