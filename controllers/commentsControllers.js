@@ -62,95 +62,6 @@ const createComment = async (req, res) => {
             .json({ Msg: 'Problem increasing comment count' });
         }
       }
-      // if (existingMedia) {
-      //   //create comment object with fields: postedBy, text, parentMediaId: externalId
-      //   let newComment = new Comment({
-      //     postedBy: userId,
-      //     parentMediaId: existingMedia._id,
-      //     text,
-      //   });
-
-      //   await newComment.save();
-      //   await foundUser.comments.push(newComment);
-      //   await foundUser.save();
-      //   await existingMedia.comments.push(newComment);
-      //   await existingMedia.save();
-
-      //   if (mediaType == 'movie') {
-      //     try {
-      //       await Movie.findByIdAndUpdate(
-      //         { _id: externalId },
-      //         {
-      //           $inc: { commentCount: 1 },
-      //         }
-      //       );
-      //     } catch (error) {
-      //       console.log(error);
-      //       res
-      //         .status(500)
-      //         .json({ Msg: 'Something went wrong adding your comment' });
-      //     }
-      //   } else if (mediaType == 'Tv') {
-      //     try {
-      //       await Tv.findByIdAndUpdate(
-      //         { _id: externalId },
-      //         {
-      //           $inc: { commentCount: 1 },
-      //         }
-      //       );
-      //     } catch (error) {
-      //       console.log(error);
-      //       res
-      //         .status(500)
-      //         .json({ Msg: 'Something went wrong adding your comment' });
-      //     }
-      //   } else if (mediaType == 'Season') {
-      //     try {
-      //       await Season.findByIdAndUpdate(
-      //         { _id: externalId },
-      //         {
-      //           $inc: { commentCount: 1 },
-      //         }
-      //       );
-      //     } catch (error) {
-      //       console.log(error);
-      //       res
-      //         .status(500)
-      //         .json({ Msg: 'Something went wrong adding your comment' });
-      //     }
-      //   } else if (mediaType == 'Episode') {
-      //     try {
-      //       await Episode.findByIdAndUpdate(
-      //         { _id: externalId },
-      //         {
-      //           $inc: { commentCount: 1 },
-      //         }
-      //       );
-      //     } catch (error) {
-      //       console.log(error);
-      //       res
-      //         .status(500)
-      //         .json({ Msg: 'Something went wrong adding your comment' });
-      //     }
-      //   } else if (mediaType == 'Book') {
-      //     try {
-      //       await Book.findByIdAndUpdate(
-      //         { _id: externalId },
-      //         {
-      //           $inc: { commentCount: 1 },
-      //         }
-      //       );
-      //     } catch (error) {
-      //       console.log(error);
-      //       res
-      //         .status(500)
-      //         .json({ Msg: 'Something went wrong adding your comment' });
-      //     }
-      //   }
-      //   res.status(201).json({ Msg: 'Comment created' });
-      // } else {
-      //   res.status(404).json({ Msg: 'Media not found' });
-      // }
     } else {
       res.status(404).json({ Msg: 'User not found' });
     }
@@ -163,6 +74,7 @@ const createComment = async (req, res) => {
 const replyToComment = async (req, res) => {
   //find parentComment by id
   //create the new comment and add it to the replies inside of comment
+  //REFACTOR WITH NEW MODEL UTILITY
   const { text } = req.body;
   const userId = req.header('userId');
   const parentCommentId = req.header('parentCommentId');
@@ -172,142 +84,121 @@ const replyToComment = async (req, res) => {
   try {
     let foundUser = await User.findById(userId).select('-password');
     if (foundUser) {
-      try {
-        // let foundMedia = await Media.findById(parentMediaId);
-        let foundMedia = await getMedia(parentMediaId, mediaType);
-        if (foundMedia) {
-          try {
-            let foundComment = await Comment.findById(parentCommentId);
-            if (foundComment) {
-              let newComment = new Comment({
-                postedBy: userId,
-                parentMediaId: foundMedia._id,
-                text,
-                parentComment: parentCommentId,
-              });
-              await newComment.save();
-              await foundUser.comments.push(newComment);
-              await foundUser.save();
-              await foundComment.replies.push(newComment);
-              await foundComment.save();
-              await Comment.findByIdAndUpdate(
-                parentCommentId,
-                {
-                  $inc: { parentCommentReplyCount: 1 },
-                },
-                { new: true }
-              );
-              let model = chooseModel(mediaType);
-              if (!model) {
-                return res.status(500).json({
-                  Msg: 'This media type does not exist in our database',
+      // try {
+      //   let foundMedia = await getMedia(parentMediaId, mediaType);
+      //   if (foundMedia) {
+      //     try {
+      //       let foundComment = await Comment.findById(parentCommentId);
+      //       if (foundComment) {
+      //         let newComment = new Comment({
+      //           postedBy: userId,
+      //           parentMediaId: foundMedia._id,
+      //           text,
+      //           parentComment: parentCommentId,
+      //         });
+      //         await newComment.save();
+      //         await foundUser.comments.push(newComment);
+      //         await foundUser.save();
+      //         await foundComment.replies.push(newComment);
+      //         await foundComment.save();
+      //         await Comment.findByIdAndUpdate(
+      //           parentCommentId,
+      //           {
+      //             $inc: { parentCommentReplyCount: 1 },
+      //           },
+      //           { new: true }
+      //         );
+      //         let model = chooseModel(mediaType);
+      //         if (!model) {
+      //           return res.status(500).json({
+      //             Msg: 'This media type does not exist in our database',
+      //           });
+      //         } else {
+      //           try {
+      //             await model.findByIdAndUpdate(
+      //               { _id: parentMediaId },
+      //               {
+      //                 $inc: { commentCount: 1 },
+      //               }
+      //             );
+      //             return res.status(200).json({ Msg: 'Success reply' });
+      //           } catch (err) {
+      //             console.log(err);
+      //             return res.status(500).json({
+      //               Msg: 'Something went wrong while incrementing comment count',
+      //             });
+      //           }
+      //         }
+
+      //         //res.status(404).json({ Msg: 'Invalid comment id' });
+      //       }
+      //     } catch (error) {
+      //       console.log(error);
+      //       res.status(500).json({ Msg: 'Something went wrong' });
+      //     }
+      //   } else {
+      //     res.status(404).json({ Msg: 'Invalid parent media id' });
+      //   }
+      // } catch (error) {
+      //   console.log(error);
+      //   res.status(500).json({ Msg: 'Something went wrong' });
+      // }
+      let model = chooseModel(mediaType);
+      if (!model) {
+        return res
+          .status(500)
+          .json({ Msg: 'This media type does not exist our database' });
+      } else {
+        try {
+          let foundMedia = await model.findById(parentMediaId);
+          if (foundMedia) {
+            try {
+              let foundComment = await Comment.findById(parentCommentId);
+              if (foundComment) {
+                let newComment = new Comment({
+                  postedBy: userId,
+                  parentMediaId: foundMedia._id,
+                  text,
+                  parentComment: parentCommentId,
                 });
+                await newComment.save();
+                await foundUser.comments.push(newComment);
+                await foundUser.save();
+                await foundComment.replies.push(newComment);
+                await foundComment.save();
+                await Comment.findByIdAndUpdate(
+                  parentCommentId,
+                  {
+                    $inc: { parentCommentReplyCount: 1 },
+                  },
+                  { new: true }
+                );
+                await model.findByIdAndUpdate(
+                  { _id: parentMediaId },
+                  {
+                    $inc: { commentCount: 1 },
+                  }
+                );
+                return res.status(200).json({ Msg: 'Success reply' });
               } else {
-                try {
-                  await model.findByIdAndUpdate(
-                    { _id: parentMediaId },
-                    {
-                      $inc: { commentCount: 1 },
-                    }
-                  );
-                  return res.status(200).json({ Msg: 'Success reply' });
-                } catch (err) {
-                  console.log(err);
-                  return res.status(500).json({
-                    Msg: 'Something went wrong while incrementing comment count',
-                  });
-                }
+                return res
+                  .status(404)
+                  .json({ Msg: 'Invalid comment parent id' });
               }
-              // switch (mediaType) {
-              //   case 'movie':
-              //     try {
-              //       await Movie.findByIdAndUpdate(
-              //         { _id: parentMediaId },
-              //         {
-              //           $inc: { commentCount: 1 },
-              //         }
-              //       );
-              //     } catch (error) {
-              //       console.log(error);
-              //       return res.status(500).json({
-              //         Msg: 'Something went wrong adding your comment',
-              //       });
-              //     }
-              //     break;
-              //   case 'Tv':
-              //     try {
-              //       await Tv.findByIdAndUpdate(
-              //         { _id: parentMediaId },
-              //         {
-              //           $inc: { commentCount: 1 },
-              //         }
-              //       );
-              //     } catch (error) {
-              //       console.log(error);
-              //       return res.status(500).json({
-              //         Msg: 'Something went wrong adding your comment',
-              //       });
-              //     }
-              //     break;
-              //   case 'Season':
-              //     try {
-              //       await Season.findByIdAndUpdate(
-              //         { _id: parentMediaId },
-              //         {
-              //           $inc: { commentCount: 1 },
-              //         }
-              //       );
-              //     } catch (error) {
-              //       console.log(error);
-              //       return res.status(500).json({
-              //         Msg: 'Something went wrong adding your comment',
-              //       });
-              //     }
-              //     break;
-              //   case 'Episode':
-              //     try {
-              //       await Episode.findByIdAndUpdate(
-              //         { _id: parentMediaId },
-              //         {
-              //           $inc: { commentCount: 1 },
-              //         }
-              //       );
-              //     } catch (error) {
-              //       console.log(error);
-              //       return res.status(500).json({
-              //         Msg: 'Something went wrong adding your comment',
-              //       });
-              //     }
-              //     break;
-              //   case 'Book':
-              //     try {
-              //       await Book.findByIdAndUpdate(
-              //         { _id: parentMediaId },
-              //         {
-              //           $inc: { commentCount: 1 },
-              //         }
-              //       );
-              //     } catch (error) {
-              //       console.log(error);
-              //       return res.status(500).json({
-              //         Msg: 'Something went wrong adding your comment',
-              //       });
-              //     }
-              //     break;
-              //}
-            } else {
-              res.status(404).json({ Msg: 'Invalid comment id' });
+            } catch (error) {
+              return res
+                .status(500)
+                .json({ Msg: 'Something went wrong, try again later' });
             }
-          } catch (error) {
-            console.log(error);
-            res.status(500).json({ Msg: 'Something went wrong' });
+          } else {
+            return res.status(404).json({ Msg: 'Media not found' });
           }
-        } else {
-          res.status(404).json({ Msg: 'Invalid parent media id' });
+        } catch (error) {
+          console.log(error);
+          return res
+            .status(500)
+            .json({ Msg: 'Something went wrong, try again later' });
         }
-      } catch (error) {
-        console.log(error);
-        res.status(500).json({ Msg: 'Something went wrong' });
       }
     } else {
       res.status(404).json({ Msg: 'Invalid user id' });
@@ -319,6 +210,7 @@ const replyToComment = async (req, res) => {
 };
 
 const editComment = async (req, res) => {
+  //unable to update if not test == 'detelete'
   const commentId = req.header('commentId');
   const { text } = req.body;
   try {
