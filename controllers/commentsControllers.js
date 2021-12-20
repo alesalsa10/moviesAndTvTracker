@@ -113,19 +113,6 @@ const replyToComment = async (req, res) => {
                 await foundUser.save();
                 await foundComment.replies.push(newComment);
                 await foundComment.save();
-                // await Comment.findByIdAndUpdate(
-                //   parentCommentId,
-                //   {
-                //     $inc: { parentCommentReplyCount: 1 },
-                //   },
-                //   { new: true }
-                // );
-                // await model.findByIdAndUpdate(
-                //   { _id: parentMediaId },
-                //   {
-                //     $inc: { commentCount: 1 },
-                //   }
-                // );
                 return res.status(200).json({ Msg: 'Success reply' });
               } else {
                 return res
@@ -133,6 +120,7 @@ const replyToComment = async (req, res) => {
                   .json({ Msg: 'Invalid comment parent id' });
               }
             } catch (error) {
+              console.log(error);
               return res
                 .status(500)
                 .json({ Msg: 'Something went wrong, try again later' });

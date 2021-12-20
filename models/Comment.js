@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const chooseModel = require('../utils/chooseModel');
+//get topComment id and only inc count of the topComment to sort by it
 
 const CommentSchema = new mongoose.Schema({
   postedBy: {
@@ -31,101 +31,92 @@ const CommentSchema = new mongoose.Schema({
   },
   parentMediaId: {
     //the movie or show is belongs to
-    type: Number,//mongoose.Types.ObjectId,
+    type: Number, //mongoose.Types.ObjectId,
     ref: 'Media',
   },
-  parentTv:{
+  parentTv: {
     type: Number,
-    ref: 'Season'
+    ref: 'Season',
   },
-  parentSeason:{
+  parentSeason: {
     type: String,
-    ref: 'Season'
+    ref: 'Season',
   },
-  parentEpisode:{
+  parentEpisode: {
     type: Number,
-    ref: 'Episode'
+    ref: 'Episode',
   },
-  parentMovie:{
+  parentMovie: {
     type: Number,
-    ref: 'Movie'
+    ref: 'Movie',
   },
-  parentBook:{
+  parentBook: {
     type: mongoose.Types.ObjectId,
-    ref: 'Book'
+    ref: 'Book',
   },
-  parentCommentReplyCount:{
+  parentCommentReplyCount: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 });
 
-
 CommentSchema.pre('save', async function (next) {
-  let model;
-  if(this.parentTv){
-    model = chooseModel('tv');
-  }else if(this.parentSeason){
-    model = chooseModel('season');
-  }else if(this.parentEpisode){
-    model = chooseModel('episode');
-  }else if(this.parentMovie){
-    model = chooseModel('movie');
-  }else if(this.parentBook){
-    model = chooseModel('book')
-  }else {
-    model = null
-    const err = new Error('Something went wrong');
-    next(err);
-  }
+  const selectModel = () => {
+    console.log(this, 'something');
+    if (this.parentTv) {
+      return mongoose.model('Tv');
+    } else if (this.parentSeason) {
+      return mongoose.model('Season');
+    } else if (this.parentEpisode) {
+      return mongoose.model('Episode');
+    } else if (this.parentMovie) {
+      return mongoose.model('Movie');
+    } else if (this.parentBook) {
+      return mongoose.model('Book');
+    } else {
+      const err = new Error('Something went wrong');
+      next(err);
+    }
+  };
 
-  if(model){
-    try{
-      let media = await model.findByIdAndUpdate(
-        this.parentMovie,
-        {
-          $inc: { commentCount: 1 },
-        }
-      );
-      console.log({'media': media})
-      if(media){
+  let mongoModel = selectModel();
+
+  if (mongoModel) {
+    try {
+      let media = await mongoModel.findByIdAndUpdate(this.parentMovie, {
+        $inc: { commentCount: 1 },
+      });
+      if (media) {
         //next();
         //still not working
-        if(this.parentComment){
-          try{
-            let com = await Comment.findByIdAndUpdate(
-              this.parentComment,
-              {
-                $inc: { parentCommentReplyCount: 1 },
-              }            
-            );
-            console.log({'com': com})
-            if(com){
+        if (this.parentComment) {
+          try {
+            let com = await Comment.findByIdAndUpdate(this.parentComment, {
+              $inc: { parentCommentReplyCount: 1 },
+            });
+            if (com) {
               next();
-            }else {
-              const err = new Error('Something went wrong');
+            } else {
+              const err = new Error('Something went wrong 1');
               next(err);
             }
-          }catch(error){
+          } catch (error) {
             console.log(error);
             return next(error);
           }
-        }else {
-          next()
+        } else {
+          next();
         }
-      }else {
-        const err = new Error('Something went wrong');
-        next(err)
+      } else {
+        const err = new Error('Something went wrong 2');
+        next(err);
       }
-      console.log(media)
-    }catch(error){
-      console.log(error)
-      return next(error)
+    } catch (error) {
+      console.log(error);
+      return next(error);
     }
-
   }
 });
-
 
 const Comment = mongoose.model('Comment', CommentSchema);
 
