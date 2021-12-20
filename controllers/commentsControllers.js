@@ -1,12 +1,7 @@
 const User = require('../models/User');
 const Comment = require('../models/Comment');
-const Tv = require('../models/Tv');
-const Season = require('../models/Season');
-const Episode = require('../models/Episode');
-const Movie = require('../models/Movie');
-const Book = require('../models/Book');
-const getMedia = require('../utils/getMedia');
 const chooseModel = require('../utils/chooseModel');
+const chooseCommentParent = require('../utils/chooseCommentParent');
 
 const createComment = async (req, res) => {
   const { text } = req.body;
@@ -27,16 +22,25 @@ const createComment = async (req, res) => {
         try {
           let existingMedia = await model.findById(externalId);
           if (existingMedia) {
-            let newComment = new Comment({
-              postedBy: userId,
-              parentMediaId: existingMedia._id,
-              text,
-            });
-            await newComment.save();
-            await foundUser.comments.push(newComment);
-            await foundUser.save();
-            await existingMedia.comments.push(newComment);
-            await existingMedia.save();
+            //comments don't have the right references parentMovie, parentTv, stc.
+            try {
+              let commentParentMedia = chooseCommentParent(mediaType);
+              let newComment = new Comment({
+                postedBy: userId,
+                [commentParentMedia]: existingMedia._id,
+                text,
+              });
+              await newComment.save();
+              await foundUser.comments.push(newComment);
+              await foundUser.save();
+              await existingMedia.comments.push(newComment);
+              await existingMedia.save();
+            } catch (error) {
+              console.log(error);
+              return res
+                .status(500)
+                .json('Something went wrong while saving your comment');
+            }
           } else {
             return res
               .status(404)
@@ -48,19 +52,20 @@ const createComment = async (req, res) => {
             .status(500)
             .json({ Msg: 'Something went wrong trying to find the media' });
         }
-        try {
-          await model.findOneAndUpdate(
-            { _id: externalId },
-            {
-              $inc: { commentCount: 1 },
-            }
-          );
-          return res.status(201).json({ Msg: 'Comment created' });
-        } catch (err) {
-          return res
-            .status(500)
-            .json({ Msg: 'Problem increasing comment count' });
-        }
+        // try {
+        //   await model.findOneAndUpdate(
+        //     { _id: externalId },
+        //     {
+        //       $inc: { commentCount: 1 },
+        //     }
+        //   );
+        //   return res.status(201).json({ Msg: 'Comment created' });
+        // } catch (err) {
+        //   return res
+        //     .status(500)
+        //     .json({ Msg: 'Problem increasing comment count' });
+        // }
+        return res.status(201).json({ Msg: 'Comment created' });
       }
     } else {
       res.status(404).json({ Msg: 'User not found' });
@@ -84,65 +89,6 @@ const replyToComment = async (req, res) => {
   try {
     let foundUser = await User.findById(userId).select('-password');
     if (foundUser) {
-      // try {
-      //   let foundMedia = await getMedia(parentMediaId, mediaType);
-      //   if (foundMedia) {
-      //     try {
-      //       let foundComment = await Comment.findById(parentCommentId);
-      //       if (foundComment) {
-      //         let newComment = new Comment({
-      //           postedBy: userId,
-      //           parentMediaId: foundMedia._id,
-      //           text,
-      //           parentComment: parentCommentId,
-      //         });
-      //         await newComment.save();
-      //         await foundUser.comments.push(newComment);
-      //         await foundUser.save();
-      //         await foundComment.replies.push(newComment);
-      //         await foundComment.save();
-      //         await Comment.findByIdAndUpdate(
-      //           parentCommentId,
-      //           {
-      //             $inc: { parentCommentReplyCount: 1 },
-      //           },
-      //           { new: true }
-      //         );
-      //         let model = chooseModel(mediaType);
-      //         if (!model) {
-      //           return res.status(500).json({
-      //             Msg: 'This media type does not exist in our database',
-      //           });
-      //         } else {
-      //           try {
-      //             await model.findByIdAndUpdate(
-      //               { _id: parentMediaId },
-      //               {
-      //                 $inc: { commentCount: 1 },
-      //               }
-      //             );
-      //             return res.status(200).json({ Msg: 'Success reply' });
-      //           } catch (err) {
-      //             console.log(err);
-      //             return res.status(500).json({
-      //               Msg: 'Something went wrong while incrementing comment count',
-      //             });
-      //           }
-      //         }
-
-      //         //res.status(404).json({ Msg: 'Invalid comment id' });
-      //       }
-      //     } catch (error) {
-      //       console.log(error);
-      //       res.status(500).json({ Msg: 'Something went wrong' });
-      //     }
-      //   } else {
-      //     res.status(404).json({ Msg: 'Invalid parent media id' });
-      //   }
-      // } catch (error) {
-      //   console.log(error);
-      //   res.status(500).json({ Msg: 'Something went wrong' });
-      // }
       let model = chooseModel(mediaType);
       if (!model) {
         return res
@@ -155,9 +101,10 @@ const replyToComment = async (req, res) => {
             try {
               let foundComment = await Comment.findById(parentCommentId);
               if (foundComment) {
+                let commentParentMedia = chooseCommentParent(mediaType);
                 let newComment = new Comment({
                   postedBy: userId,
-                  parentMediaId: foundMedia._id,
+                  [commentParentMedia]: foundMedia._id,
                   text,
                   parentComment: parentCommentId,
                 });
@@ -166,19 +113,19 @@ const replyToComment = async (req, res) => {
                 await foundUser.save();
                 await foundComment.replies.push(newComment);
                 await foundComment.save();
-                await Comment.findByIdAndUpdate(
-                  parentCommentId,
-                  {
-                    $inc: { parentCommentReplyCount: 1 },
-                  },
-                  { new: true }
-                );
-                await model.findByIdAndUpdate(
-                  { _id: parentMediaId },
-                  {
-                    $inc: { commentCount: 1 },
-                  }
-                );
+                // await Comment.findByIdAndUpdate(
+                //   parentCommentId,
+                //   {
+                //     $inc: { parentCommentReplyCount: 1 },
+                //   },
+                //   { new: true }
+                // );
+                // await model.findByIdAndUpdate(
+                //   { _id: parentMediaId },
+                //   {
+                //     $inc: { commentCount: 1 },
+                //   }
+                // );
                 return res.status(200).json({ Msg: 'Success reply' });
               } else {
                 return res

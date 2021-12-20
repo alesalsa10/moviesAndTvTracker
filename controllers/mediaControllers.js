@@ -7,7 +7,6 @@ const Tv = require('../models/Tv');
 const apiCalls = require('../externalAPI/apiCalls');
 const { default: axios } = require('axios');
 const BasedOnBook = require('../models/BasedOnBook');
-const Book = require('../models/Book');
 const chooseModel = require('../utils/chooseModel');
 
 const getMediaById = async (req, res) => {
@@ -24,7 +23,6 @@ const getMediaById = async (req, res) => {
   try {
     foundMedia = await model
       .findById(id)
-      .populate('comments')
       .populate({
         path: 'comments',
         populate: {
