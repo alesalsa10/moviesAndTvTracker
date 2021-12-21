@@ -8,6 +8,7 @@ const apiCalls = require('../externalAPI/apiCalls');
 const { default: axios } = require('axios');
 const BasedOnBook = require('../models/BasedOnBook');
 const chooseModel = require('../utils/chooseModel');
+const Selector = require('../utils/selector');
 
 const getMediaById = async (req, res) => {
   //lookup media by id
@@ -16,7 +17,8 @@ const getMediaById = async (req, res) => {
   //merge response with my own database,
   const { mediaType, id } = req.params;
   let foundMedia;
-  let model = chooseModel(mediaType);
+  const selector = new Selector();
+  let model = selector.chooseModel(mediaType);
   if (!model) {
     return res.status(500).json({ Msg: 'No media by this name' });
   }

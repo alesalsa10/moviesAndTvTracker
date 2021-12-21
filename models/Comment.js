@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const User = require('../models/User');
 //get topComment id and only inc count of the topComment to sort by it
 
 const CommentSchema = new mongoose.Schema({
@@ -24,15 +25,15 @@ const CommentSchema = new mongoose.Schema({
     ref: 'Comment',
     default: null,
   },
+  topComment: {
+    type: mongoose.Types.ObjectId,
+    ref: 'Comment',
+    default: null,
+  },
   datePosted: {
     type: Date,
     default: Date.now,
     required: true,
-  },
-  parentMediaId: {
-    //the movie or show is belongs to
-    type: Number, //mongoose.Types.ObjectId,
-    ref: 'Media',
   },
   parentTv: {
     type: Number,
@@ -54,15 +55,15 @@ const CommentSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     ref: 'Book',
   },
-  parentCommentReplyCount: {
+  topCommentReplyCount: {
     type: Number,
     default: 0,
   },
 });
 
 CommentSchema.pre('save', async function (next) {
+  //const selector = new Selector(this.CommentSchema);
   const selectModel = () => {
-    console.log(this, 'something');
     if (this.parentTv) {
       return mongoose.model('Tv');
     } else if (this.parentSeason) {
@@ -75,15 +76,33 @@ CommentSchema.pre('save', async function (next) {
       return mongoose.model('Book');
     } else {
       const err = new Error('Something went wrong');
-      next(err);
+      //next(err);
+      return err;
     }
   };
 
+  const selectParentMedia = () => {
+    if (this.parentTv) {
+      return this.parentTv;
+    } else if (this.parentSeason) {
+      return this.parentSeason;
+    } else if (this.parentEpisode) {
+      return this.parentEpisode;
+    } else if (this.parentMovie) {
+      return this.parentMovie;
+    } else if (this.parentBook) {
+      return this.parentBook;
+    } else {
+      const err = new Error('Something went wrong');
+      //next(err);
+      return err;
+    }
+  };
   let mongoModel = selectModel();
-
+  let parentMediaType = selectParentMedia();
   if (mongoModel) {
     try {
-      let media = await mongoModel.findByIdAndUpdate(this.parentMovie, {
+      let media = await mongoModel.findByIdAndUpdate(parentMediaType, {
         $inc: { commentCount: 1 },
       });
       if (media) {
@@ -92,7 +111,7 @@ CommentSchema.pre('save', async function (next) {
         if (this.parentComment) {
           try {
             let com = await Comment.findByIdAndUpdate(this.parentComment, {
-              $inc: { parentCommentReplyCount: 1 },
+              $inc: { topCommentReplyCount: 1 },
             });
             if (com) {
               next();
@@ -110,6 +129,77 @@ CommentSchema.pre('save', async function (next) {
       } else {
         const err = new Error('Something went wrong 2');
         next(err);
+      }
+    } catch (error) {
+      console.log(error);
+      return next(error);
+    }
+  }
+});
+
+CommentSchema.pre('remove', async function (next) {
+  //before removing remove comment from user, and from media, and decrement reply count
+  const selectModel = () => {
+    if (this.parentTv) {
+      return mongoose.model('Tv');
+    } else if (this.parentSeason) {
+      return mongoose.model('Season');
+    } else if (this.parentEpisode) {
+      return mongoose.model('Episode');
+    } else if (this.parentMovie) {
+      return mongoose.model('Movie');
+    } else if (this.parentBook) {
+      return mongoose.model('Book');
+    } else {
+      const err = new Error('Something went wrong');
+      //next(err);
+      return err;
+    }
+  };
+
+  const selectParentMedia = () => {
+    if (this.parentTv) {
+      return this.parentTv;
+    } else if (this.parentSeason) {
+      return this.parentSeason;
+    } else if (this.parentEpisode) {
+      return this.parentEpisode;
+    } else if (this.parentMovie) {
+      return this.parentMovie;
+    } else if (this.parentBook) {
+      return this.parentBook;
+    } else {
+      const err = new Error('Something went wrong');
+      //next(err);
+      return err;
+    }
+  };
+  let mongoModel = selectModel();
+  let parentMediaType = selectParentMedia();
+
+  if (mongoModel) {
+    try {
+      //remove reference from the user
+      await User.findByIdAndUpdate(this.postedBy, {
+        $pull: {
+          comments: this._id,
+        },
+      });
+      try {
+        //remove reference from the media and decrement count
+        let media = await mongoModel.findByIdAndUpdate(this.parentMovie, {
+          $inc: { commentCount: -1 },
+          $pull: { comments: this._id },
+        });
+        if (media) {
+          //dec
+        } else {
+          const err = new Error('Something went wrong 2');
+          next(err);
+        }
+      } catch (error) {
+        console.log(error);
+        return next(error);
       }
     } catch (error) {
       console.log(error);
