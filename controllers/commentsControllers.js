@@ -1,8 +1,9 @@
 const User = require('../models/User');
 const Comment = require('../models/Comment');
-const chooseModel = require('../utils/chooseModel');
 const chooseCommentParent = require('../utils/chooseCommentParent');
-const Selector = require('../utils/selector')
+const Selector = require('../utils/selector');
+
+//make it so if comment value == '[Deleted]' this type of comment cannot be deleted since this is only used a reference key
 
 const createComment = async (req, res) => {
   const { text } = req.body;
@@ -152,7 +153,7 @@ const replyToComment = async (req, res) => {
 
 const editComment = async (req, res) => {
   //unable to update if not test == 'detelete'
-  const commentId = req.header('commentId');
+  const commentId = req.params.commentId;
   const { text } = req.body;
   try {
     const update = {
@@ -177,14 +178,7 @@ const deleteComment = async (req, res) => {
   //this will be done so the threaded comment can still be looked up, how reddit works
   //only do the 'deleted' logic if the comment has replies
   //make sure to delete comment from user and media
-  const commentId = req.header('commentId');
-  //need parent mediaId (movie/tv/season/episode) and userId
-  const userId = req.header('userId');
-  const { mediaType } = req.params;
-  const parentCommentId = req.header('parentCommentId') || undefined;
-  const topCommentId = req.header('topCommentId') || undefined;
-  const parentMediaId = req.header('parentMediaId');
-
+  const commentId = req.params.commentId;
   try {
     const update = {
       text: '[Deleted]',

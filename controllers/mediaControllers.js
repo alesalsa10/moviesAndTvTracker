@@ -2,12 +2,11 @@
 //it is created with the api key when the user goes to click on given media from the movie database api
 const Season = require('../models/Season');
 const Episode = require('../models/Episode');
-const Movie = require('../models/Movie');
+//const Movie = require('../models/Movie');
 const Tv = require('../models/Tv');
 const apiCalls = require('../externalAPI/apiCalls');
 const { default: axios } = require('axios');
 const BasedOnBook = require('../models/BasedOnBook');
-const chooseModel = require('../utils/chooseModel');
 const Selector = require('../utils/selector');
 
 const getMediaById = async (req, res) => {
@@ -185,7 +184,6 @@ const getSeason = async (req, res) => {
       `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}&append_to_response=videos`
     );
     console.log(response);
-    //res.status(200).json(response.data);
     try {
       let foundMedia = await Tv.findById(id);
       if (foundMedia) {

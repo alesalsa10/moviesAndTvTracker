@@ -12,14 +12,6 @@ const bookSchema = new mongoose.Schema({
     ref: 'User',
   },
   _id: String,
-  // title: {
-  //     type: String,
-  //     required: true
-  // },
-  // author:{
-  //     type: String,
-  //     required: true
-  // }
   commentCount: {
     type: Number,
     default: 0,

@@ -99,7 +99,7 @@ const verifyEmail = async (req, res) => {
   if (!token) {
     return res
       .status(404)
-      .json({ Msg: 'Token not found, might  have expired' });
+      .json({ Msg: 'Token not found, it might  have expired' });
   } else {
     let currentDate = new Date(Date.now());
     if (token.expiresAt > currentDate) {
@@ -122,7 +122,7 @@ const verifyEmail = async (req, res) => {
             .send('User has been already verified. Please Login');
         } else {
           //delete the token from the database since I don't have con job yet
-          await Token.findByIdAndDelete(token._id);
+          await EmailToken.findByIdAndDelete(token._id);
 
           //verify account
           await findByIdAndUpdate(token.user, { isVerified: true });
@@ -250,6 +250,11 @@ const changePassword = async (req, res) => {
   //this is for the user is already logged in
   //previous password check,, then new
 };
+
+
+const signInWithGoogle = async(req, res)=>{
+  //placeholder, will add this once I have a demo frontend
+}
 
 module.exports = {
   register,

@@ -41,11 +41,18 @@ router.post(
 );
 
 router.put(
-  '/edit',
+  '/edit/:commentId',
   auth,
   checkVerification,
   isLoggedInSameUser,
-  [check('text').notEmpty().withMessage('Text must exist')],
+  [
+    check('text')
+      .notEmpty()
+      .withMessage('Text must exist')
+      .not()
+      .equals('[Deleted]')
+      .withMessage(`Text cannot be equal to [Deleted]`),
+  ],
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -58,7 +65,7 @@ router.put(
 );
 
 router.put(
-  '/:mediaType/delete',
+  '/delete/:commentId',
   auth,
   checkVerification,
   isLoggedInSameUser,

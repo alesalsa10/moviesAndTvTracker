@@ -5,12 +5,15 @@ const { check, validationResult } = require('express-validator');
 const mediaControllers = require('../controllers/bookmarksControllers');
 const auth = require('../middlewares/auth');
 const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser.js');
+const checkVerification = require("../middlewares/checkVerification");
+
+
 
 // media/new/userId
 router.post(
   '/new',
   auth,
-  isLoggedInSameUser,
+  checkVerification,
   [check('externalId').notEmpty().withMessage('External id must exist')],
   (req, res, next) => {
     const errors = validationResult(req);
@@ -23,7 +26,7 @@ router.post(
   mediaControllers.addBookmark
 );
 
-router.get('/all', auth, isLoggedInSameUser, mediaControllers.getAllBookmarks);
+router.get('/all', auth, checkVerification, mediaControllers.getAllBookmarks);
 router.get(
   '/:mediaType',
   auth,
@@ -33,7 +36,7 @@ router.get(
 router.delete(
   '/:bookmarkId',
   auth,
-  isLoggedInSameUser,
+  checkVerification,
   mediaControllers.deleteBookmark
 );
 
