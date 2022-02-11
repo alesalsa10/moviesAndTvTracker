@@ -4,13 +4,14 @@ const { check, validationResult } = require('express-validator');
 
 const auth = require('../middlewares/auth');
 const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser.js');
+const checkVerification = require('../middlewares/checkVerification');
 
 const commentControllers = require('../controllers/commentsControllers');
 
 router.post(
   '/:mediaType/new',
   auth,
-  isLoggedInSameUser,
+  checkVerification,
   [check('text').notEmpty().withMessage('External id must exist')],
   (req, res, next) => {
     const errors = validationResult(req);
@@ -26,7 +27,7 @@ router.post(
 router.post(
   '/:mediaType/reply',
   auth,
-  isLoggedInSameUser,
+  checkVerification,
   [check('text').notEmpty().withMessage('Text must exist')],
   (req, res, next) => {
     const errors = validationResult(req);
@@ -42,6 +43,7 @@ router.post(
 router.put(
   '/edit',
   auth,
+  checkVerification,
   isLoggedInSameUser,
   [check('text').notEmpty().withMessage('Text must exist')],
   (req, res, next) => {
@@ -58,6 +60,7 @@ router.put(
 router.put(
   '/:mediaType/delete',
   auth,
+  checkVerification,
   isLoggedInSameUser,
   commentControllers.deleteComment
 );

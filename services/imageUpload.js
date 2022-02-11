@@ -17,20 +17,23 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({
-  fileFilter,
-  storage: multerS3({
-    //acl: "public-read",
-    s3,
-    bucket: process.env.bucketName,
-    contentType: multerS3.AUTO_CONTENT_TYPE,
-    metadata: function (req, file, cb) {
-      cb(null, { fieldName: file.fieldname });
-    },
-    key: function (req, file, cb) {
-      cb(null, Date.now().toString());
-    },
-  }),
-});
+const uploadImage = (folder) => {
+  const upload = multer({
+    fileFilter,
+    storage: multerS3({
+      s3,
+      bucket: process.env.AWSBucketName,
+      contentType: multerS3.AUTO_CONTENT_TYPE,
+      metadata: function (req, file, cb) {
+        cb(null, { fieldName: file.fieldname });
+      },
+      key: function (req, file, cb) {
+        let fileName = `${folder}/${file.originalname}${Date.now().toString()}`;
+        cb(null, fileName);
+      },
+    }),
+  });
+  return upload;
+};
 
-module.exports = upload;
+module.exports = uploadImage;

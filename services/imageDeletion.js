@@ -7,9 +7,9 @@ aws.config.update({
   region: 'us-east-2',
 });
 
-const deletePicture = (filename, callback) => {
-  var params = {
-    Bucket: process.env.bucketName,
+const deleteImage = (filename, callback) => {
+  let params = {
+    Bucket: process.env.AWSBucketName,
     Key: filename,
   };
   s3.deleteObject(params, function (err, data) {
@@ -22,4 +22,4 @@ const deletePicture = (filename, callback) => {
   });
 };
 
-module.exports = deletePicture;
+module.exports = deleteImage;

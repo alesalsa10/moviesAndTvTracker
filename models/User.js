@@ -21,14 +21,6 @@ const UserSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  // bookmarks: [
-  //   {
-  //     //this will be the id from the external api
-  //     type: Number, //mongoose.Types.ObjectId,
-  //     ref: 'Media',
-  //     unique: true,
-  //   },
-  // ],
   favoriteBooks: [
     {
       type: Number,
@@ -55,17 +47,21 @@ const UserSchema = new mongoose.Schema({
     required: true,
     minlength: 4,
   },
-  resetPasswordToken: {
-    type: String,
-    default: null,
+  passwordToken: {
+    type: mongoose.Types.ObjectId,
+    ref: 'PasswordToken'
   },
-  resetPasswordTokenExpiration: {
-    type: Date,
-    default: null,
+  verificationToken:{
+    type: mongoose.Types.ObjectId,
+    ref: 'EmailToken'
   },
   profilePicture:{
     type: String,
     default: null
+  },
+  isVerified:{
+    type: Boolean,
+    default: false
   }
 });
 

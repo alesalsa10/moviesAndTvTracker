@@ -2,7 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDb = require('./config/mongooseConnection');
+const helmet = require('helmet')
 
+const authRoutes = require('./routes/authRoutes');
 const userRouter = require('./routes/userRoutes');
 const bookmarkRouter = require('./routes/bookmarkRoutes');
 const commentsRouter = require('./routes/commentsRoutes');
@@ -17,13 +19,15 @@ const app = express();
 
 
 app.use(cors());
-connectDb();
+app.use(helmet())
 app.use(express.json());
+connectDb();
 
 app.get('/', (req, res) => {
   res.send('it is working!');
 });
 
+app.use('/auth', authRoutes);
 app.use('/users', userRouter);
 app.use('/bookmarks', bookmarkRouter);
 app.use('/comments', commentsRouter);

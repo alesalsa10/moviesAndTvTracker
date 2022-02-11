@@ -1,0 +1,113 @@
+const express = require('express');
+const router = express.Router();
+const { check, validationResult, oneOf } = require('express-validator');
+
+const authController = require('../controllers/authController');
+const auth = require('../middlewares/auth');
+const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser');
+
+router.post(
+  '/register',
+  [
+    check('email').isEmail().withMessage('Must be a valid email'),
+    check('password')
+      .isStrongPassword({
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+      })
+      .withMessage(
+        'Password must be greater than 8 and contain at least one uppercase letter, one lowercase letter, and one number'
+      ),
+    check('username').notEmpty().withMessage('Username cannot be emtpy'),
+    check('name').notEmpty().withMessage('Name cannot be emtpy'),
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    } else {
+      next();
+    }
+  },
+  authController.register
+);
+
+router.post(
+  '/signIn',
+  [
+    oneOf([
+      check('username').notEmpty().withMessage('Username cannot be empty'),
+      check('email').isEmail().withMessage('Type a valid email'),
+    ]),
+    check('password')
+      .isLength({ min: 6 })
+      .withMessage('Password must be at least 6 charcaters long'),
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    } else {
+      next();
+    }
+  },
+  authController.signIn
+);
+
+router.post(
+  '/verify/resendEmail',
+  [check('email').isEmail().withMessage('Must be a valid email')],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    } else {
+      next();
+    }
+  },
+   authController.resendVerificationEmail
+);
+
+//this will just send the link to reset the password
+router.post(
+  '/forgotPassword',
+  [check('email').isEmail().withMessage('Must be a valid email')],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    } else {
+      next();
+    }
+  },
+  authController.forgotPassword
+);
+
+router.post(
+  '/resetPassword/:token',
+  [
+    check('password')
+      .isStrongPassword({
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+      })
+      .withMessage(
+        'Password must be greater than 8 and contain at least one uppercase letter, one lowercase letter, and one number'
+      ),
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    } else {
+      next();
+    }
+  },
+  authController.resetPassword
+);
+
+module.exports = router;

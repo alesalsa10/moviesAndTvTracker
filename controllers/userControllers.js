@@ -1,80 +1,11 @@
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
-const sendEmail = require('../utils/sendEmail');
+const sendEmail = require('../services/sendEmail');
 
-const upload = require('../services/imageUpload');
+const uploadImage = require('../services/imageUpload');
 const deletePicture = require('../services/imageDeletion')
-const singleUpload = upload.single('image');
 
 const User = require('../models/User');
-
-const register = async (req, res) => {
-  const { email, password, username, name } = req.body;
-
-  try {
-    //check user by username and by email
-    let userByEmail = await User.findOne({ email });
-    let userByUsername = await User.findOne({ username });
-
-    if (userByEmail || userByUsername) {
-      //if a user is found already return error
-      return res.status(409).json({ Error: 'User already exists' });
-    } else {
-      const salt = await bcrypt.genSalt(10);
-      // hash the password along with our new salt
-      const encryptedPassword = await bcrypt.hash(password, salt);
-
-      //create user
-      let user = new User({
-        email,
-        password: encryptedPassword,
-        username,
-        name,
-      });
-
-      await user.save();
-      res.status(203).json({ user });
-      console.log(user);
-    }
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ Error: 'Oops, something went wrong' });
-  }
-};
-
-const signIn = async (req, res) => {
-  const { username, password, email } = req.body;
-  //check if user exists
-  //if no user exist send error invalid crednetial error
-  //if user users exist, compared hashed password, if it mataches create jwt token to send back to client
-  try {
-    let foundUserByUsername = await User.findOne({ username });
-    let foundUserByEmail = await User.findOne({ email });
-
-    if (foundUserByUsername || foundUserByEmail) {
-      //if user is found with given email or username, compare password with hashed password
-      let match;
-      if (foundUserByEmail) {
-        console.log(foundUserByEmail);
-        match = await bcrypt.compare(password, foundUserByEmail.password);
-      } else {
-        match = await bcrypt.compare(password, foundUserByUsername.password);
-      }
-      let user = foundUserByEmail || foundUserByUsername;
-      if (match) {
-        var token = jwt.sign({ user: user._id }, process.env.jwtKey);
-        res.status(201).json(token);
-      } else {
-        res.status(401).json({ Msg: 'Invalid credentials' });
-      }
-    } else {
-      res.status(401).json({ Msg: 'Incorrect credentials' });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ Error: 'Something went wrong' });
-  }
-};
 
 const getUser = async (req, res) => {
   const { id } = req.params;
@@ -147,70 +78,9 @@ const deleteUser = async (req, res) => {
   }
 };
 
-const forgotPassword = async (req, res) => {
-  const { email } = req.body;
-  try {
-    let foundUser = await User.findOne({ email });
-    if (foundUser) {
-      //before sending the email I have to create a token which gets attached to the resetPasswordToken
-      // sendEmail(email, foundUser._id, 4555);
-      // res.status(200).json({Msg: 'Check your email'})
-      let resetToken = Math.floor(100000 + Math.random() * 900000);
-      let emailResponse = await sendEmail(email, foundUser._id, resetToken);
-      console.log(emailResponse);
 
-      if (!emailResponse.error) {
-        let expiry = Date.now() + 60 * 1000 * 15; //15 minutes
-        foundUser.resetPasswordToken = resetToken;
-        foundUser.resetPasswordTokenExpiration = expiry;
 
-        await foundUser.save();
 
-        res.status(200).json({
-          Msg: 'If the email is found, you should receive a link to reset your password shortly',
-        });
-      } else {
-        res.status(500).json({ Msg: 'Could not sent email. Try again later' });
-      }
-    } else {
-      res.status(404).json({ Msg: 'No user with that given address' });
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ Msg: 'Something went wrong' });
-  }
-};
-
-const resetPassword = async (req, res) => {
-  const { userId, token } = req.params;
-  const { password } = req.body;
-
-  //find the user by id and token
-  //check that token has not expired
-  //get user password
-  //hash it
-  //set token and expiration back to null
-  //save the user
-
-  const foundUser = await User.findOne({
-    _id: userId,
-    resetPasswordToken: token,
-    resetPasswordTokenExpiration: { $gt: Date.now() },
-  });
-
-  if (!foundUser) {
-    res.send(401).json({ Msg: 'Password reset token invalid or has expired' });
-  } else {
-    const salt = await bcrypt.genSalt(10);
-    const encryptedPassword = await bcrypt.hash(password, salt);
-    foundUser.password = encryptedPassword;
-    foundUser.resetPasswordToken = null;
-    foundUser.resetPasswordTokenExpiration = null;
-    await foundUser.save();
-
-    res.status(201).json({ Msg: 'Password has been changed' });
-  }
-};
 
 const uploadProfileImage = async (req, res) => {
   const { userId } = req.params;
@@ -223,6 +93,7 @@ const uploadProfileImage = async (req, res) => {
       let profilePicture = foundUser.profilePicture;
       if(!profilePicture){
         //if it is not, then upload directly. it will be null on users with no picture
+        const singleUpload = uploadImage('mediaprofilelogo').single('image');
         singleUpload(req, res, async function (err) {
           if (err) {
             return res.json({
@@ -293,12 +164,8 @@ const uploadProfileImage = async (req, res) => {
 };
 
 module.exports = {
-  register,
-  signIn,
   getUser,
   editUser,
   deleteUser,
-  forgotPassword,
-  resetPassword,
   uploadProfileImage,
 };
