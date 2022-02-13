@@ -39,9 +39,10 @@ const register = async (req, res) => {
       try {
         await sendEmail(email, cryptoToken, 'verify');
         await user.save();
-        //res.status(203).json({ user });
         console.log(user);
+        const token = jwt.sign({ user: user._id }, process.env.jwtKey);
         return res.status(200).json({
+          token,
           msg: 'A verification email has been sent. It will expire after one hour.',
         });
       } catch (e) {
@@ -75,7 +76,7 @@ const signIn = async (req, res) => {
       }
       let user = foundUserByEmail || foundUserByUsername;
       if (match) {
-        var token = jwt.sign({ user: user._id }, process.env.jwtKey);
+        const token = jwt.sign({ user: user._id }, process.env.jwtKey);
         res.status(201).json(token);
       } else {
         res.status(401).json({ Msg: 'Invalid credentials' });

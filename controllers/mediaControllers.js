@@ -77,19 +77,16 @@ const getMediaByCategories = async (req, res) => {
 };
 
 const searchMedia = async (req, res) => {
-  //   https://api.themoviedb.org/3/search/multi?api_key=f2e1db77c8ae74a5c21ae7b7d5630dfb&language=en-US&query=avengers&page=1&include_adult=false
-
-  //STILL NEED TO ADD BOOKS RESULTS TO THIS SEARCH
+  //from the front end a search will call this, and search book in the bookController
+  //this allows for better error handling
   const { searchQuery } = req.params;
-  console.log(req.params);
   try {
     const response = await axios.get(
       `${process.env.baseURL}/search/multi?api_key=${process.env.apiKey}&query=${searchQuery}&include_adult=false`
     );
-    console.log(response);
     res.status(200).json(response.data);
   } catch (err) {
-    console.log(searchQuery);
+    console.log(err)
     res
       .status(err.response.status)
       .json({ Msg: err.response.data.status_message });
