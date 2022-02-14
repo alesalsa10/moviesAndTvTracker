@@ -72,4 +72,6 @@ router.put(
   commentControllers.deleteComment
 );
 
+router.get('/:mediaType/:id', commentControllers.getComments)
+
 module.exports = router;

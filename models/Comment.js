@@ -43,7 +43,7 @@ const CommentSchema = new mongoose.Schema({
     type: String,
     ref: 'Season',
   },
-  parentEpisode: {
+  parentSeason: {
     type: Number,
     ref: 'Episode',
   },

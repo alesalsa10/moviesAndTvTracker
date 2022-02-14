@@ -199,8 +199,10 @@ const deleteComment = async (req, res) => {
           //res.status(200).json({ Msg: 'Comment deleted' });
           if (deleted) {
             res.status(200).json({ Msg: 'Comment deleted' });
-          }else {
-            res.status(500).json({Msg: 'There was an issue deleting your comment'})
+          } else {
+            res
+              .status(500)
+              .json({ Msg: 'There was an issue deleting your comment' });
           }
         } catch (error) {
           console.log(error);
@@ -218,9 +220,48 @@ const deleteComment = async (req, res) => {
   }
 };
 
+const getComments = async (req, res) => {
+  const { mediaType, id } = req.params;
+  let parent;
+  switch (mediaType) {
+    case 'movie':
+      parent = 'parentMovie';
+    case 'tv':
+      parent = 'parentTv';
+    case 'season':
+      parent = 'parentSeason';
+    case 'episode':
+      parent = 'parentSeason';
+    case 'book':
+      parent = 'parentBook';
+    default:
+      parent = null;
+  }
+  if (!mediaType) {
+    return res.status(400).json({ Msg: 'Not a valid media type' });
+  } else {
+    try {
+      let comments = await Comment.find({
+        parent: id,
+      })
+        .populate({
+          path: 'replies',
+        })
+        .lean();
+      return res.status(200).json(comments);
+    } catch (e) {
+      console.log(e);
+      return res
+        .status(500)
+        .json({ Msg: 'Error getting comments, try again later' });
+    }
+  }
+};
+
 module.exports = {
   createComment,
   replyToComment,
   editComment,
   deleteComment,
+  getComments
 };

@@ -24,12 +24,12 @@ const getMediaById = async (req, res) => {
   try {
     foundMedia = await model
       .findById(id)
-      .populate({
-        path: 'comments',
-        populate: {
-          path: 'replies',
-        },
-      })
+      // .populate({
+      //   path: 'comments',
+      //   populate: {
+      //     path: 'replies',
+      //   },
+      // })
       .lean();
   } catch (error) {
     console.log(error);
