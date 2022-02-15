@@ -31,14 +31,16 @@ const register = async (req, res) => {
         password: encryptedPassword,
         username,
         name,
-        verificationToken: {
-          token: cryptoToken,
-        },
       });
-
+      await user.save();
+      const newToken = new EmailToken({
+        user: user._id,
+        token: cryptoToken,
+      });
+      await newToken.save();
       try {
         await sendEmail(email, cryptoToken, 'verify');
-        await user.save();
+
         console.log(user);
         const token = jwt.sign({ user: user._id }, process.env.jwtKey);
         return res.status(200).json({
@@ -240,7 +242,9 @@ const resetPassword = async (req, res) => {
       } else {
         const salt = await bcrypt.genSalt(10);
         const encryptedPassword = await bcrypt.hash(newPassword, salt);
-        const updatedUser = await User.findByIdAndUpdate(token.user, {password: encryptedPassword});
+        const updatedUser = await User.findByIdAndUpdate(token.user, {
+          password: encryptedPassword,
+        });
         return res.status(200).json({ Msg: 'Password changed successfully' });
       }
     }
@@ -252,10 +256,9 @@ const changePassword = async (req, res) => {
   //previous password check,, then new
 };
 
-
-const signInWithGoogle = async(req, res)=>{
+const signInWithGoogle = async (req, res) => {
   //placeholder, will add this once I have a demo frontend
-}
+};
 
 module.exports = {
   register,
@@ -264,5 +267,5 @@ module.exports = {
   resendVerificationEmail,
   forgotPassword,
   resetPassword,
-  changePassword
+  changePassword,
 };

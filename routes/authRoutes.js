@@ -20,8 +20,8 @@ router.post(
       .withMessage(
         'Password must be greater than 8 and contain at least one uppercase letter, one lowercase letter, and one number'
       ),
-    check('username').notEmpty().withMessage('Username cannot be emtpy'),
-    check('name').notEmpty().withMessage('Name cannot be emtpy'),
+    check('username').notEmpty().withMessage('Username is required'),
+    check('name').notEmpty().withMessage('Name is required'),
   ],
   (req, res, next) => {
     const errors = validationResult(req);

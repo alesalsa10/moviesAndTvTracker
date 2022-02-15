@@ -12,7 +12,7 @@ const EmailTokenSchema = new mongoose.Schema({
     ref: 'User',
   },
   token:{
-      type: Number,
+      type: String,
       required: true,
       unique: true
   },
