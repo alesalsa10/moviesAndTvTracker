@@ -16,9 +16,14 @@ const register = async (req, res) => {
     let userByEmail = await User.findOne({ email });
     let userByUsername = await User.findOne({ username });
 
-    if (userByEmail || userByUsername) {
-      //if a user is found already return error
-      return res.status(409).json({ Error: 'User already exists' });
+    if (userByEmail && userByUsername) {
+      return res
+        .status(409)
+        .json({ Error: 'Username and email already in use' });
+    } else if (userByEmail) {
+      return res.status(409).json({ Error: 'Email already in use' });
+    } else if (userByUsername) {
+      return res.status(409).json({ Error: 'Username already in use' });
     } else {
       const salt = await bcrypt.genSalt(10);
       // hash the password along with our new salt
