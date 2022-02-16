@@ -86,10 +86,10 @@ const signIn = async (req, res) => {
         const token = jwt.sign({ user: user._id }, process.env.jwtKey);
         res.status(201).json(token);
       } else {
-        res.status(401).json({ Msg: 'Invalid credentials' });
+        res.status(401).json({ Msg: 'Invalid username or password' });
       }
     } else {
-      res.status(401).json({ Msg: 'Incorrect credentials' });
+      res.status(401).json({ Msg: 'Invalid username or password' });
     }
   } catch (error) {
     console.log(error);
@@ -110,7 +110,7 @@ const verifyEmail = async (req, res) => {
       .json({ Msg: 'Token not found, it might  have expired' });
   } else {
     let currentDate = new Date(Date.now());
-    if (token.expiresAt > currentDate) {
+    if (token.expiresAt < currentDate) {
       return res.status(401).json({ Msg: 'Token has expired' });
     } else {
       try {
@@ -122,7 +122,7 @@ const verifyEmail = async (req, res) => {
         });
         if (!user) {
           return res.status(401).send({
-            msg: 'We were unable to find a user for this verification.',
+            Msg: 'We were unable to find a user for this verification.',
           });
         } else if (user.isVerified) {
           return res
@@ -134,7 +134,7 @@ const verifyEmail = async (req, res) => {
 
           //verify account
           await findByIdAndUpdate(token.user, { isVerified: true });
-
+          await EmailToken.findByIdAndDelete(token._id);
           res
             .status(200)
             .json({ Msg: 'Your account has been successfully verified' });
@@ -194,7 +194,7 @@ const forgotPassword = async (req, res) => {
   const email = req.body.email;
   const user = await User.findOne({ email });
   if (!user) {
-    return res.status(400).json({ Msg: 'User not found' });
+    return res.status(200).json({ Msg: 'If your acccount exists, you will receive an email with instructions shortly' });
   } else {
     const passwordToken = await PasswordToken.findOne({
       user: user._id,
@@ -213,7 +213,7 @@ const forgotPassword = async (req, res) => {
     try {
       await sendEmail(email, cryptoToken, 'reset');
       return res.status(200).json({
-        msg: 'An email to reset your password has been sent',
+        Msg: 'If your acccount exists, you will receive an email with instructions shortly',
       });
     } catch (e) {
       console.log(e);
@@ -236,13 +236,13 @@ const resetPassword = async (req, res) => {
       .json({ Msg: 'Token not found, it might  have expired' });
   } else {
     let currentDate = new Date(Date.now());
-    if (token.expiresAt > currentDate) {
+    if (token.expiresAt < currentDate) {
       return res.status(401).json({ Msg: 'Token has expired' });
     } else {
       const user = await User.findById(token.user);
       if (!user) {
         return res.status(401).send({
-          msg: 'We were unable to find a user for this verification.',
+          Msg: 'We were unable to find a user for this verification.',
         });
       } else {
         const salt = await bcrypt.genSalt(10);
@@ -250,6 +250,7 @@ const resetPassword = async (req, res) => {
         const updatedUser = await User.findByIdAndUpdate(token.user, {
           password: encryptedPassword,
         });
+        await PasswordToken.findByIdAndDelete(token._id)
         return res.status(200).json({ Msg: 'Password changed successfully' });
       }
     }

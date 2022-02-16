@@ -18,7 +18,7 @@ router.post(
         minNumbers: 1,
       })
       .withMessage(
-        'Password must be greater than 8 and contain at least one uppercase letter, one lowercase letter, and one number'
+        'Password must be 8 or more characters, contain at least 1 uppercase letter, a lowercase letter, and a number'
       ),
     check('username').notEmpty().withMessage('Username is required'),
     check('name').notEmpty().withMessage('Name is required'),
@@ -35,15 +35,12 @@ router.post(
 );
 
 router.post(
-  '/signIn',
+  '/signin',
   [
-    oneOf([
-      check('username').notEmpty().withMessage('Username cannot be empty'),
-      check('email').isEmail().withMessage('Type a valid email'),
-    ]),
+    check('email').isEmail().withMessage('Enter a valid email'),
     check('password')
-      .isLength({ min: 6 })
-      .withMessage('Password must be at least 6 charcaters long'),
+      .isLength({ min: 8 })
+      .withMessage('Invalid credentials'),
   ],
   (req, res, next) => {
     const errors = validationResult(req);
@@ -56,6 +53,9 @@ router.post(
   authController.signIn
 );
 
+
+router.post('/verifyEmail/:token', authController.verifyEmail)
+
 router.post(
   '/verify/resendEmail',
   [check('email').isEmail().withMessage('Must be a valid email')],
@@ -67,7 +67,7 @@ router.post(
       next();
     }
   },
-   authController.resendVerificationEmail
+  authController.resendVerificationEmail
 );
 
 //this will just send the link to reset the password
@@ -96,7 +96,7 @@ router.post(
         minNumbers: 1,
       })
       .withMessage(
-        'Password must be greater than 8 and contain at least one uppercase letter, one lowercase letter, and one number'
+        'Password must be 8 or more characters, contain at least 1 uppercase letter, a lowercase letter, and a number'
       ),
   ],
   (req, res, next) => {

@@ -23,7 +23,7 @@ const sendEmail = async (
         to: email,
         subject: 'Please, verity your email',
         html: `
-        <p>Click <a href="http://localhost:3000/auth/verify/${token}">Here</a> to verify your email</p>
+        <p>Click <a href="http://localhost:3001/verify/${token}">Here</a> to verify your email</p>
       `,
       });
     } else {
@@ -32,7 +32,7 @@ const sendEmail = async (
         to: email,
         subject: 'Password reset',
         html: `
-        <p>Click <a href="http://localhost:3000/auth/resetPassword/${token}">Here</a> to reset password</p>
+        <p>Click <a href="http://localhost:3001/forgotPassword/${token}">Here</a> to reset password</p>
       `,
       });
     }
