@@ -12,6 +12,7 @@ router.get('/lists/:mediaType/:listType', mediaControllers.getMediaLists);
 router.get('/recommendations/:mediaType/:id', mediaControllers.getRecommendations);
 router.get('/tv/season/:id/:seasonNumber', mediaControllers.getSeason);
 router.get('/tv/:id/season/:seasonNumber/episode/:episodeNumber', mediaControllers.getEpisode);
+router.get('/all/:timePeriod', mediaControllers.getTrending);
 
 
 module.exports = router;

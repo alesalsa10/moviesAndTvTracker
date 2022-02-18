@@ -93,6 +93,21 @@ const searchMedia = async (req, res) => {
   }
 };
 
+const getTrending = async(req, res) =>{
+  const {timePeriod} = req.params
+  try {
+    const response = await axios.get(
+      `${process.env.baseURL}/trending/all/${timePeriod}`
+    );
+    res.status(200).json(response.data);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(err.response.status)
+      .json({ Msg: err.response.data.status_message });
+  }
+}
+
 const getMediaLists = async (req, res) => {
   const { mediaType, listType } = req.params;
   try {
@@ -359,4 +374,5 @@ module.exports = {
   getRecommendations,
   getSeason,
   getEpisode,
+  getTrending
 };
