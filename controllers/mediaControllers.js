@@ -94,10 +94,10 @@ const searchMedia = async (req, res) => {
 };
 
 const getTrending = async(req, res) =>{
-  const {timePeriod} = req.params
+  const {mediaType, timePeriod} = req.params
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/trending/all/${timePeriod}`
+      `${process.env.baseURL}/trending/${mediaType}/${timePeriod}?api_key=${process.env.apiKey}`
     );
     res.status(200).json(response.data);
   } catch (err) {
