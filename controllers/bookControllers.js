@@ -104,7 +104,7 @@ const getBestSellers = async (req, res) => {
     let response = await axios.get(
       `${process.env.newYorkTimesBaseUrl}/lists/overview.json?api-key=${process.env.newYorkTimesKey}`
     );
-    console.log(response.data.results.results.lists);
+    console.log(response.data.results.lists);
     res.status(200).json(response.data.results.lists);
     //best sellers uses googleapi image for theirs
     //use isbn to look up book on google api when I click on the book
