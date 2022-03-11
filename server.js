@@ -13,6 +13,7 @@ const favoriteRouter = require('./routes/favoriteRoutes');
 const bookRouter = require('./routes/bookRoutes');
 const peopleRouter = require('./routes/peopleRoutes');
 const configRouter = require('./routes/mediaApiConfigRoute');
+const genreRouter = require('./routes/genreRoutes');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -36,6 +37,7 @@ app.use('/favorites', favoriteRouter);
 app.use('/book', bookRouter);
 app.use('/people', peopleRouter);
 app.use('/configuration', configRouter);
+app.use('/genre', genreRouter)
 
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

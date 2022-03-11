@@ -366,6 +366,22 @@ const getEpisode = async (req, res) => {
   }
 };
 
+const filterByGenre = async (req, res) => {
+  const { mediaType } = req.params;
+  let with_genres = req.query.with_genres;
+  //with_genres comma separated
+  try {
+    const response = await axios.get(
+      `${process.env.baseUrl}/discover/${mediaType}?api_key=${process.env.apiKey}&with_genres=${with_genres}`
+    );
+    console.log(response);
+    res.status(200).json(response.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ Msg: 'Something went wrong, try again later' });
+  }
+};
+
 module.exports = {
   getMediaById,
   getMediaByCategories,
@@ -374,5 +390,6 @@ module.exports = {
   getRecommendations,
   getSeason,
   getEpisode,
-  getTrending
+  getTrending,
+  filterByGenre
 };

@@ -13,6 +13,7 @@ router.get('/recommendations/:mediaType/:id', mediaControllers.getRecommendation
 router.get('/tv/season/:id/:seasonNumber', mediaControllers.getSeason);
 router.get('/tv/:id/season/:seasonNumber/episode/:episodeNumber', mediaControllers.getEpisode);
 router.get('/trending/:mediaType/:timePeriod', mediaControllers.getTrending);
+router.get('/discover/:/mediaType', mediaControllers.filterByGenre)
 
 
 module.exports = router;
