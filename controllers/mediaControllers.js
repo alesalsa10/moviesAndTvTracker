@@ -110,9 +110,10 @@ const getTrending = async(req, res) =>{
 
 const getMediaLists = async (req, res) => {
   const { mediaType, listType } = req.params;
+  let page = req.query.page;
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/${mediaType}/${listType}?api_key=${process.env.apiKey}`
+      `${process.env.baseURL}/${mediaType}/${listType}?api_key=${process.env.apiKey}&page=${page}`
     );
     console.log(response);
     res.status(200).json(response.data);
