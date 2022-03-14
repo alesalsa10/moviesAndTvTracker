@@ -4,13 +4,15 @@ const auth = require('../middlewares/auth');
 const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser.js');
 const booksControllers = require('../controllers/bookControllers');
 
+
+router.get('/search', booksControllers.searchBook);
+
 router.get('/:bookId', booksControllers.getBookById);
 
 router.get('/genre/:genre', booksControllers.getBooksByGenre);
 
 router.get('/recommendation/:bookId', booksControllers.doesBookHaveMedia);
 
-router.get('/search/:searchQuery', booksControllers.searchBook);
 
 router.get('/newYorkTimes/bestSellers', booksControllers.getBestSellers);
 

@@ -90,8 +90,11 @@ const doesBookHaveMedia = async (req, res) => {
 };
 
 const searchBook = async (req, res) => {
-  const { searchQuery } = req.params;
-  let books = await apiCalls.searchBook(searchQuery);
+  //const { searchQuery } = req.params;
+  let search_query = req.query.search_query;
+
+  let books = await apiCalls.searchBook(search_query
+    );
   if (books.error) {
     res.status(books.error.status).json(books.error.Msg);
   } else {

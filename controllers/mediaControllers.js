@@ -79,10 +79,12 @@ const getMediaByCategories = async (req, res) => {
 const searchMedia = async (req, res) => {
   //from the front end a search will call this, and search book in the bookController
   //this allows for better error handling
-  const { searchQuery } = req.params;
+  //const { searchQuery } = req.params;
+  let search_query = req.query.search_query;
+  console.log(search_query)
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/search/multi?api_key=${process.env.apiKey}&query=${searchQuery}&include_adult=false`
+      `${process.env.baseURL}/search/multi?api_key=${process.env.apiKey}&query=${search_query}&include_adult=false`
     );
     res.status(200).json(response.data);
   } catch (err) {
@@ -370,6 +372,7 @@ const getEpisode = async (req, res) => {
 const filterByGenre = async (req, res) => {
   const { mediaType } = req.params;
   let with_genres = req.query.with_genres;
+  console.log(mediaType, req.query)
   //with_genres comma separated
   try {
     const response = await axios.get(
