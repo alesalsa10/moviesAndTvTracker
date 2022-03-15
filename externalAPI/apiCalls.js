@@ -71,24 +71,6 @@ const booksByGenre = async (genre) => {
   }
 };
 
-const searchBook = async(bookName)=>{
-  try {
-    const response = await axios.get(
-      `https://www.googleapis.com/books/v1/volumes?q=name:${bookName}&maxResults=10&key=${process.env.googleBooksKey}
-`
-    );
-    response.data.Err = null;
-    return response.data;
-  } catch (err) {
-    console.log(err.response.data);
-    return {
-      error: {
-        status: err.response.data.error.code,
-        Msg: err.response.data.error.message,
-      },
-    };
-  }
-}
 
 const searchMedia = async(mediaType, searchQuery) =>{
   try{
@@ -107,4 +89,4 @@ const searchMedia = async(mediaType, searchQuery) =>{
   }
 }
 
-module.exports = { getBook, externalGetMediaById, booksByGenre, searchMedia, searchBook, getBookByIsbn };
+module.exports = { getBook, externalGetMediaById, booksByGenre, searchMedia, getBookByIsbn };

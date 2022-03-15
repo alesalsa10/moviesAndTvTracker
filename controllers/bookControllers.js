@@ -90,15 +90,16 @@ const doesBookHaveMedia = async (req, res) => {
 };
 
 const searchBook = async (req, res) => {
-  //const { searchQuery } = req.params;
-  let search_query = req.query.search_query;
-
-  let books = await apiCalls.searchBook(search_query
+  let search_query = req.query.search_query.split(' ').join('+');
+  try {
+    const response = await axios.get(
+      `https://www.googleapis.com/books/v1/volumes?q=name:${search_query}&maxResults=10&key=${process.env.googleBooksKey}
+`
     );
-  if (books.error) {
-    res.status(books.error.status).json(books.error.Msg);
-  } else {
-    res.status(400).json({ books });
+    return res.status(200).json(response.data);
+  } catch (err) {
+    console.log(err.response.data);
+    return res.status(err.response.data.error.code).json({Msg: err.response.data.error.message})
   }
 };
 
@@ -117,8 +118,8 @@ const getBestSellers = async (req, res) => {
   }
 };
 
-const getBookByIsbn = async(req, res)=>{
-  const {isbn} = req.params;
+const getBookByIsbn = async (req, res) => {
+  const { isbn } = req.params;
   //do something similar as id search
   //look up book by isbn, get and and save with google api id
   //call googleapi and search by isbn
@@ -127,21 +128,21 @@ const getBookByIsbn = async(req, res)=>{
     res.status(book.error.status).json(book.error.Msg);
   } else {
     //res.status(400).json( book.items[0].id );
-    try{
-      let foundBook = await Book.findOne({_id: book.items[0].id});
-      if(foundBook){
-        res.status(200).json({foundBook, book})
-      }else {
+    try {
+      let foundBook = await Book.findOne({ _id: book.items[0].id });
+      if (foundBook) {
+        res.status(200).json({ foundBook, book });
+      } else {
         foundBook = new Book({ _id: book.items[0].id });
         await foundBook.save();
-        res.status(200).json({foundBook, book})
+        res.status(200).json({ foundBook, book });
       }
-    }catch(error){
+    } catch (error) {
       console.log(error);
-      res.status(500).json({Msg: 'Something went wrong, try again later.'})
+      res.status(500).json({ Msg: 'Something went wrong, try again later.' });
     }
   }
-}
+};
 
 module.exports = {
   getBookById,
@@ -149,5 +150,5 @@ module.exports = {
   doesBookHaveMedia,
   searchBook,
   getBestSellers,
-  getBookByIsbn
+  getBookByIsbn,
 };

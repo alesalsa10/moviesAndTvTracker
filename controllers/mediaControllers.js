@@ -80,7 +80,7 @@ const searchMedia = async (req, res) => {
   //from the front end a search will call this, and search book in the bookController
   //this allows for better error handling
   //const { searchQuery } = req.params;
-  let search_query = req.query.search_query;
+  let search_query = req.query.search_query.split(' ').join('+');
   console.log(search_query)
   try {
     const response = await axios.get(
