@@ -29,10 +29,10 @@ const getCredits = async(req, res) =>{
 }
 
 const getPopular = async (req, res) => {
-  const { personId, mediaType } = req.params;
+  let page = req.query.page;
   try {
     const response = await axios.get(
-      `${process.env.baseUrl}/person/popular?api_key=${process.env.apiKey}`
+      `${process.env.baseUrl}/person/popular?api_key=${process.env.apiKey}&page=${page}`
     );
     console.log(response);
     res.status(200).json(response.data);

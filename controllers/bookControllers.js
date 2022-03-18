@@ -26,6 +26,33 @@ const getBookById = async (req, res) => {
   }
 };
 
+const getBookByIsbn = async (req, res) => {
+
+  const { isbn } = req.params;
+  //do something similar as id search
+  //look up book by isbn, get and and save with google api id
+  //call googleapi and search by isbn
+  let book = await apiCalls.getBookByIsbn(isbn);
+  if (book.error) {
+    res.status(book.error.status).json(book.error.Msg);
+  } else {
+    //res.status(400).json( book.items[0].id );
+    try {
+      let foundBook = await Book.findOne({ _id: book.items[0].id });
+      if (foundBook) {
+        res.status(200).json({ foundBook, book });
+      } else {
+        foundBook = new Book({ _id: book.items[0].id });
+        await foundBook.save();
+        res.status(200).json({ foundBook, book });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ Msg: 'Something went wrong, try again later.' });
+    }
+  }
+};
+
 const getBooksByGenre = async (req, res) => {
   let { genre } = req.params;
   let books = await apiCalls.booksByGenre(genre);
@@ -118,31 +145,7 @@ const getBestSellers = async (req, res) => {
   }
 };
 
-const getBookByIsbn = async (req, res) => {
-  const { isbn } = req.params;
-  //do something similar as id search
-  //look up book by isbn, get and and save with google api id
-  //call googleapi and search by isbn
-  let book = await apiCalls.getBookByIsbn(isbn);
-  if (book.error) {
-    res.status(book.error.status).json(book.error.Msg);
-  } else {
-    //res.status(400).json( book.items[0].id );
-    try {
-      let foundBook = await Book.findOne({ _id: book.items[0].id });
-      if (foundBook) {
-        res.status(200).json({ foundBook, book });
-      } else {
-        foundBook = new Book({ _id: book.items[0].id });
-        await foundBook.save();
-        res.status(200).json({ foundBook, book });
-      }
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ Msg: 'Something went wrong, try again later.' });
-    }
-  }
-};
+
 
 module.exports = {
   getBookById,
