@@ -194,7 +194,11 @@ const forgotPassword = async (req, res) => {
   const email = req.body.email;
   const user = await User.findOne({ email });
   if (!user) {
-    return res.status(200).json({ Msg: 'If your acccount exists, you will receive an email with instructions shortly' });
+    return res
+      .status(200)
+      .json({
+        Msg: 'If your acccount exists, you will receive an email with instructions shortly',
+      });
   } else {
     const passwordToken = await PasswordToken.findOne({
       user: user._id,
@@ -250,7 +254,7 @@ const resetPassword = async (req, res) => {
         const updatedUser = await User.findByIdAndUpdate(token.user, {
           password: encryptedPassword,
         });
-        await PasswordToken.findByIdAndDelete(token._id)
+        await PasswordToken.findByIdAndDelete(token._id);
         return res.status(200).json({ Msg: 'Password changed successfully' });
       }
     }
@@ -259,7 +263,26 @@ const resetPassword = async (req, res) => {
 
 const changePassword = async (req, res) => {
   //this is for the user is already logged in
-  //previous password check,, then new
+  //previous password check, then new
+  const { currentPassword, newPassword } = req.body;
+  try {
+    let foundUser = await User.findById(req.user);
+    if (foundUser) {
+        let match = await bcrypt.compare(currentPassword, foundUser.password);
+        if(match){
+          const salt = await bcrypt.genSalt(10);
+          const encryptedPassword = await bcrypt.hash(newPassword, salt);
+          const updatedUser = await User.findByIdAndUpdate(token.user, {
+            password: encryptedPassword,
+          });
+          return res.status(200).json({Msg: 'Password updated successfully'})
+        }else {
+          return res.status(401).json({Msg: 'Invalid current password'})
+        }
+    } else {
+      return res.status(404).json({ Msg: 'User not found' });
+    }
+  } catch (error) {}
 };
 
 const signInWithGoogle = async (req, res) => {

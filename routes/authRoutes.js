@@ -38,9 +38,7 @@ router.post(
   '/signin',
   [
     check('email').isEmail().withMessage('Enter a valid email'),
-    check('password')
-      .isLength({ min: 8 })
-      .withMessage('Invalid credentials'),
+    check('password').isLength({ min: 8 }).withMessage('Invalid credentials'),
   ],
   (req, res, next) => {
     const errors = validationResult(req);
@@ -53,8 +51,21 @@ router.post(
   authController.signIn
 );
 
+router.post('/changePassword', auth, [
+  check('currentPassword').notEmpty().withMessage('Current password required'),
+  check('password')
+    .isStrongPassword({
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+    })
+    .withMessage(
+      'Password must be 8 or more characters, contain at least 1 uppercase letter, a lowercase letter, and a number'
+    ),
+], authController.changePassword);
 
-router.post('/verifyEmail/:token', authController.verifyEmail)
+router.post('/verifyEmail/:token', authController.verifyEmail);
 
 router.post(
   '/verify/resendEmail',

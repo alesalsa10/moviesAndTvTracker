@@ -107,7 +107,6 @@ const doesBookHaveMedia = async (req, res) => {
       //if one is found call tmbd api for a search with those paraments
       //if result is found search to make sure it doesn't exist on our db
       //it it exists, just return the media from tmdb and the model in my db
-      //else create a new media, and return it with the model
     } else {
       res
         .status(404)
