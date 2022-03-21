@@ -6,22 +6,22 @@ const { default: axios } = require('axios');
 const getBookById = async (req, res) => {
   let { bookId } = req.params;
   console.log(bookId);
-  let foundBook = await Book.findById(bookId);
+  let foundMedia = await Book.findById(bookId);
   let bookInfo = await apiCalls.getBook(bookId);
   console.log(bookInfo, '44');
-  if (foundBook) {
+  if (foundMedia) {
     if (bookInfo.error) {
       res.status(bookInfo.error.status).json({ Msg: bookInfo.error.Msg });
     } else {
-      res.status(200).json({ foundBook, bookInfo });
+      res.status(200).json({ foundMedia, bookInfo });
     }
   } else {
-    foundBook = new Book({ _id: bookId });
-    await foundBook.save();
+    foundMedia = new Book({ _id: bookId });
+    await foundMedia.save();
     if (bookInfo.error) {
-      res.status(foundBook.error.status).json({ Msg: foundBook.error.Msg });
+      res.status(foundMedia.error.status).json({ Msg: foundMedia.error.Msg });
     } else {
-      res.status(200).json({ foundBook, bookInfo });
+      res.status(200).json({ foundMedia, bookInfo });
     }
   }
 };
@@ -32,19 +32,21 @@ const getBookByIsbn = async (req, res) => {
   //do something similar as id search
   //look up book by isbn, get and and save with google api id
   //call googleapi and search by isbn
-  let book = await apiCalls.getBookByIsbn(isbn);
-  if (book.error) {
-    res.status(book.error.status).json(book.error.Msg);
+  let mediaDetails = await apiCalls.getBookByIsbn(isbn);
+  if (mediaDetails.error) {
+    res.status(mediaDetails.error.status).json(mediaDetails.error.Msg);
   } else {
     //res.status(400).json( book.items[0].id );
     try {
-      let foundBook = await Book.findOne({ _id: book.items[0].id });
-      if (foundBook) {
-        res.status(200).json({ foundBook, book });
+      let foundMedia = await Book.findOne({ _id: mediaDetails.items[0].id });
+      if (foundMedia) {
+        mediaDetails = mediaDetails.items[0]
+        res.status(200).json({ foundMedia, mediaDetails });
       } else {
-        foundBook = new Book({ _id: book.items[0].id });
-        await foundBook.save();
-        res.status(200).json({ foundBook, book });
+        foundMedia = new Book({ _id: mediaDetails.items[0].id });
+        await foundMedia.save();
+        mediaDetails = mediaDetails.items[0]
+        res.status(200).json({ foundMedia, mediaDetails });
       }
     } catch (error) {
       console.log(error);
@@ -72,7 +74,7 @@ const doesBookHaveMedia = async (req, res) => {
   if (bookInfo.error) {
     res.status(bookInfo.error.status).json({ Msg: bookInfo.error.Msg });
   } else {
-    //res.status(200).json({ foundBook, bookInfo });
+    //res.status(200).json({ foundMedia, bookInfo });
     //search basedOnBook model for a bookInfo name and author last name
 
     let authorLastName = bookInfo.volumeInfo.authors[0].split(' ');
@@ -89,7 +91,7 @@ const doesBookHaveMedia = async (req, res) => {
           basedBook.media_name
         );
         if (mediaDetails.err) {
-          res.status(foundBook.error.status).json({ Msg: foundBook.error.Msg });
+          res.status(foundMedia.error.status).json({ Msg: foundMedia.error.Msg });
         } else {
           res.status(200).json(mediaDetails.results[0]);
         }
@@ -99,7 +101,7 @@ const doesBookHaveMedia = async (req, res) => {
           basedBook.media_name
         );
         if (mediaDetails.error) {
-          res.status(foundBook.error.status).json({ Msg: foundBook.error.Msg });
+          res.status(foundMedia.error.status).json({ Msg: foundMedia.error.Msg });
         } else {
           res.status(200).json(mediaDetails.results[0]);
         }
