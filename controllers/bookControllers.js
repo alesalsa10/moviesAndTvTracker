@@ -119,7 +119,7 @@ const searchBook = async (req, res) => {
   let search_query = req.query.search_query.split(' ').join('+');
   try {
     const response = await axios.get(
-      `https://www.googleapis.com/books/v1/volumes?q=name:${search_query}&maxResults=10&key=${process.env.googleBooksKey}
+      `https://www.googleapis.com/books/v1/volumes?q=intitle:${search_query}&maxResults=40&key=${process.env.googleBooksKey}
 `
     );
     return res.status(200).json(response.data);
