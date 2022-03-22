@@ -127,6 +127,23 @@ const getMediaLists = async (req, res) => {
   }
 };
 
+const getCredits = async (req, res)=>{
+  const { mediaType, mediaId } = req.params;
+  let page = req.query.page;
+  try {
+    const response = await axios.get(
+      `${process.env.baseURL}/${mediaType}/${mediaId}/credits?api_key=${process.env.apiKey}`
+    );
+    console.log(response);
+    res.status(200).json(response.data);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(err.response.status)
+      .json({ Msg: err.response.data.status_message });
+  }
+}
+
 const getRecommendations = async (req, res) => {
   const { mediaType, id } = req.params;
   try {
@@ -395,5 +412,6 @@ module.exports = {
   getSeason,
   getEpisode,
   getTrending,
-  filterByGenre
+  filterByGenre,
+  getCredits
 };
