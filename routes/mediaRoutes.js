@@ -9,7 +9,6 @@ router.get('/getById/:mediaType/:id', mediaControllers.getMediaById);
 router.get('/search/all', mediaControllers.searchMedia);
 router.get('/discover/:mediaType', mediaControllers.filterByGenre);
 router.get('/:mediaType/:category', mediaControllers.getMediaByCategories);
-//router.get('/:mediaType/:mediaId/credits', mediaControllers.getCredits);
 router.get('/lists/:mediaType/:listType', mediaControllers.getMediaLists);
 router.get('/recommendations/:mediaType/:id', mediaControllers.getRecommendations);
 router.get('/tv/season/:id/:seasonNumber', mediaControllers.getSeason);
