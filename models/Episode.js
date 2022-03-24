@@ -15,7 +15,7 @@ const episodeSchema = new mongoose.Schema({
       ref: 'Comment',
     },
   ],
-  _id: Number,
+  _id: String,
   commentCount: {
     type: Number,
     default: 0,

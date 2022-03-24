@@ -5,10 +5,10 @@ const externalGetMediaById = async (mediaType, id) => {
     const response = await axios.get(
       `${process.env.baseURL}/${mediaType}/${id}?api_key=${process.env.apiKey}&append_to_response=videos, ,credits,release_dates,content_ratings,recommendations`
     );
-    response.data.Err = null;
+    //response.data.error = null;
     return response.data;
   } catch (err) {
-    console.log(err.response.status);
+    console.log(err.response, '123456');
     return {
       error: {
         status: err.response.status,

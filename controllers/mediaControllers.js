@@ -37,6 +37,7 @@ const getMediaById = async (req, res) => {
   }
   if (foundMedia) {
     let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
+    console.log(mediaDetails, '1111111')
     if (mediaDetails.error) {
       res
         .status(mediaDetails.error.status)
@@ -46,6 +47,7 @@ const getMediaById = async (req, res) => {
     }
   } else {
     let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
+    console.log(mediaDetails, '1111111')
     if (mediaDetails.error) {
       res
         .status(mediaDetails.error.status)
@@ -53,7 +55,7 @@ const getMediaById = async (req, res) => {
     } else {
       let foundMedia;
       foundMedia = new model({
-        _id: id,
+        _id: id, //mediaDetails.id
       });
       await foundMedia.save();
       res.status(200).json({ mediaDetails, foundMedia });
@@ -194,15 +196,16 @@ const getSeason = async (req, res) => {
   //return the season information with merged with the founded season created on my DB
   //use lean() to be able to merge objects
   const { id, seasonNumber } = req.params;
+  console.log(id, seasonNumber)
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}&append_to_response=videos`
+      `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}&append_to_response=videos,credits,release_dates`
     );
-    console.log(response);
+    console.log(response, 'aaaa');
     try {
       let foundMedia = await Tv.findById(id);
       if (foundMedia) {
-        try {
+        //try {
           let foundSeason = await Season.findOne({ seasonNumber })
             .populate('comments')
             .populate({
@@ -225,10 +228,10 @@ const getSeason = async (req, res) => {
             await foundMedia.save();
             res.status(200).json({ ...response.data, foundSeason });
           }
-        } catch (err) {
-          console.log(err);
-          res.status(500).json({ Msg: 'Something went wrong' });
-        }
+        //} catch (err) {
+          //console.log(err);
+          //res.status(500).json({ Msg: 'Something went wrong' });
+       // }
       } else {
         let foundMedia = new Tv({
           _id: id,
@@ -249,7 +252,7 @@ const getSeason = async (req, res) => {
       res.status(500).json({ Msg: 'Something went wrong' });
     }
   } catch (err) {
-    console.log(err);
+    console.log(err,'rtret');
     res
       .status(err.response.status)
       .json({ Msg: err.response.data.status_message });
@@ -260,13 +263,13 @@ const getEpisode = async (req, res) => {
   const { id, seasonNumber, episodeNumber } = req.params;
   try {
     const episode = await axios.get(
-      `${process.env.baseURL}/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${process.env.apiKey}&append_to_response=videos`
+      `${process.env.baseURL}/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${process.env.apiKey}&append_to_response=videos,credits,release_dates`
     );
     console.log(episode);
     //res.status(200).json(response.data);
     try {
       const season = await axios.get(
-        `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}&append_to_response=videos`
+        `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}&append_to_response=videos,credits,release_dates`
       );
       console.log(season);
       try {

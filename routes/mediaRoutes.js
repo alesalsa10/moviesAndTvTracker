@@ -11,7 +11,7 @@ router.get('/discover/:mediaType', mediaControllers.filterByGenre);
 router.get('/:mediaType/:category', mediaControllers.getMediaByCategories);
 router.get('/lists/:mediaType/:listType', mediaControllers.getMediaLists);
 router.get('/recommendations/:mediaType/:id', mediaControllers.getRecommendations);
-router.get('/tv/season/:id/:seasonNumber', mediaControllers.getSeason);
+router.get('/tv/:id/season/:seasonNumber', mediaControllers.getSeason);
 router.get('/tv/:id/season/:seasonNumber/episode/:episodeNumber', mediaControllers.getEpisode);
 router.get('/trending/:mediaType/:timePeriod', mediaControllers.getTrending);
 

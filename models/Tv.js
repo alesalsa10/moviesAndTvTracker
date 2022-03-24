@@ -13,7 +13,7 @@ const TvSchema = new mongoose.Schema({
       ref: 'Season',
     },
   ],
-  _id: Number,
+  _id: String,
   user: {
     type: mongoose.Types.ObjectId,
     ref: 'User',

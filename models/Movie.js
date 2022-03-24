@@ -11,7 +11,7 @@ const movieSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId, //for when the user creates a bookmark
     ref: 'User',
   },
-  _id: Number,
+  _id: String,
   commentCount: {
     type: Number,
     default: 0,
