@@ -37,7 +37,7 @@ const getMediaById = async (req, res) => {
   }
   if (foundMedia) {
     let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
-    console.log(mediaDetails, '1111111')
+    console.log(mediaDetails, '1111111');
     if (mediaDetails.error) {
       res
         .status(mediaDetails.error.status)
@@ -47,7 +47,7 @@ const getMediaById = async (req, res) => {
     }
   } else {
     let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
-    console.log(mediaDetails, '1111111')
+    console.log(mediaDetails, '1111111');
     if (mediaDetails.error) {
       res
         .status(mediaDetails.error.status)
@@ -83,22 +83,22 @@ const searchMedia = async (req, res) => {
   //this allows for better error handling
   //const { searchQuery } = req.params;
   let search_query = req.query.search_query.split(' ').join('+');
-  console.log(search_query)
+  console.log(search_query);
   try {
     const response = await axios.get(
       `${process.env.baseURL}/search/multi?api_key=${process.env.apiKey}&query=${search_query}&include_adult=false`
     );
     res.status(200).json(response.data);
   } catch (err) {
-    console.log(err)
+    console.log(err);
     res
       .status(err.response.status)
       .json({ Msg: err.response.data.status_message });
   }
 };
 
-const getTrending = async(req, res) =>{
-  const {mediaType, timePeriod} = req.params
+const getTrending = async (req, res) => {
+  const { mediaType, timePeriod } = req.params;
   try {
     const response = await axios.get(
       `${process.env.baseURL}/trending/${mediaType}/${timePeriod}?api_key=${process.env.apiKey}`
@@ -110,7 +110,7 @@ const getTrending = async(req, res) =>{
       .status(err.response.status)
       .json({ Msg: err.response.data.status_message });
   }
-}
+};
 
 const getMediaLists = async (req, res) => {
   const { mediaType, listType } = req.params;
@@ -196,16 +196,17 @@ const getSeason = async (req, res) => {
   //return the season information with merged with the founded season created on my DB
   //use lean() to be able to merge objects
   const { id, seasonNumber } = req.params;
-  console.log(id, seasonNumber)
+  console.log(id, seasonNumber);
   try {
     const response = await axios.get(
       `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}&append_to_response=videos,credits,release_dates`
     );
     console.log(response, 'aaaa');
+    let mediaDetails = response.data
     try {
       let foundMedia = await Tv.findById(id);
       if (foundMedia) {
-        //try {
+        try {
           let foundSeason = await Season.findOne({ seasonNumber })
             .populate('comments')
             .populate({
@@ -216,7 +217,8 @@ const getSeason = async (req, res) => {
             })
             .lean();
           if (foundSeason) {
-            res.status(200).json({ ...response.data, foundSeason });
+            //mediaDetails
+            res.status(200).json({ mediaDetails, foundSeason });
           } else {
             let foundSeason = new Season({
               seasonNumber,
@@ -226,12 +228,12 @@ const getSeason = async (req, res) => {
             await foundSeason.save();
             await foundMedia.seasons.push(foundSeason);
             await foundMedia.save();
-            res.status(200).json({ ...response.data, foundSeason });
+            res.status(200).json({ mediaDetails, foundSeason });
           }
-        //} catch (err) {
-          //console.log(err);
-          //res.status(500).json({ Msg: 'Something went wrong' });
-       // }
+        } catch (err) {
+          console.log(err);
+          res.status(500).json({ Msg: 'Something went wrong' });
+        }
       } else {
         let foundMedia = new Tv({
           _id: id,
@@ -252,7 +254,7 @@ const getSeason = async (req, res) => {
       res.status(500).json({ Msg: 'Something went wrong' });
     }
   } catch (err) {
-    console.log(err,'rtret');
+    console.log(err, 'rtret');
     res
       .status(err.response.status)
       .json({ Msg: err.response.data.status_message });
@@ -375,7 +377,7 @@ const getEpisode = async (req, res) => {
 const filterByGenre = async (req, res) => {
   const { mediaType } = req.params;
   let with_genres = req.query.with_genres;
-  console.log(mediaType, req.query)
+  console.log(mediaType, req.query);
   //with_genres comma separated
   try {
     const response = await axios.get(
@@ -398,5 +400,5 @@ module.exports = {
   getSeason,
   getEpisode,
   getTrending,
-  filterByGenre
+  filterByGenre,
 };
