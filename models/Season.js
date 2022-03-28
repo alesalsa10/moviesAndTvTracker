@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const SeasonSchema = new mongoose.Schema({
   episodes: [
     {
-      type: mongoose.Types.ObjectId,
+      type: String,
       ref: 'Episode',
     },
   ],

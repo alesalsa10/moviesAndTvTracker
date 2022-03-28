@@ -6,7 +6,7 @@ const episodeSchema = new mongoose.Schema({
     required: true,
   },
   season: {
-    type: mongoose.Types.ObjectId,
+    type: String,
     ref: 'Season',
   },
   comments: [

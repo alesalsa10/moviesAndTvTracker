@@ -268,6 +268,7 @@ const getEpisode = async (req, res) => {
       `${process.env.baseURL}/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${process.env.apiKey}&append_to_response=videos,credits,release_dates`
     );
     console.log(episode);
+    let mediaDetails = episode.data
     //res.status(200).json(response.data);
     try {
       const season = await axios.get(
@@ -292,7 +293,8 @@ const getEpisode = async (req, res) => {
                   })
                   .lean();
                 if (foundEpisode) {
-                  res.status(200).json({ ...episode.data, foundEpisode });
+                  //let mediaDetails = episode.data
+                  res.status(200).json({ mediaDetails, foundEpisode });
                 } else {
                   let foundEpisode = new Episode({
                     _id: episode.data.id,
@@ -302,7 +304,7 @@ const getEpisode = async (req, res) => {
                   await foundEpisode.save();
                   await foundSeason.episodes.push(foundEpisode);
                   await foundSeason.save();
-                  res.status(200).json({ ...episode.data, foundEpisode });
+                  res.status(200).json({ mediaDetails, foundEpisode });
                 }
               } catch (err) {
                 console.log(err);
@@ -327,7 +329,7 @@ const getEpisode = async (req, res) => {
               await foundEpisode.save();
               await foundSeason.episodes.push(foundEpisode);
               await foundSeason.save();
-              res.status(200).json({ ...episode.data, foundEpisode });
+              res.status(200).json({ mediaDetails, foundEpisode });
             }
           } catch (err) {
             console.log(err);
@@ -354,7 +356,7 @@ const getEpisode = async (req, res) => {
           await foundEpisode.save();
           await foundSeason.episodes.push(foundEpisode);
           await foundSeason.save();
-          res.status(200).json({ ...season.data, foundEpisode });
+          res.status(200).json({ mediaDetails, foundEpisode });
         }
       } catch (err) {
         console.log(err);
