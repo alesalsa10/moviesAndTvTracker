@@ -6,9 +6,11 @@ const Selector = require('../utils/selector');
 //make it so if comment value == '[Deleted]' this type of comment cannot be deleted since this is only used a reference key
 
 const createComment = async (req, res) => {
-  const { text } = req.body;
-  const userId = req.header('userId');
-  const externalId = req.header('externalId');
+  const { text, externalId } = req.body;
+  const userId = req.user;
+
+  // const userId = req.header('userId');
+  // const externalId = req.header('externalId');
   const { mediaType } = req.params;
 
   try {
@@ -71,11 +73,11 @@ const replyToComment = async (req, res) => {
   //find parentComment by id
   //create the new comment and add it to the replies inside of comment
   //REFACTOR WITH NEW MODEL UTILITY
-  const { text } = req.body;
-  const userId = req.header('userId');
-  const parentCommentId = req.header('parentCommentId'); //this is whover is being replies too
-  const topCommentId = req.header('topCommentId'); //if it is the reply of a reply this will be the top most comment in the chain
-  const parentMediaId = req.header('parentMediaId');
+  const { text, parentCommentId, topCommentId, parentMediaId } = req.body;
+  const userId = req.user;
+  // const parentCommentId = req.header('parentCommentId'); //this is whover is being replies too
+  // const topCommentId = req.header('topCommentId'); //if it is the reply of a reply this will be the top most comment in the chain
+  // const parentMediaId = req.header('parentMediaId');
   const { mediaType } = req.params;
 
   try {
@@ -263,5 +265,5 @@ module.exports = {
   replyToComment,
   editComment,
   deleteComment,
-  getComments
+  getComments,
 };

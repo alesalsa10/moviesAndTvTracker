@@ -12,7 +12,10 @@ router.post(
   '/:mediaType/new',
   auth,
   checkVerification,
-  [check('text').notEmpty().withMessage('External id must exist')],
+  [
+    check('text').notEmpty().withMessage('Text must exist'),
+    check('externalId').notEmpty().withMessage('External Id must exist'),
+  ],
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -28,7 +31,14 @@ router.post(
   '/:mediaType/reply',
   auth,
   checkVerification,
-  [check('text').notEmpty().withMessage('Text must exist')],
+  [
+    check('text').notEmpty().withMessage('Text must exist'),
+    check('parentCommentId')
+      .notEmpty()
+      .withMessage('Parent Comment Id must exist'),
+    check('topCommentId').notEmpty().withMessage('Top Comment ID must exist'),
+    check('parentMediaId').notEmpty().withMessage('pParent Media ID must exist'),
+  ],
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -72,6 +82,6 @@ router.put(
   commentControllers.deleteComment
 );
 
-router.get('/:mediaType/:id', commentControllers.getComments)
+router.get('/:mediaType/:id', commentControllers.getComments);
 
 module.exports = router;

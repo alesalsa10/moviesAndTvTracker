@@ -50,7 +50,8 @@ const register = async (req, res) => {
         const token = jwt.sign({ user: user._id }, process.env.jwtKey);
         return res.status(200).json({
           token,
-          msg: 'A verification email has been sent. It will expire after one hour.',
+          Msg: 'A verification email has been sent. It will expire after one hour.',
+          user
         });
       } catch (e) {
         console.log(e);
@@ -84,7 +85,7 @@ const signIn = async (req, res) => {
       let user = foundUserByEmail || foundUserByUsername;
       if (match) {
         const token = jwt.sign({ user: user._id }, process.env.jwtKey);
-        res.status(201).json(token);
+        res.status(201).json({token, user});
       } else {
         res.status(401).json({ Msg: 'Invalid username or password' });
       }

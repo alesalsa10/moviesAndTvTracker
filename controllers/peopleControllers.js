@@ -4,7 +4,7 @@ const getPersonById = async (req, res) => {
     const {personId} = req.params;
     try{
         const response = await axios.get(
-          `${process.env.baseUrl}/person/${personId}?api_key=${process.env.apiKey}&append_to_response=images`
+          `${process.env.baseUrl}/person/${personId}?api_key=${process.env.apiKey}&append_to_response=images,combined_credits`
         );
         console.log(response)
         res.status(200).json(response.data)
