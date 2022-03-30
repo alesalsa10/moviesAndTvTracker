@@ -16,11 +16,6 @@ const UserSchema = new mongoose.Schema({
       ref: 'Comment',
     },
   ],
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-  },
   favoriteBooks: [
     {
       type: Number,
@@ -62,6 +57,9 @@ const UserSchema = new mongoose.Schema({
   isVerified:{
     type: Boolean,
     default: false
+  },
+  refreshToken:{
+    type: String,
   }
 });
 

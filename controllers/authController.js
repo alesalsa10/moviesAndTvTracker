@@ -9,21 +9,14 @@ const PasswordToken = require('../models/PasswordToken');
 const { findByIdAndUpdate } = require('../models/User');
 
 const register = async (req, res) => {
-  const { email, password, username, name } = req.body;
+  const { email, password, name } = req.body;
 
   try {
     //check user by username and by email
     let userByEmail = await User.findOne({ email });
-    let userByUsername = await User.findOne({ username });
 
-    if (userByEmail && userByUsername) {
-      return res
-        .status(409)
-        .json({ Error: 'Username and email already in use' });
-    } else if (userByEmail) {
+    if (userByEmail) {
       return res.status(409).json({ Error: 'Email already in use' });
-    } else if (userByUsername) {
-      return res.status(409).json({ Error: 'Username already in use' });
     } else {
       const salt = await bcrypt.genSalt(10);
       // hash the password along with our new salt
@@ -34,7 +27,6 @@ const register = async (req, res) => {
       let user = new User({
         email,
         password: encryptedPassword,
-        username,
         name,
       });
       await user.save();
@@ -47,11 +39,8 @@ const register = async (req, res) => {
         await sendEmail(email, cryptoToken, 'verify');
 
         console.log(user);
-        const token = jwt.sign({ user: user._id }, process.env.jwtKey);
         return res.status(200).json({
-          token,
           Msg: 'A verification email has been sent. It will expire after one hour.',
-          user
         });
       } catch (e) {
         console.log(e);
@@ -65,27 +54,36 @@ const register = async (req, res) => {
 };
 
 const signIn = async (req, res) => {
-  const { username, password, email } = req.body;
+  const { password, email } = req.body;
   //check if user exists
   //if no user exist send error invalid crednetial error
   //if user users exist, compared hashed password, if it mataches create jwt token to send back to client
   try {
-    let foundUserByUsername = await User.findOne({ username });
-    let foundUserByEmail = await User.findOne({ email });
+    let foundUser = await User.findOne({ email });
 
-    if (foundUserByUsername || foundUserByEmail) {
+    if (foundUser) {
       //if user is found with given email or username, compare password with hashed password
-      let match;
-      if (foundUserByEmail) {
-        console.log(foundUserByEmail);
-        match = await bcrypt.compare(password, foundUserByEmail.password);
-      } else {
-        match = await bcrypt.compare(password, foundUserByUsername.password);
-      }
-      let user = foundUserByEmail || foundUserByUsername;
+      let match = await bcrypt.compare(password, foundUser.password);
+
       if (match) {
-        const token = jwt.sign({ user: user._id }, process.env.jwtKey);
-        res.status(201).json({token, user});
+        const accessToken = jwt.sign(
+          { user: foundUser._id },
+          process.env.ACCESS_TOKEN_SECRET,
+          { expiresIn: '15m' }
+        );
+
+        //this is all new
+        const refreshToken = jwt.sign(
+          { user: foundUser._id },
+          process.env.REFRESH_TOKEN_SECRET,
+          { expiresIn: '1d' }
+        );
+
+        foundUser.refreshToken = refreshToken;
+        await foundUser.save();
+
+        res.cookie('jwt', refreshToken, {httpOnly: true, maxAge: 24 * 60 * 60 * 60})
+        res.status(201).json({ accessToken, foundUser });
       } else {
         res.status(401).json({ Msg: 'Invalid username or password' });
       }
@@ -96,6 +94,29 @@ const signIn = async (req, res) => {
     console.log(error);
     res.status(500).json({ Error: 'Something went wrong' });
   }
+};
+
+const signout = async (req, res) => {
+  // On client, also delete the accessToken
+
+  const cookies = req.cookies;
+  if (!cookies?.jwt) return res.sendStatus(204); //No content
+  const refreshToken = cookies.jwt;
+
+  // Is refreshToken in db?
+  const foundUser = await User.findOne({ refreshToken }).exec();
+  if (!foundUser) {
+    res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
+    return res.sendStatus(204);
+  }
+
+  // Delete refreshToken in db
+  foundUser.refreshToken = '';
+  const result = await foundUser.save();
+  console.log(result);
+
+  res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
+  res.sendStatus(204);
 };
 
 const verifyEmail = async (req, res) => {
@@ -195,11 +216,9 @@ const forgotPassword = async (req, res) => {
   const email = req.body.email;
   const user = await User.findOne({ email });
   if (!user) {
-    return res
-      .status(200)
-      .json({
-        Msg: 'If your acccount exists, you will receive an email with instructions shortly',
-      });
+    return res.status(200).json({
+      Msg: 'If your acccount exists, you will receive an email with instructions shortly',
+    });
   } else {
     const passwordToken = await PasswordToken.findOne({
       user: user._id,
@@ -269,17 +288,17 @@ const changePassword = async (req, res) => {
   try {
     let foundUser = await User.findById(req.user);
     if (foundUser) {
-        let match = await bcrypt.compare(currentPassword, foundUser.password);
-        if(match){
-          const salt = await bcrypt.genSalt(10);
-          const encryptedPassword = await bcrypt.hash(newPassword, salt);
-          const updatedUser = await User.findByIdAndUpdate(token.user, {
-            password: encryptedPassword,
-          });
-          return res.status(200).json({Msg: 'Password updated successfully'})
-        }else {
-          return res.status(401).json({Msg: 'Invalid current password'})
-        }
+      let match = await bcrypt.compare(currentPassword, foundUser.password);
+      if (match) {
+        const salt = await bcrypt.genSalt(10);
+        const encryptedPassword = await bcrypt.hash(newPassword, salt);
+        const updatedUser = await User.findByIdAndUpdate(token.user, {
+          password: encryptedPassword,
+        });
+        return res.status(200).json({ Msg: 'Password updated successfully' });
+      } else {
+        return res.status(401).json({ Msg: 'Invalid current password' });
+      }
     } else {
       return res.status(404).json({ Msg: 'User not found' });
     }
@@ -298,4 +317,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   changePassword,
+  signout
 };

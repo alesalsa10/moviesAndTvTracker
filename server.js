@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const connectDb = require('./config/mongooseConnection');
 const helmet = require('helmet')
@@ -14,6 +15,7 @@ const bookRouter = require('./routes/bookRoutes');
 const peopleRouter = require('./routes/peopleRoutes');
 const configRouter = require('./routes/mediaApiConfigRoute');
 const genreRouter = require('./routes/genreRoutes');
+const refreshRouter = require('./routes/refreshTokenRoute');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -22,6 +24,7 @@ const app = express();
 app.use(cors());
 app.use(helmet())
 app.use(express.json());
+app.use(cookieParser());
 connectDb();
 
 app.get('/', (req, res) => {
@@ -29,6 +32,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/auth', authRoutes);
+app.use('/refresh', refreshRouter);
 app.use('/users', userRouter);
 app.use('/bookmarks', bookmarkRouter);
 app.use('/comments', commentsRouter);

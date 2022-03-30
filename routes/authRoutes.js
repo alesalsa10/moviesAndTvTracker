@@ -20,7 +20,6 @@ router.post(
       .withMessage(
         'Password must be 8 or more characters, contain at least 1 uppercase letter, a lowercase letter, and a number'
       ),
-    check('username').notEmpty().withMessage('Username is required'),
     check('name').notEmpty().withMessage('Name is required'),
   ],
   (req, res, next) => {
@@ -50,6 +49,8 @@ router.post(
   },
   authController.signIn
 );
+
+router.get('/signout', authController.signout)
 
 router.post('/changePassword', auth, [
   check('currentPassword').notEmpty().withMessage('Current password required'),
