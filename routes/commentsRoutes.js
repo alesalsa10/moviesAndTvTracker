@@ -9,12 +9,11 @@ const checkVerification = require('../middlewares/checkVerification');
 const commentControllers = require('../controllers/commentsControllers');
 
 router.post(
-  '/:mediaType/new',
+  '/:mediaType/:id',
   auth,
   checkVerification,
   [
     check('text').notEmpty().withMessage('Text must exist'),
-    check('externalId').notEmpty().withMessage('External Id must exist'),
   ],
   (req, res, next) => {
     const errors = validationResult(req);
@@ -28,7 +27,7 @@ router.post(
 );
 
 router.post(
-  '/:mediaType/reply',
+  '/:mediaType/:id/reply',
   auth,
   checkVerification,
   [

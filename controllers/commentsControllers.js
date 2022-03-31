@@ -6,8 +6,9 @@ const Selector = require('../utils/selector');
 //make it so if comment value == '[Deleted]' this type of comment cannot be deleted since this is only used a reference key
 
 const createComment = async (req, res) => {
-  const { text, externalId } = req.body;
+  const { text } = req.body;
   const userId = req.user;
+  const {id} = req.params;
 
   // const userId = req.header('userId');
   // const externalId = req.header('externalId');
@@ -26,7 +27,7 @@ const createComment = async (req, res) => {
         return res.status(500).json({ Msg: 'This model does not exist' });
       } else {
         try {
-          let existingMedia = await model.findById(externalId);
+          let existingMedia = await model.findById(id);
           if (existingMedia) {
             //comments don't have the right references parentMovie, parentTv, stc.
             try {
