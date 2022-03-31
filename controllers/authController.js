@@ -13,9 +13,9 @@ const register = async (req, res) => {
 
   try {
     //check user by username and by email
-    let userByEmail = await User.findOne({ email });
+    let foundUser = await User.findOne({ email });
 
-    if (userByEmail) {
+    if (foundUser) {
       return res.status(409).json({ Error: 'Email already in use' });
     } else {
       const salt = await bcrypt.genSalt(10);
@@ -37,10 +37,29 @@ const register = async (req, res) => {
       await newToken.save();
       try {
         await sendEmail(email, cryptoToken, 'verify');
-
         console.log(user);
+        const accessToken = jwt.sign(
+          { user: foundUser._id },
+          process.env.ACCESS_TOKEN_SECRET,
+          { expiresIn: '30s' } //15m
+        );
+        const refreshToken = jwt.sign(
+          { user: foundUser._id },
+          process.env.REFRESH_TOKEN_SECRET,
+          { expiresIn: '1d' }
+        );
+
+        foundUser.refreshToken = refreshToken;
+        await foundUser.save();
+
+        res.cookie('jwt', refreshToken, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 60,
+        });
         return res.status(200).json({
+          accessToken,
           Msg: 'A verification email has been sent. It will expire after one hour.',
+          user,
         });
       } catch (e) {
         console.log(e);
@@ -69,10 +88,9 @@ const signIn = async (req, res) => {
         const accessToken = jwt.sign(
           { user: foundUser._id },
           process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: '15m' }
+          { expiresIn: '5m' } //15m
         );
 
-        //this is all new
         const refreshToken = jwt.sign(
           { user: foundUser._id },
           process.env.REFRESH_TOKEN_SECRET,
@@ -98,7 +116,6 @@ const signIn = async (req, res) => {
 
 const signout = async (req, res) => {
   // On client, also delete the accessToken
-
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.sendStatus(204); //No content
   const refreshToken = cookies.jwt;
@@ -202,7 +219,7 @@ const resendVerificationEmail = async (req, res) => {
     try {
       await sendEmail(email, cryptoToken, 'verify');
       return res.status(200).json({
-        msg: 'A verification email has been sent. It will expire after one hour.',
+        Msg: 'A verification email has been sent. It will expire after one hour.',
       });
     } catch (e) {
       console.log(e);
