@@ -7,6 +7,7 @@ const User = require('../models/User');
 const EmailToken = require('../models/EmailToken');
 const PasswordToken = require('../models/PasswordToken');
 const { findByIdAndUpdate } = require('../models/User');
+const { permittedCrossDomainPolicies } = require('helmet');
 
 const register = async (req, res) => {
   const { email, password, name } = req.body;
@@ -41,12 +42,12 @@ const register = async (req, res) => {
         const accessToken = jwt.sign(
           { user: foundUser._id },
           process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: '30s' } //15m
+          { expiresIn: '15m' } //15m
         );
         const refreshToken = jwt.sign(
           { user: foundUser._id },
           process.env.REFRESH_TOKEN_SECRET,
-          { expiresIn: '1d' }
+          { expiresIn: '30d' }
         );
 
         foundUser.refreshToken = refreshToken;
@@ -88,13 +89,13 @@ const signIn = async (req, res) => {
         const accessToken = jwt.sign(
           { user: foundUser._id },
           process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: '5m' } //15m
+          { expiresIn: '15m' } //15m
         );
 
         const refreshToken = jwt.sign(
           { user: foundUser._id },
           process.env.REFRESH_TOKEN_SECRET,
-          { expiresIn: '1d' }
+          { expiresIn: '30d' }
         );
 
         foundUser.refreshToken = refreshToken;
@@ -322,8 +323,36 @@ const changePassword = async (req, res) => {
   } catch (error) {}
 };
 
-const signInWithGoogle = async (req, res) => {
-  //placeholder, will add this once I have a demo frontend
+const refreshToken = async (req, res) => {
+  const cookies = req.cookies;
+  console.log(cookies, 'cook')
+  if (!cookies?.jwt) return res.status(401);
+  const refreshToken = cookies.jwt;
+
+  const foundUser = await User.findOne({ refreshToken }).exec();
+  if (!foundUser) {
+    return res.status(403); //Forbidden
+  }
+  // evaluate jwt
+  else {
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+      (err, decoded) => {
+        console.log(decoded, err);
+        if (err || foundUser._id.toString() !== decoded.user) {
+          console.log('made it here');
+          return res.status(403);
+        }
+        const accessToken = jwt.sign(
+          { user: foundUser._id },
+          process.env.ACCESS_TOKEN_SECRET,
+          { expiresIn: '15m' } //15m
+        );
+        res.status(200).json({ accessToken });
+      }
+    );
+  }
 };
 
 module.exports = {
@@ -334,5 +363,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   changePassword,
-  signout
+  signout,
+  refreshToken
 };

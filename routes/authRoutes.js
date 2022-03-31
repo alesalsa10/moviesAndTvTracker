@@ -122,4 +122,6 @@ router.post(
   authController.resetPassword
 );
 
+router.get('/refresh', authController.refreshToken);
+
 module.exports = router;
