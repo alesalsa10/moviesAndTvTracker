@@ -215,37 +215,33 @@ const getComments = async (req, res) => {
   switch (mediaType) {
     case 'movie':
       parent = 'parentMovie';
+      break
     case 'tv':
       parent = 'parentTv';
+      break;
     case 'season':
       parent = 'parentSeason';
+      break;
     case 'episode':
       parent = 'parentSeason';
+      break;
     case 'book':
       parent = 'parentBook';
+      break;
     default:
       parent = null;
+      break;
   }
+  console.log(parent)
   if (!mediaType) {
     return res.status(400).json({ Msg: 'Not a valid media type' });
   } else {
     try {
       let comments = await Comment.find({
-        parent: id,
-        parentComment: null
-      })
-        // .populate({
-        //   path: 'postedBy',
-        //   select: 'name',
-        // })
-        // .populate({
-        //   path: 'replies',
-        //   populate: {
-        //     path: 'postedBy',
-        //     select: 'name',
-        //   },
-        // })
-        .lean();
+        [parent]: id,
+        parentComment: null,
+      }).lean();
+     // console.log(comments)
       return res.status(200).json(comments);
     } catch (e) {
       console.log(e);
