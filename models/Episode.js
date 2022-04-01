@@ -16,6 +16,10 @@ const episodeSchema = new mongoose.Schema({
     },
   ],
   _id: String,
+  commentCount: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const Episode = mongoose.model('Episode', episodeSchema);

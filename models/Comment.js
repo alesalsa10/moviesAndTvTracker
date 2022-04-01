@@ -52,23 +52,7 @@ const CommentSchema = new mongoose.Schema(
       ref: 'Book',
     },
   },
-  { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
-
-const getRepliesCount = (comment, count = 0) => {
-  //console.log(comment)
-  if (comment.replies.length === 0) {
-    return 1;
-  }
-  for (const reply of comment.replies) {
-    count += getRepliesCount(reply, count);
-  }
-  return count;
-};
-
-CommentSchema.virtual('total').get(function () {
-  return  getRepliesCount(this) + 1;
-});
 
 CommentSchema.pre('remove', async function (next) {
   //before removing remove comment from user, and from media, and decrement reply count

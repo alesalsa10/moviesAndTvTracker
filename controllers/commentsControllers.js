@@ -24,6 +24,8 @@ const createComment = async (req, res) => {
       } else {
         try {
           let existingMedia = await model.findById(id);
+          existingMedia.commentCount++;
+          await existingMedia.save();
           console.log(existingMedia);
           if (existingMedia) {
             try {
@@ -67,9 +69,6 @@ const createComment = async (req, res) => {
 };
 
 const replyToComment = async (req, res) => {
-  //find parentComment by id
-  //create the new comment and add it to the replies inside of comment
-  //REFACTOR WITH NEW MODEL UTILITY
   const { text, parentCommentId } = req.body;
   const userId = req.user;
   const { mediaType, id } = req.params;
@@ -87,6 +86,8 @@ const replyToComment = async (req, res) => {
       } else {
         try {
           let foundMedia = await model.findById(id);
+          foundMedia.commentCount++;
+          await foundMedia.save();
           console.log(foundMedia);
           if (foundMedia) {
             try {
@@ -139,22 +140,26 @@ const editComment = async (req, res) => {
   //unable to update if not test == 'detelete'
   const commentId = req.params.commentId;
   const { text } = req.body;
+
   try {
-    const update = {
-      text,
-    };
-    let foundComment = await Comment.findByIdAndUpdate(commentId, update, {
-      new: true,
-    });
-    if (foundComment) {
-      res.status(202).json({ foundComment });
+    let comment = await Comment.findById(commentId);
+    if (comment.text === '[Deleted]') {
+      return res.status(401).json({ Msg: `Can't edit deleted comments` });
     } else {
-      res.status(404).json({ Msg: 'No comment with given id was found' });
+      try {
+        const update = {
+          text,
+        };
+        let foundComment = await Comment.findByIdAndUpdate(commentId, update, {
+          new: true,
+        });
+        res.status(202).json({ foundComment });
+      } catch (error) {
+        console.log(error);
+        res.status(500).json({ Msg: 'Something went wrong' });
+      }
     }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ Msg: 'Something went wrong' });
-  }
+  } catch (err) {}
 };
 
 const deleteComment = async (req, res) => {
@@ -231,8 +236,7 @@ const getComments = async (req, res) => {
         .populate({
           path: 'replies',
         })
-        //.lean();
-      //console.log(comments);
+        .lean();
       return res.status(200).json(comments);
     } catch (e) {
       console.log(e);
