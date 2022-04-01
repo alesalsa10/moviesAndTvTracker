@@ -54,6 +54,16 @@ const CommentSchema = new mongoose.Schema(
   },
 );
 
+
+function autoPopulateReplies(next) {
+  this.populate('replies');
+  this.populate('postedBy', 'name')
+  next();
+}
+
+CommentSchema.pre('findOne', autoPopulateReplies).pre('find', autoPopulateReplies);
+
+
 CommentSchema.pre('remove', async function (next) {
   //before removing remove comment from user, and from media, and decrement reply count
   const selectModel = () => {

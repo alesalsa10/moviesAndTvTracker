@@ -232,10 +232,19 @@ const getComments = async (req, res) => {
     try {
       let comments = await Comment.find({
         parent: id,
+        parentComment: null
       })
-        .populate({
-          path: 'replies',
-        })
+        // .populate({
+        //   path: 'postedBy',
+        //   select: 'name',
+        // })
+        // .populate({
+        //   path: 'replies',
+        //   populate: {
+        //     path: 'postedBy',
+        //     select: 'name',
+        //   },
+        // })
         .lean();
       return res.status(200).json(comments);
     } catch (e) {
