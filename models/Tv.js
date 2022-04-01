@@ -18,10 +18,7 @@ const TvSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     ref: 'User',
   },
-  commentCount: {
-    type: Number,
-    default: 0,
-  },
+
 });
 
 const Tv = mongoose.model('Tv', TvSchema);

@@ -18,21 +18,21 @@ const UserSchema = new mongoose.Schema({
   ],
   favoriteBooks: [
     {
-      type: Number,
+      type: String,
       ref: 'Book',
       unique: true,
     },
   ],
   favoriteMovies: [
     {
-      type: Number,
+      type: String,
       ref: 'Movie',
       unique: true,
     },
   ],
   favoriteTv: [
     {
-      type: Number,
+      type: String,
       ref: 'Tv',
       unique: true,
     },

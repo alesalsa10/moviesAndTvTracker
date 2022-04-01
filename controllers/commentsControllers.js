@@ -8,28 +8,24 @@ const Selector = require('../utils/selector');
 const createComment = async (req, res) => {
   const { text } = req.body;
   const userId = req.user;
-  const {id} = req.params;
+  const { id } = req.params;
 
   // const userId = req.header('userId');
   // const externalId = req.header('externalId');
   const { mediaType } = req.params;
-
   try {
     let foundUser = await User.findById(userId).select('-password');
     if (foundUser) {
-      // let existingMedia = await getMedia(externalId, mediaType);
-      // console.log(existingMedia);
-      //check if the media exist, it doesn't create it
-      //let model = chooseModel(mediaType);
       const selector = new Selector();
       let model = selector.chooseModel(mediaType);
+      console.log(model);
       if (!model) {
         return res.status(500).json({ Msg: 'This model does not exist' });
       } else {
         try {
           let existingMedia = await model.findById(id);
+          console.log(existingMedia);
           if (existingMedia) {
-            //comments don't have the right references parentMovie, parentTv, stc.
             try {
               let commentParentMedia = chooseCommentParent(mediaType);
               let newComment = new Comment({
@@ -74,13 +70,10 @@ const replyToComment = async (req, res) => {
   //find parentComment by id
   //create the new comment and add it to the replies inside of comment
   //REFACTOR WITH NEW MODEL UTILITY
-  const { text, parentCommentId, topCommentId, parentMediaId } = req.body;
+  const { text, parentCommentId } = req.body;
   const userId = req.user;
-  // const parentCommentId = req.header('parentCommentId'); //this is whover is being replies too
-  // const topCommentId = req.header('topCommentId'); //if it is the reply of a reply this will be the top most comment in the chain
-  // const parentMediaId = req.header('parentMediaId');
-  const { mediaType } = req.params;
-
+  const { mediaType, id } = req.params;
+  console.log(mediaType, id);
   try {
     let foundUser = await User.findById(userId).select('-password');
     if (foundUser) {
@@ -93,47 +86,35 @@ const replyToComment = async (req, res) => {
           .json({ Msg: 'This media type does not exist our database' });
       } else {
         try {
-          let foundMedia = await model.findById(parentMediaId);
+          let foundMedia = await model.findById(id);
+          console.log(foundMedia);
           if (foundMedia) {
             try {
-              let foundTopComment = await Comment.findById(topCommentId);
-              if (foundTopComment) {
-                try {
-                  let foundComment = await Comment.findById(parentCommentId);
-                  if (foundComment) {
-                    let commentParentMedia = chooseCommentParent(mediaType);
-                    let newComment = new Comment({
-                      postedBy: userId,
-                      [commentParentMedia]: foundMedia._id,
-                      text,
-                      parentComment: parentCommentId,
-                      topComment: topCommentId,
-                    });
-                    await newComment.save();
-                    await foundUser.comments.push(newComment);
-                    await foundUser.save();
-                    await foundComment.replies.push(newComment);
-                    await foundComment.save();
-                    return res.status(200).json({ Msg: 'Success reply' });
-                  } else {
-                    return res
-                      .status(404)
-                      .json({ Msg: 'Invalid comment parent id' });
-                  }
-                } catch (error) {
-                  console.log(error);
-                  return res
-                    .status(500)
-                    .json({ Msg: 'Something went wrong, try again later' });
-                }
+              let foundComment = await Comment.findById(parentCommentId);
+              if (foundComment) {
+                let commentParentMedia = chooseCommentParent(mediaType);
+                let newComment = new Comment({
+                  postedBy: userId,
+                  [commentParentMedia]: foundMedia._id,
+                  text,
+                  parentComment: parentCommentId,
+                });
+                await newComment.save();
+                await foundUser.comments.push(newComment);
+                await foundUser.save();
+                await foundComment.replies.push(newComment);
+                await foundComment.save();
+                return res.status(200).json({ Msg: 'Success reply' });
               } else {
-                res.status(404).json({ Msg: 'Top comment not found' });
+                return res
+                  .status(404)
+                  .json({ Msg: 'Invalid comment parent id' });
               }
             } catch (error) {
               console.log(error);
-              return res.status(500).json({
-                Msg: 'Something went wrong trying to find the top comment',
-              });
+              return res
+                .status(500)
+                .json({ Msg: 'Something went wrong, try again later' });
             }
           } else {
             return res.status(404).json({ Msg: 'Media not found' });
@@ -250,7 +231,8 @@ const getComments = async (req, res) => {
         .populate({
           path: 'replies',
         })
-        .lean();
+        //.lean();
+      //console.log(comments);
       return res.status(200).json(comments);
     } catch (e) {
       console.log(e);

@@ -35,8 +35,7 @@ router.post(
     check('parentCommentId')
       .notEmpty()
       .withMessage('Parent Comment Id must exist'),
-    check('topCommentId').notEmpty().withMessage('Top Comment ID must exist'),
-    check('parentMediaId').notEmpty().withMessage('pParent Media ID must exist'),
+    //check('parentMediaId').notEmpty().withMessage('Parent Media ID must exist'),
   ],
   (req, res, next) => {
     const errors = validationResult(req);
