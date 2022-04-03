@@ -249,7 +249,9 @@ const getComments = async (req, res) => {
       let comments = await Comment.find({
         [parent]: id,
         parentComment: null,
-      }).lean();
+      })
+        .sort({datePosted: -1})
+        .lean();
       // console.log(comments)
       return res.status(200).json(comments);
     } catch (e) {
