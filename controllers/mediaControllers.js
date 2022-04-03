@@ -61,7 +61,7 @@ const getMediaByCategories = async (req, res) => {
   const { mediaType, category } = req.params;
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/${mediaType}/${category}?api_key=${process.env.apiKey}`
+      `${process.env.TMDB_BASE_URL}/${mediaType}/${category}?api_key=${process.env.TMDB_KEY}`
     );
     console.log(response);
     res.status(200).json(response.data);
@@ -80,7 +80,7 @@ const searchMedia = async (req, res) => {
   console.log(search_query);
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/search/multi?api_key=${process.env.apiKey}&query=${search_query}&include_adult=false`
+      `${process.env.TMDB_BASE_URL}/search/multi?api_key=${process.env.TMDB_KEY}&query=${search_query}&include_adult=false`
     );
     res.status(200).json(response.data);
   } catch (err) {
@@ -95,7 +95,7 @@ const getTrending = async (req, res) => {
   const { mediaType, timePeriod } = req.params;
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/trending/${mediaType}/${timePeriod}?api_key=${process.env.apiKey}`
+      `${process.env.TMDB_BASE_URL}/trending/${mediaType}/${timePeriod}?api_key=${process.env.TMDB_KEY}`
     );
     res.status(200).json(response.data);
   } catch (err) {
@@ -111,7 +111,7 @@ const getMediaLists = async (req, res) => {
   let page = req.query.page;
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/${mediaType}/${listType}?api_key=${process.env.apiKey}&page=${page}`
+      `${process.env.TMDB_BASE_URL}/${mediaType}/${listType}?api_key=${process.env.TMDB_KEY}&page=${page}`
     );
     console.log(response);
     res.status(200).json(response.data);
@@ -127,7 +127,7 @@ const getRecommendations = async (req, res) => {
   const { mediaType, id } = req.params;
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/${mediaType}/${id}/recommendations?api_key=${process.env.apiKey}`
+      `${process.env.TMDB_BASE_URL}/${mediaType}/${id}/recommendations?api_key=${process.env.TMDB_KEY}`
     );
     console.log(response);
     let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
@@ -193,7 +193,7 @@ const getSeason = async (req, res) => {
   console.log(id, seasonNumber);
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}&append_to_response=videos,credits,release_dates`
+      `${process.env.TMDB_BASE_URL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.TMDB_KEY}&append_to_response=videos,credits,release_dates`
     );
     console.log(response, 'aaaa');
     let mediaDetails = response.data
@@ -259,14 +259,14 @@ const getEpisode = async (req, res) => {
   const { id, seasonNumber, episodeNumber } = req.params;
   try {
     const episode = await axios.get(
-      `${process.env.baseURL}/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${process.env.apiKey}&append_to_response=videos,credits,release_dates`
+      `${process.env.TMDB_BASE_URL}/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${process.env.TMDB_KEY}&append_to_response=videos,credits,release_dates`
     );
     console.log(episode);
     let mediaDetails = episode.data
     //res.status(200).json(response.data);
     try {
       const season = await axios.get(
-        `${process.env.baseURL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.apiKey}&append_to_response=videos,credits,release_dates`
+        `${process.env.TMDB_BASE_URL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.TMDB_KEY}&append_to_response=videos,credits,release_dates`
       );
       console.log(season);
       try {
@@ -377,7 +377,7 @@ const filterByGenre = async (req, res) => {
   //with_genres comma separated
   try {
     const response = await axios.get(
-      `${process.env.baseUrl}/discover/${mediaType}?api_key=${process.env.apiKey}&with_genres=${with_genres}`
+      `${process.env.TMDB_BASE_URL}/discover/${mediaType}?api_key=${process.env.TMDB_KEY}&with_genres=${with_genres}`
     );
     console.log(response);
     res.status(200).json(response.data);

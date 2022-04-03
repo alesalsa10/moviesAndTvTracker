@@ -27,7 +27,6 @@ const getBookById = async (req, res) => {
 };
 
 const getBookByIsbn = async (req, res) => {
-
   const { isbn } = req.params;
   //do something similar as id search
   //look up book by isbn, get and and save with google api id
@@ -40,12 +39,12 @@ const getBookByIsbn = async (req, res) => {
     try {
       let foundMedia = await Book.findOne({ _id: mediaDetails.items[0].id });
       if (foundMedia) {
-        mediaDetails = mediaDetails.items[0]
+        mediaDetails = mediaDetails.items[0];
         res.status(200).json({ foundMedia, mediaDetails });
       } else {
         foundMedia = new Book({ _id: mediaDetails.items[0].id });
         await foundMedia.save();
-        mediaDetails = mediaDetails.items[0]
+        mediaDetails = mediaDetails.items[0];
         res.status(200).json({ foundMedia, mediaDetails });
       }
     } catch (error) {
@@ -91,7 +90,9 @@ const doesBookHaveMedia = async (req, res) => {
           basedBook.media_name
         );
         if (mediaDetails.err) {
-          res.status(foundMedia.error.status).json({ Msg: foundMedia.error.Msg });
+          res
+            .status(foundMedia.error.status)
+            .json({ Msg: foundMedia.error.Msg });
         } else {
           res.status(200).json(mediaDetails.results[0]);
         }
@@ -101,7 +102,9 @@ const doesBookHaveMedia = async (req, res) => {
           basedBook.media_name
         );
         if (mediaDetails.error) {
-          res.status(foundMedia.error.status).json({ Msg: foundMedia.error.Msg });
+          res
+            .status(foundMedia.error.status)
+            .json({ Msg: foundMedia.error.Msg });
         } else {
           res.status(200).json(mediaDetails.results[0]);
         }
@@ -121,20 +124,22 @@ const searchBook = async (req, res) => {
   let search_query = req.query.search_query.split(' ').join('+');
   try {
     const response = await axios.get(
-      `https://www.googleapis.com/books/v1/volumes?q=intitle:${search_query}&maxResults=40&key=${process.env.googleBooksKey}
+      `https://www.googleapis.com/books/v1/volumes?q=intitle:${search_query}&maxResults=40&key=${process.env.GOOGLE_BOOKS_KEY}
 `
     );
     return res.status(200).json(response.data);
   } catch (err) {
     console.log(err.response.data);
-    return res.status(err.response.data.error.code).json({Msg: err.response.data.error.message})
+    return res
+      .status(err.response.data.error.code)
+      .json({ Msg: err.response.data.error.message });
   }
 };
 
 const getBestSellers = async (req, res) => {
   try {
     let response = await axios.get(
-      `${process.env.newYorkTimesBaseUrl}/lists/overview.json?api-key=${process.env.newYorkTimesKey}`
+      `${process.env.NY_TIMES_URL}/lists/overview.json?api-key=${process.env.NY_TIMES_KEY}`
     );
     console.log(response.data.results.lists);
     res.status(200).json(response.data.results.lists);
@@ -145,8 +150,6 @@ const getBestSellers = async (req, res) => {
     res.status(500).json({ Msg: 'Something went wrong' });
   }
 };
-
-
 
 module.exports = {
   getBookById,

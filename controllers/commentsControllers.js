@@ -40,6 +40,11 @@ const createComment = async (req, res) => {
               await foundUser.save();
               await existingMedia.comments.push(newComment);
               await existingMedia.save();
+              newComment = await Comment.findById(newComment._id).populate(
+                'postedBy',
+                'name'
+              );
+              return res.status(201).json(newComment);
             } catch (error) {
               console.log(error);
               return res
@@ -57,7 +62,6 @@ const createComment = async (req, res) => {
             .status(500)
             .json({ Msg: 'Something went wrong trying to find the media' });
         }
-        return res.status(201).json({ Msg: 'Comment created' });
       }
     } else {
       res.status(404).json({ Msg: 'User not found' });
@@ -105,7 +109,12 @@ const replyToComment = async (req, res) => {
                 await foundUser.save();
                 await foundComment.replies.push(newComment);
                 await foundComment.save();
-                return res.status(200).json({ Msg: 'Success reply' });
+                newComment = await Comment.findById(newComment._id).populate(
+                  'postedBy',
+                  'name'
+                );
+
+                return res.status(200).json(newComment);
               } else {
                 return res
                   .status(404)
@@ -215,7 +224,7 @@ const getComments = async (req, res) => {
   switch (mediaType) {
     case 'movie':
       parent = 'parentMovie';
-      break
+      break;
     case 'tv':
       parent = 'parentTv';
       break;
@@ -232,7 +241,7 @@ const getComments = async (req, res) => {
       parent = null;
       break;
   }
-  console.log(parent)
+  console.log(parent);
   if (!mediaType) {
     return res.status(400).json({ Msg: 'Not a valid media type' });
   } else {
@@ -241,7 +250,7 @@ const getComments = async (req, res) => {
         [parent]: id,
         parentComment: null,
       }).lean();
-     // console.log(comments)
+      // console.log(comments)
       return res.status(200).json(comments);
     } catch (e) {
       console.log(e);

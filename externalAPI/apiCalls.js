@@ -3,7 +3,7 @@ const axios = require('axios');
 const externalGetMediaById = async (mediaType, id) => {
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/${mediaType}/${id}?api_key=${process.env.apiKey}&append_to_response=videos, ,credits,release_dates,content_ratings,recommendations`
+      `${process.env.TMDB_BASE_URL}/${mediaType}/${id}?api_key=${process.env.TMDB_KEY}&append_to_response=videos, ,credits,release_dates,content_ratings,recommendations`
     );
     //response.data.error = null;
     return response.data;
@@ -21,7 +21,7 @@ const externalGetMediaById = async (mediaType, id) => {
 const getBook = async (id) => {
   try {
     const response = await axios.get(
-      `https://www.googleapis.com/books/v1/volumes/${id}?key=${process.env.googleBooksKey}`
+      `https://www.googleapis.com/books/v1/volumes/${id}?key=${process.env.GOOGLE_BOOKS_KEY}`
     );
     response.data.Err = null;
     console.log(response.data);
@@ -39,7 +39,7 @@ const getBook = async (id) => {
 const getBookByIsbn = async (isbn) => {
   try {
     const response = await axios.get(
-      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&key=${process.env.googleBooksKey}`
+      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&key=${process.env.GOOGLE_BOOKS_KEY}`
     );
     return response.data;
   } catch (err) {
@@ -55,7 +55,7 @@ const getBookByIsbn = async (isbn) => {
 const booksByGenre = async (genre) => {
   try {
     const response = await axios.get(
-      `https://www.googleapis.com/books/v1/volumes?q=subject:${genre}&maxResults=10&key=${process.env.googleBooksKey}
+      `https://www.googleapis.com/books/v1/volumes?q=subject:${genre}&maxResults=10&key=${process.env.GOOGLE_BOOKS_KEY}
 `
     );
     response.data.Err = null;
@@ -74,7 +74,7 @@ const booksByGenre = async (genre) => {
 const searchMedia = async (mediaType, searchQuery) => {
   try {
     const response = await axios.get(
-      `${process.env.baseURL}/search/${mediaType}?api_key=${process.env.apiKey}&query=${searchQuery}&include_adult=false`
+      `${process.env.TMDB_BASE_URL}/search/${mediaType}?api_key=${process.env.TMDB_KEY}&query=${searchQuery}&include_adult=false`
     );
     response.data.Err = null;
     return response.data;

@@ -4,7 +4,7 @@ const getPersonById = async (req, res) => {
     const {personId} = req.params;
     try{
         const response = await axios.get(
-          `${process.env.baseUrl}/person/${personId}?api_key=${process.env.apiKey}&append_to_response=images,combined_credits`
+          `${process.env.TMDB_BASE_URL}/person/${personId}?api_key=${process.env.TMDB_KEY}&append_to_response=images,combined_credits`
         );
         console.log(response)
         res.status(200).json(response.data)
@@ -18,7 +18,7 @@ const getCredits = async(req, res) =>{
     const {personId, mediaType} = req.params;
     try{
         const response = await axios.get(
-          `${process.env.baseUrl}/person/${personId}/${mediaType}?api_key=${process.env.apiKey}`
+          `${process.env.TMDB_BASE_URL}/person/${personId}/${mediaType}?api_key=${process.env.TMDB_KEY}`
         );
         console.log(response);
         res.status(200).json(response.data);
@@ -32,7 +32,7 @@ const getPopular = async (req, res) => {
   let page = req.query.page;
   try {
     const response = await axios.get(
-      `${process.env.baseUrl}/person/popular?api_key=${process.env.apiKey}&page=${page}`
+      `${process.env.TMDB_BASE_URL}/person/popular?api_key=${process.env.TMDB_KEY}&page=${page}`
     );
     console.log(response);
     res.status(200).json(response.data);

@@ -3,7 +3,7 @@ const { default: axios } = require('axios');
 const getConfiguration = async (req, res) =>{
     try{
         const response = await axios.get(
-          `${process.env.baseUrl}/configuration?api_key=${process.env.apiKey}`
+          `${process.env.baseUrl}/configuration?api_key=${process.env.TMDB_KEY}`
         );
         res.status(200).json(response.data);
     }catch(error){
