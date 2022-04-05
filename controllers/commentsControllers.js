@@ -24,9 +24,10 @@ const createComment = async (req, res) => {
       } else {
         try {
           let existingMedia = await model.findById(id);
+          console.log(existingMedia);
+
           existingMedia.commentCount++;
           await existingMedia.save();
-          console.log(existingMedia);
           if (existingMedia) {
             try {
               let commentParentMedia = chooseCommentParent(mediaType);
@@ -232,7 +233,7 @@ const getComments = async (req, res) => {
       parent = 'parentSeason';
       break;
     case 'episode':
-      parent = 'parentSeason';
+      parent = 'parentEpisode';
       break;
     case 'book':
       parent = 'parentBook';
@@ -250,9 +251,9 @@ const getComments = async (req, res) => {
         [parent]: id,
         parentComment: null,
       })
-        .sort({datePosted: -1})
+        .sort({ datePosted: -1 })
         .lean();
-      // console.log(comments)
+       console.log(comments)
       return res.status(200).json(comments);
     } catch (e) {
       console.log(e);

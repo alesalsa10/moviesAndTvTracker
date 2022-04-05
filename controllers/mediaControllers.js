@@ -216,7 +216,7 @@ const getSeason = async (req, res) => {
           } else {
             let foundSeason = new Season({
               seasonNumber,
-              _id: response.data._id,
+              _id: mediaDetails.id,
               media: foundMedia._id,
             });
             await foundSeason.save();
@@ -235,7 +235,7 @@ const getSeason = async (req, res) => {
         await foundMedia.save();
         let foundSeason = new Season({
           seasonNumber,
-          _id: response.data._id,
+          _id: mediaDetails.id,
           media: foundMedia._id,
         });
         await foundSeason.save();
@@ -291,7 +291,7 @@ const getEpisode = async (req, res) => {
                   res.status(200).json({ mediaDetails, foundEpisode });
                 } else {
                   let foundEpisode = new Episode({
-                    _id: episode.data.id,
+                    _id: mediaDetails.id,
                     season: foundSeason._id,
                     episodeNumber: episodeNumber,
                   });
@@ -316,7 +316,7 @@ const getEpisode = async (req, res) => {
               //res.status(200).json({ ...season.data, foundSeason });
               //search for episode
               let foundEpisode = new Episode({
-                _id: episode.data.id,
+                _id: mediaDetails.id,
                 season: foundSeason._id,
                 episodeNumber: episodeNumber,
               });
@@ -343,7 +343,7 @@ const getEpisode = async (req, res) => {
           await foundMedia.seasons.push(foundSeason);
           await foundMedia.save();
           let foundEpisode = new Episode({
-            _id: episode.data.id,
+            _id: mediaDetails.id,
             season: foundSeason._id,
             episodeNumber: episodeNumber,
           });
