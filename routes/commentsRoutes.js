@@ -72,11 +72,11 @@ router.put(
   commentControllers.editComment
 );
 
-router.put(
+router.delete(
   '/delete/:commentId',
   auth,
   checkVerification,
-  isLoggedInSameUser,
+  //isLoggedInSameUser,
   commentControllers.deleteComment
 );
 

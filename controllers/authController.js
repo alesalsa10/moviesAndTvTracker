@@ -7,7 +7,6 @@ const User = require('../models/User');
 const EmailToken = require('../models/EmailToken');
 const PasswordToken = require('../models/PasswordToken');
 const { findByIdAndUpdate } = require('../models/User');
-const { permittedCrossDomainPolicies } = require('helmet');
 
 const register = async (req, res) => {
   const { email, password, name } = req.body;
@@ -25,20 +24,20 @@ const register = async (req, res) => {
       const cryptoToken = crypto.randomBytes(16).toString('hex');
 
       //create user
-      let user = new User({
+      let foundUser = new User({
         email,
         password: encryptedPassword,
         name,
       });
-      await user.save();
+      await foundUser.save();
       const newToken = new EmailToken({
-        user: user._id,
+        user: foundUser._id,
         token: cryptoToken,
       });
       await newToken.save();
       try {
         await sendEmail(email, cryptoToken, 'verify');
-        console.log(user);
+        console.log(foundUser);
         const accessToken = jwt.sign(
           { user: foundUser._id },
           process.env.ACCESS_TOKEN_SECRET,
@@ -57,10 +56,13 @@ const register = async (req, res) => {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 60,
         });
+        foundUser = await User.findById(foundUser._id)
+          .select('-password')
+          .populate('comments');
         return res.status(200).json({
           accessToken,
           Msg: 'A verification email has been sent. It will expire after one hour.',
-          user,
+          foundUser,
         });
       } catch (e) {
         console.log(e);
@@ -80,7 +82,6 @@ const signIn = async (req, res) => {
   //if user users exist, compared hashed password, if it mataches create jwt token to send back to client
   try {
     let foundUser = await User.findOne({ email });
-
     if (foundUser) {
       //if user is found with given email or username, compare password with hashed password
       let match = await bcrypt.compare(password, foundUser.password);
@@ -100,6 +101,8 @@ const signIn = async (req, res) => {
 
         foundUser.refreshToken = refreshToken;
         await foundUser.save();
+
+        foundUser = await User.findById(foundUser._id).select('-password').populate('comments')
 
         res.cookie('jwt', refreshToken, {httpOnly: true, maxAge: 24 * 60 * 60 * 60})
         res.status(201).json({ accessToken, foundUser });

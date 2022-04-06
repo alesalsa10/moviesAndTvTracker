@@ -190,14 +190,13 @@ const deleteComment = async (req, res) => {
     if (comment) {
       let repliesLength = comment.replies.length;
       if (repliesLength > 0) {
-        await Comment.findByIdAndUpdate(commentId, update, { new: true });
-        res.status(202).json({ Msg: 'Comment deleted' });
+        comment = await Comment.findByIdAndUpdate(commentId, update, { new: true });
+        res.status(200).json(comment);
       } else {
         try {
           let deleted = await Comment.findByIdAndDelete(commentId); //IMPORTANT
-          //res.status(200).json({ Msg: 'Comment deleted' });
           if (deleted) {
-            res.status(200).json({ Msg: 'Comment deleted' });
+            res.status(200).json( {Msg: 'Complete Deletion'} );
           } else {
             res
               .status(500)
