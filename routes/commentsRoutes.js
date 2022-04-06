@@ -52,7 +52,7 @@ router.put(
   '/edit/:commentId',
   auth,
   checkVerification,
-  isLoggedInSameUser,
+  //isLoggedInSameUser,
   [
     check('text')
       .notEmpty()
