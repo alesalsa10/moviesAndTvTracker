@@ -178,6 +178,7 @@ const deleteComment = async (req, res) => {
   //only do the 'deleted' logic if the comment has replies
   //make sure to delete comment from user and media
   const commentId = req.params.commentId;
+  console.log(commentId);
   try {
     const update = {
       text: '[Deleted]',
@@ -190,18 +191,16 @@ const deleteComment = async (req, res) => {
     if (comment) {
       let repliesLength = comment.replies.length;
       if (repliesLength > 0) {
-        comment = await Comment.findByIdAndUpdate(commentId, update, { new: true });
+        comment = await Comment.findByIdAndUpdate(comment._id, update, {
+          new: true,
+        });
         res.status(200).json(comment);
       } else {
         try {
-          let deleted = await Comment.findByIdAndDelete(commentId); //IMPORTANT
-          if (deleted) {
-            res.status(200).json( {Msg: 'Complete Deletion'} );
-          } else {
-            res
-              .status(500)
-              .json({ Msg: 'There was an issue deleting your comment' });
-          }
+          await Comment.findByIdAndDelete(comment._id); //IMPORTANT
+          console.log('was deleted');
+
+          res.status(200).json({ Msg: 'Complete Deletion' });
         } catch (error) {
           console.log(error);
           return res
@@ -252,7 +251,7 @@ const getComments = async (req, res) => {
       })
         .sort({ datePosted: -1 })
         .lean();
-       console.log(comments)
+      console.log(comments);
       return res.status(200).json(comments);
     } catch (e) {
       console.log(e);
