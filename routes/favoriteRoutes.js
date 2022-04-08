@@ -4,25 +4,23 @@ const favoriteControllers = require('../controllers/favoritesControllers');
 const auth = require('../middlewares/auth');
 const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser.js');
 
-router.post(
-  '/new/movie/:externalId',
+router.put(
+  '/movie/:externalId',
   auth,
-  isLoggedInSameUser,
-  favoriteControllers.addMovieToFavorites
+  favoriteControllers.toggleMovieFavorite
 );
 
-router.post(
-  '/new/Tv/:externalId',
+router.put(
+  '/tv/:externalId',
   auth,
-  isLoggedInSameUser,
-  favoriteControllers.addTvToFavorites
+  favoriteControllers.toggleTvFavorite
 );
 
-router.post(
-  '/new/book/:externalId',
+router.put(
+  '/book/:externalId',
   auth,
   isLoggedInSameUser,
-  favoriteControllers.addBookToFavorites
+  favoriteControllers.toggleBookFavorite
 );
 
 router.get(
@@ -32,25 +30,5 @@ router.get(
   favoriteControllers.getAllFavorites
 );
 
-router.delete(
-  '/delete/movie/:bookmarkId',
-  auth,
-  isLoggedInSameUser,
-  favoriteControllers.removeMovieFromFavorites
-)
-
-router.delete(
-  '/delete/tv/:bookmarkId',
-  auth,
-  isLoggedInSameUser,
-  favoriteControllers.removeTvFromFavorites
-);
-
-router.delete(
-  '/delete/book/:bookmarkId',
-  auth,
-  isLoggedInSameUser,
-  favoriteControllers.removeBookFromFavorites
-);
 
 module.exports = router

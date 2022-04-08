@@ -5,30 +5,24 @@ const Book = require('../models/Book');
 const externalGetMediaById = require('../externalAPI/apiCalls');
 const getBook = require('../externalAPI/apiCalls');
 
-const addMovieToFavorites = async (req, res) => {
+const toggleMovieFavorite = async (req, res) => {
   const { externalId } = req.params;
-  const userId = req.header('userId');
-  //find user first
   try {
-    let foundUser = await User.findById(userId).select('-password');
+    let foundUser = await User.findById(req.user).select('-password');
     console.log(foundUser);
     if (foundUser) {
-      let existingMovie = await Movie.findOne({ externalId });
-      if (existingMovie) {
-        let favoriteExist = foundUser.favoriteMovies.includes(
-          existingMovie._id
+      let favoriteExist = foundUser.favoriteMovies.includes(externalId);
+      if (!favoriteExist) {
+        await foundUser.favoriteMovies.push(externalId);
+        await foundUser.save();
+        res.status(200).json({ Msg: 'Bookmark created' });
+      } else {
+        await User.updateOne(
+          { _id: req.user },
+          { $pull: { favoriteMovies: externalId } },
+          { multi: true }
         );
-        if (!favoriteExist) {
-          await foundUser.favoriteMovies.push(existingMovie);
-          await foundUser.save();
-          res.status(201).json({ Msg: 'Bookmark successfully created' });
-        } else {
-          res.status(409).json({ Msg: 'Already exist' });
-        }
-      } else {
-        res
-          .status(500)
-          .json({ Msg: 'There was a problem adding your favorite' });
+        res.status(200).json({ Msg: 'Bookmark deleted' });
       }
     } else {
       res.status(404).json({ Msg: 'User not found' });
@@ -41,28 +35,25 @@ const addMovieToFavorites = async (req, res) => {
   }
 };
 
-const addTvToFavorites = async (req, res) => {
+const toggleTvFavorite = async (req, res) => {
   const { externalId } = req.params;
-  const userId = req.header('userId');
   //find user first
   try {
-    let foundUser = await User.findById(userId).select('-password');
-    console.log(foundUser);
+    let foundUser = await User.findById(req.user).select('-password');
     if (foundUser) {
-      let existingTv = await Tv.findOne({ externalId });
-      if (existingTv) {
-        let favoriteExist = foundUser.favoriteTv.includes(existingTv._id);
-        if (!favoriteExist) {
-          await foundUser.favoriteTv.push(existingTv);
-          await foundUser.save();
-          res.status(201).json({ Msg: 'Bookmark successfully created' });
-        } else {
-          res.status(409).json({ Msg: 'Already exist' });
-        }
+      let favoriteExist = foundUser.favoriteTv.includes(externalId);
+      if (!favoriteExist) {
+        await foundUser.favoriteTv.push(externalId);
+        await foundUser.save();
+        res.status(201).json({ Msg: 'Bookmark created' });
       } else {
-        res
-          .status(500)
-          .json({ Msg: 'There was a problem adding your favorite' });
+        //res.status(409).json({ Msg: 'Already exist' });
+        await User.updateOne(
+          { _id: req.user },
+          { $pull: { favoriteTv: externalId } },
+          { multi: true }
+        );
+        res.status(200).json({ Msg: 'Bookmark deleted' });
       }
     } else {
       res.status(404).json({ Msg: 'User not found' });
@@ -75,28 +66,26 @@ const addTvToFavorites = async (req, res) => {
   }
 };
 
-const addBookToFavorites = async (req, res) => {
+const toggleBookFavorite = async (req, res) => {
   const { externalId } = req.params;
-  const userId = req.header('userId');
   //find user first
   try {
-    let foundUser = await User.findById(userId).select('-password');
-    console.log(foundUser);
+    let foundUser = await User.findById(req.user).select('-password');
     if (foundUser) {
       let existingBook = await Book.findOne({ externalId });
-      if (existingBook) {
-        let favoriteExist = foundUser.favoriteBooks.includes(existingBook._id);
-        if (!favoriteExist) {
-          await foundUser.favoriteBooks.push(existingBook);
-          await foundUser.save();
-          res.status(201).json({ Msg: 'Bookmark successfully created' });
-        } else {
-          res.status(409).json({ Msg: 'Already exist' });
-        }
+
+      let favoriteExist = foundUser.favoriteBooks.includes(externalId);
+      if (!favoriteExist) {
+        await foundUser.favoriteBooks.push(existingBook);
+        await foundUser.save();
+        res.status(201).json({ Msg: 'Bookmark created' });
       } else {
-        res
-          .status(500)
-          .json({ Msg: 'There was a problem adding your favorite' });
+        await User.updateOne(
+          { _id: req.user },
+          { $pull: { favoriteBooks: externalId } },
+          { multi: true }
+        );
+        res.status(200).json({ Msg: 'Bookmark deleted' });
       }
     } else {
       res.status(404).json({ Msg: 'User not found' });
@@ -149,60 +138,9 @@ const getAllFavorites = async (req, res) => {
   }
 };
 
-const removeMovieFromFavorites = async (req, res) => {
-  const { bookmarkId } = req.params;
-  const userId = req.header('userId');
-  try {
-    await User.updateOne(
-      { _id: userId },
-      { $pull: { favoriteMovies: bookmarkId } },
-      { multi: true }
-    );
-    res.status(200).json({ Msg: 'Bookmark deleted' });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ Msg: 'Something went wrong' });
-  }
-};
-
-const removeTvFromFavorites = async (req, res) => {
-  const { bookmarkId } = req.params;
-  const userId = req.header('userId');
-  try {
-    await User.updateOne(
-      { _id: userId },
-      { $pull: { favoriteTv: bookmarkId } },
-      { multi: true }
-    );
-    res.status(200).json({ Msg: 'Bookmark deleted' });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ Msg: 'Something went wrong' });
-  }
-};
-
-const removeBookFromFavorites = async (req, res) => {
-  const { bookmarkId } = req.params;
-  const userId = req.header('userId');
-  try {
-    await User.updateOne(
-      { _id: userId },
-      { $pull: { favoriteBooks: bookmarkId } },
-      { multi: true }
-    );
-    res.status(200).json({ Msg: 'Bookmark deleted' });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ Msg: 'Something went wrong' });
-  }
-};
-
 module.exports = {
-  addMovieToFavorites,
-  addTvToFavorites,
-  addBookToFavorites,
+  toggleMovieFavorite,
+  toggleTvFavorite,
+  toggleBookFavorite,
   getAllFavorites,
-  removeMovieFromFavorites,
-  removeTvFromFavorites,
-  removeBookFromFavorites,
 };
