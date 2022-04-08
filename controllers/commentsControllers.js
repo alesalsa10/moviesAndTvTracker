@@ -152,11 +152,12 @@ const editComment = async (req, res) => {
       try {
         const update = {
           text,
+          editedAt: Date.now()
         };
         let foundComment = await Comment.findByIdAndUpdate(commentId, update, {
           new: true,
         });
-        res.status(202).json({ foundComment });
+        res.status(202).json(foundComment );
       } catch (error) {
         console.log(error);
         res.status(500).json({ Msg: 'Something went wrong' });
@@ -214,7 +215,6 @@ const getComments = async (req, res) => {
   //add option to sort by reply count, only first row
   const { mediaType, id } = req.params;
   let sort = req.query.sort;
-  console.log(sort)
   let parent;
   switch (mediaType) {
     case 'movie':
@@ -249,7 +249,6 @@ const getComments = async (req, res) => {
         })
           .sort({ replies: -1 })
           .lean();
-        console.log(comments);
         return res.status(200).json(comments);
       }
 
@@ -259,7 +258,6 @@ const getComments = async (req, res) => {
       })
         .sort({ datePosted: -1 })
         .lean();
-      console.log(comments);
       return res.status(200).json(comments);
 
     } catch (e) {

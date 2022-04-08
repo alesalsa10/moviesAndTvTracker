@@ -30,7 +30,6 @@ const getMediaById = async (req, res) => {
   }
   if (foundMedia) {
     let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
-    console.log(mediaDetails);
     if (mediaDetails.error) {
       res
         .status(mediaDetails.error.status)
@@ -40,7 +39,6 @@ const getMediaById = async (req, res) => {
     }
   } else {
     let mediaDetails = await apiCalls.externalGetMediaById(mediaType, id);
-    console.log(mediaDetails);
     if (mediaDetails.error) {
       res
         .status(mediaDetails.error.status)

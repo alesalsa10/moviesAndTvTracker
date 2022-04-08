@@ -44,23 +44,28 @@ const UserSchema = new mongoose.Schema({
   },
   passwordToken: {
     type: mongoose.Types.ObjectId,
-    ref: 'PasswordToken'
+    ref: 'PasswordToken',
   },
-  verificationToken:{
+  verificationToken: {
     type: mongoose.Types.ObjectId,
-    ref: 'EmailToken'
+    ref: 'EmailToken',
   },
-  profilePicture:{
+  profilePicture: {
     type: String,
-    default: null
+    default: null,
   },
-  isVerified:{
+  isVerified: {
     type: Boolean,
-    default: false
+    default: false,
   },
-  refreshToken:{
+  refreshToken: {
     type: String,
-  }
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    required: true,
+  },
 });
 
 const User = mongoose.model('User', UserSchema);

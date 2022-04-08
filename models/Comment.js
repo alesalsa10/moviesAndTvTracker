@@ -31,6 +31,10 @@ const CommentSchema = new mongoose.Schema(
       default: Date.now,
       required: true,
     },
+    editedAt:{
+      type: Date,
+      default: null
+    },
     parentTv: {
       type: String,
       ref: 'Season',

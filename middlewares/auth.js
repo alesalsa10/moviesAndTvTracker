@@ -13,6 +13,7 @@ const auth = (req, res, next) => {
         return res.status(401).json({Msg: 'Unathorized'})
       }
       req.user = decoded.user;
+      console.log(req.user)
       next()
     } )
   }

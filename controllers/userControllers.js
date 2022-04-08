@@ -3,28 +3,22 @@ var jwt = require('jsonwebtoken');
 const sendEmail = require('../services/sendEmail');
 
 const uploadImage = require('../services/imageUpload');
-const deletePicture = require('../services/imageDeletion')
+const deletePicture = require('../services/imageDeletion');
 
 const User = require('../models/User');
 
 const getUser = async (req, res) => {
   const { id } = req.params;
-  //check if user is different than the one on req.parms
-  //display info depending on who it is
-  console.log(req.user);
-  let user;
-  if (req.user == id) {
-    console.log('can see all info');
-    user = await User.findOne({ _id: id }).populate('bookmarks');
-    // return 404 if no user found, return user otherwise.
+  try {
+    let user = await User.findOne({ _id: id }).select('name profilePicture');
     if (!user) {
       res.status(404).json({ Msg: 'User not found!' });
     } else {
       res.status(200).json(user);
     }
-  } else if (req.user !== id) {
-    console.log('only some info is shown');
-    user = await User.findOne({ _id: id }).select('username favorites');
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ Msg: 'Something went wrong' });
   }
 };
 
@@ -82,9 +76,9 @@ const uploadProfileImage = async (req, res) => {
   //look up the user's profile pic first
   //if it is null, then do singleupload
   //else delete user's picture from s3, and add the new one
-  try{
+  try {
     let foundUser = await User.findById(userId);
-    if(foundUser){
+    if (foundUser) {
       let profilePicture = foundUser.profilePicture;
       if (!profilePicture) {
         //if it is not, then upload directly. it will be null on users with no picture
@@ -149,12 +143,14 @@ const uploadProfileImage = async (req, res) => {
           }
         });
       }
-    }else{
-      res.status(404).json({Msg: 'No user with this ID found'})
+    } else {
+      res.status(404).json({ Msg: 'No user with this ID found' });
     }
-  }catch(error){
+  } catch (error) {
     console.log(error);
-    res.status(500).json({Msg: 'Something went wrong while trying to find user'})
+    res
+      .status(500)
+      .json({ Msg: 'Something went wrong while trying to find user' });
   }
 };
 

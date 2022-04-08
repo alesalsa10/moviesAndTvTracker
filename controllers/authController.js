@@ -102,7 +102,7 @@ const signIn = async (req, res) => {
         foundUser.refreshToken = refreshToken;
         await foundUser.save();
 
-        foundUser = await User.findById(foundUser._id).select('-password').populate('comments')
+        foundUser = await User.findById(foundUser._id).select('-password')
 
         res.cookie('jwt', refreshToken, {httpOnly: true, maxAge: 24 * 60 * 60 * 60})
         res.status(201).json({ accessToken, foundUser });
