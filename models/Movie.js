@@ -12,10 +12,7 @@ const movieSchema = new mongoose.Schema({
     ref: 'User',
   },
   _id: String,
-  commentCount: {
-    type: Number,
-    default: 0,
-  },
+
 });
 
 const Movie = mongoose.model('Movie', movieSchema);

@@ -18,16 +18,11 @@ const createComment = async (req, res) => {
     if (foundUser) {
       const selector = new Selector();
       let model = selector.chooseModel(mediaType);
-      console.log(model);
       if (!model) {
         return res.status(500).json({ Msg: 'This model does not exist' });
       } else {
         try {
           let existingMedia = await model.findById(id);
-          console.log(existingMedia);
-
-          existingMedia.commentCount++;
-          await existingMedia.save();
           if (existingMedia) {
             try {
               let commentParentMedia = chooseCommentParent(mediaType);
@@ -91,8 +86,6 @@ const replyToComment = async (req, res) => {
       } else {
         try {
           let foundMedia = await model.findById(id);
-          foundMedia.commentCount++;
-          await foundMedia.save();
           console.log(foundMedia);
           if (foundMedia) {
             try {
@@ -218,7 +211,10 @@ const deleteComment = async (req, res) => {
 };
 
 const getComments = async (req, res) => {
+  //add option to sort by reply count, only first row
   const { mediaType, id } = req.params;
+  let sort = req.query.sort;
+  console.log(sort)
   let parent;
   switch (mediaType) {
     case 'movie':
@@ -245,6 +241,18 @@ const getComments = async (req, res) => {
     return res.status(400).json({ Msg: 'Not a valid media type' });
   } else {
     try {
+
+      if(sort === 'replies'){
+        let comments = await Comment.find({
+          [parent]: id,
+          parentComment: null,
+        })
+          .sort({ replies: -1 })
+          .lean();
+        console.log(comments);
+        return res.status(200).json(comments);
+      }
+
       let comments = await Comment.find({
         [parent]: id,
         parentComment: null,
@@ -253,6 +261,7 @@ const getComments = async (req, res) => {
         .lean();
       console.log(comments);
       return res.status(200).json(comments);
+
     } catch (e) {
       console.log(e);
       return res

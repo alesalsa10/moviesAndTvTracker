@@ -12,10 +12,6 @@ const bookSchema = new mongoose.Schema({
     ref: 'User',
   },
   _id: String,
-  commentCount: {
-    type: Number,
-    default: 0,
-  },
 });
 
 const Book = mongoose.model('Book', bookSchema);
