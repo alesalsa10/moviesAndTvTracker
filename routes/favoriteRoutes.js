@@ -19,14 +19,14 @@ router.put(
 router.put(
   '/book/:externalId',
   auth,
-  isLoggedInSameUser,
+  //isLoggedInSameUser,
   favoriteControllers.toggleBookFavorite
 );
 
 router.get(
   '/all',
   auth,
-  isLoggedInSameUser,
+  //isLoggedInSameUser,
   favoriteControllers.getAllFavorites
 );
 
