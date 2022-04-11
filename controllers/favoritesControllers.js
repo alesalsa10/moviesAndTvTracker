@@ -1,9 +1,6 @@
 const User = require('../models/User');
-const Movie = require('../models/Movie');
-const Tv = require('../models/Tv');
 const Book = require('../models/Book');
-const externalGetMediaById = require('../externalAPI/apiCalls');
-const getBook = require('../externalAPI/apiCalls');
+const api = require('../externalAPI/apiCalls');
 
 const toggleMovieFavorite = async (req, res) => {
   const { externalId } = req.params;
@@ -101,9 +98,8 @@ const toggleBookFavorite = async (req, res) => {
 const getAllFavorites = async (req, res) => {
   //still needs to call movies api to get movie info inside
   //this will be done in a loop keeping count it will break onces it gets to the length of bookmarks length array
-  const userId = req.header('userId');
   try {
-    let user = await User.findById(userId)
+    let user = await User.findById(req.user)
       .select('favoriteBooks favoriteMovies favoriteTv')
       //.populate('favoriteBooks', 'favoriteMovies', 'favoriteTv')
       .lean();
@@ -115,18 +111,27 @@ const getAllFavorites = async (req, res) => {
         Tv: [],
       };
       //loop over each list and add to a parent array to return
-      for (const favorite of user.favoriteMovies) {
-        let movie = await externalGetMediaById('movie', favorite);
-        favorites.movies.push(movie);
+      if (user.favoriteMovies.length > 0) {
+        for (const favorite of user.favoriteMovies) {
+          let movie = await api.externalGetMediaById('movie', favorite);
+          favorites.movies.push(movie);
+        }
       }
-      for (const favorite of user.favoriteTv) {
-        let Tv = await externalGetMediaById('tv', favorite);
-        favorites.Tv.push(Tv);
+
+      if (user.favoriteTv.length > 0) {
+        for (const favorite of user.favoriteTv) {
+          let Tv = await api.externalGetMediaById('tv', favorite);
+          favorites.Tv.push(Tv);
+        }
       }
-      for (const favorite of user.favoriteBooks) {
-        let book = await externalGetMediaById(favorite);
-        favorites.Tv.push(book);
+
+      if (user.favoriteBooks.length > 0) {
+        for (const favorite of user.favoriteBooks) {
+          let book = await api.getBook(favorite);
+          favorites.books.push(book);
+        }
       }
+
       //still need to check books
       res.status(200).json(favorites);
     } else {

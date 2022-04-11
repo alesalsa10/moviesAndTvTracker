@@ -3,7 +3,7 @@ const axios = require('axios');
 const externalGetMediaById = async (mediaType, id) => {
   try {
     const response = await axios.get(
-      `${process.env.TMDB_BASE_URL}/${mediaType}/${id}?api_key=${process.env.TMDB_KEY}&append_to_response=videos, ,credits,release_dates,content_ratings,recommendations`
+      `${process.env.TMDB_BASE_URL}/${mediaType}/${id}?api_key=${process.env.TMDB_KEY}&append_to_response=videos,credits,release_dates,content_ratings,recommendations`
     );
     //response.data.error = null;
     return response.data;
