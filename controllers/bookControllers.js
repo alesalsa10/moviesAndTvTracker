@@ -7,21 +7,21 @@ const getBookById = async (req, res) => {
   let { bookId } = req.params;
   console.log(bookId);
   let foundMedia = await Book.findById(bookId);
-  let bookInfo = await apiCalls.getBook(bookId);
-  console.log(bookInfo, '44');
+  let mediaDetails = await apiCalls.getBook(bookId);
+  console.log(mediaDetails, '44');
   if (foundMedia) {
-    if (bookInfo.error) {
-      res.status(bookInfo.error.status).json({ Msg: bookInfo.error.Msg });
+    if (mediaDetails.error) {
+      res.status(mediaDetails.error.status).json({ Msg: mediaDetails.error.Msg });
     } else {
-      res.status(200).json({ foundMedia, bookInfo });
+      res.status(200).json({ foundMedia, mediaDetails });
     }
   } else {
     foundMedia = new Book({ _id: bookId });
     await foundMedia.save();
-    if (bookInfo.error) {
+    if (mediaDetails.error) {
       res.status(foundMedia.error.status).json({ Msg: foundMedia.error.Msg });
     } else {
-      res.status(200).json({ foundMedia, bookInfo });
+      res.status(200).json({ foundMedia, mediaDetails });
     }
   }
 };
@@ -68,18 +68,18 @@ const doesBookHaveMedia = async (req, res) => {
   //THIS STILL NEEDS TO BE TESTED
   //tells if there are any movies or tv shows based on the book
   let { bookId } = req.params;
-  let bookInfo = await apiCalls.getBook(bookId);
-  console.log(bookInfo);
-  if (bookInfo.error) {
-    res.status(bookInfo.error.status).json({ Msg: bookInfo.error.Msg });
+  let mediaDetails = await apiCalls.getBook(bookId);
+  console.log(mediaDetails);
+  if (mediaDetails.error) {
+    res.status(mediaDetails.error.status).json({ Msg: mediaDetails.error.Msg });
   } else {
-    //res.status(200).json({ foundMedia, bookInfo });
-    //search basedOnBook model for a bookInfo name and author last name
+    //res.status(200).json({ foundMedia, mediaDetails });
+    //search basedOnBook model for a mediaDetails name and author last name
 
-    let authorLastName = bookInfo.volumeInfo.authors[0].split(' ');
+    let authorLastName = mediaDetails.volumeInfo.authors[0].split(' ');
     authorLastName = authorLastName[authorLastName.length - 1].replace('"', '');
     let basedBook = await BasedOnBook.findOne({
-      book_name: bookInfo.volumeInfo.title,
+      book_name: mediaDetails.volumeInfo.title,
       book_author: authorLastName,
     }).lean();
     if (basedBook) {

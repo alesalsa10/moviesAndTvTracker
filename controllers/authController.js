@@ -9,14 +9,21 @@ const PasswordToken = require('../models/PasswordToken');
 const { findByIdAndUpdate } = require('../models/User');
 
 const register = async (req, res) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, username } = req.body;
 
   try {
     //check user by username and by email
     let foundUser = await User.findOne({ email });
+    let userByUsername = await User.findOne({ username });
 
-    if (foundUser) {
+    if (foundUser && userByUsername) {
+      return res
+        .status(409)
+        .json({ Error: 'Username and email already in use' });
+    } else if (foundUser) {
       return res.status(409).json({ Error: 'Email already in use' });
+    } else if (userByUsername) {
+      return res.status(409).json({ Error: 'Username already in use' });
     } else {
       const salt = await bcrypt.genSalt(10);
       // hash the password along with our new salt
@@ -28,6 +35,7 @@ const register = async (req, res) => {
         email,
         password: encryptedPassword,
         name,
+        username,
       });
       await foundUser.save();
       const newToken = new EmailToken({
@@ -102,9 +110,12 @@ const signIn = async (req, res) => {
         foundUser.refreshToken = refreshToken;
         await foundUser.save();
 
-        foundUser = await User.findById(foundUser._id).select('-password')
+        foundUser = await User.findById(foundUser._id).select('-password');
 
-        res.cookie('jwt', refreshToken, {httpOnly: true, maxAge: 24 * 60 * 60 * 60})
+        res.cookie('jwt', refreshToken, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 60,
+        });
         res.status(201).json({ accessToken, foundUser });
       } else {
         res.status(401).json({ Msg: 'Invalid username or password' });
@@ -328,7 +339,7 @@ const changePassword = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   const cookies = req.cookies;
-  console.log(cookies, 'cook')
+  console.log(cookies, 'cook');
   if (!cookies?.jwt) return res.status(401);
   const refreshToken = cookies.jwt;
 
@@ -367,5 +378,5 @@ module.exports = {
   resetPassword,
   changePassword,
   signout,
-  refreshToken
+  refreshToken,
 };

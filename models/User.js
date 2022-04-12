@@ -41,6 +41,14 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 4,
+    maxlength:50
+  },
+  username:{
+    type: String,
+    required: true, 
+    unique: true,
+    minlength: 3,
+    maxlength: 25
   },
   passwordToken: {
     type: mongoose.Types.ObjectId,

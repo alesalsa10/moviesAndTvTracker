@@ -10,6 +10,7 @@ router.post(
   '/register',
   [
     check('email').isEmail().withMessage('Must be a valid email'),
+    check('username').notEmpty().withMessage('Username is required'),
     check('password')
       .isStrongPassword({
         minLength: 8,
