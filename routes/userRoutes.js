@@ -6,7 +6,7 @@ const userController = require('../controllers/userControllers');
 const auth = require('../middlewares/auth');
 const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser');
 
-router.get('/:id', userController.getUser);
+router.get('/:username', userController.getUser);
 
 router.put(
   '/:id',

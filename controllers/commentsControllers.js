@@ -38,7 +38,7 @@ const createComment = async (req, res) => {
               await existingMedia.save();
               newComment = await Comment.findById(newComment._id).populate(
                 'postedBy',
-                'name'
+                'username'
               );
               return res.status(201).json(newComment);
             } catch (error) {
@@ -105,7 +105,7 @@ const replyToComment = async (req, res) => {
                 await foundComment.save();
                 newComment = await Comment.findById(newComment._id).populate(
                   'postedBy',
-                  'name'
+                  'username'
                 );
 
                 return res.status(200).json(newComment);

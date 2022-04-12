@@ -8,9 +8,9 @@ const deletePicture = require('../services/imageDeletion');
 const User = require('../models/User');
 
 const getUser = async (req, res) => {
-  const { id } = req.params;
+  const { username } = req.params;
   try {
-    let user = await User.findOne({ _id: id }).select('-password -refreshToken -email');
+    let user = await User.findOne({ username: username }).select('-password -refreshToken -email');
     if (!user) {
       res.status(404).json({ Msg: 'User not found!' });
     } else {

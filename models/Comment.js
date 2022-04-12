@@ -61,7 +61,7 @@ const CommentSchema = new mongoose.Schema(
 
 function autoPopulateReplies(next) {
   this.populate('replies');
-  this.populate('postedBy', 'name')
+  this.populate('postedBy', 'username')
   next();
 }
 
