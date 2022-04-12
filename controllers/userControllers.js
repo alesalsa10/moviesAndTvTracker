@@ -10,7 +10,7 @@ const User = require('../models/User');
 const getUser = async (req, res) => {
   const { username } = req.params;
   try {
-    let user = await User.findOne({ username: username }).select('-password -refreshToken -email');
+    let user = await User.findOne({ username: username }).select('-password -refreshToken -email').populate('comments');
     if (!user) {
       res.status(404).json({ Msg: 'User not found!' });
     } else {
