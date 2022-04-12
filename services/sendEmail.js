@@ -1,27 +1,27 @@
 const nodemailer = require('nodemailer')
+const sgTransport = require('nodemailer-sendgrid-transport');
+
 //use mailgun to send email in the future
 //enable less secure apps again
+const options = {
+  auth: {
+    api_key: process.env.SENDGRID_KEY,
+  },
+};
+ 
+
 const sendEmail = async (
   email,
   token,
   emailType
 ) => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      service: 'gmail',
-      port: 587,
-      secure: true,
-      auth: {
-        user: process.env.email,
-        pass: process.env.pass,
-      },
-    });
+    const transporter = nodemailer.createTransport(sgTransport(options))
     if (emailType === 'verify') {
       await transporter.sendMail({
         from: process.env.email,
         to: email,
-        subject: 'Please, verity your email',
+        subject: 'Please, verify your email',
         html: `
         <p>Click <a href="http://localhost:3001/verify/${token}">Here</a> to verify your email</p>
       `,
