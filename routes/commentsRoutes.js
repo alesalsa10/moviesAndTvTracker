@@ -3,7 +3,6 @@ const router = express.Router();
 const { check, validationResult } = require('express-validator');
 
 const auth = require('../middlewares/auth');
-const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser.js');
 const checkVerification = require('../middlewares/checkVerification');
 
 const commentControllers = require('../controllers/commentsControllers');
@@ -35,7 +34,6 @@ router.post(
     check('parentCommentId')
       .notEmpty()
       .withMessage('Parent Comment Id must exist'),
-    //check('parentMediaId').notEmpty().withMessage('Parent Media ID must exist'),
   ],
   (req, res, next) => {
     const errors = validationResult(req);
@@ -76,7 +74,6 @@ router.delete(
   '/delete/:commentId',
   auth,
   checkVerification,
-  //isLoggedInSameUser,
   commentControllers.deleteComment
 );
 
