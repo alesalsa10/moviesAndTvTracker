@@ -136,6 +136,24 @@ const searchBook = async (req, res) => {
   }
 };
 
+const booksByAuthor = async (req, res) => {
+  console.log(req.params)
+  let author = req.params.author.split(' ').join('+');
+  console.log(author)
+  try {
+    const response = await axios.get(
+      `https://www.googleapis.com/books/v1/volumes?q=inauthor:${author}&maxResults=10&key=${process.env.GOOGLE_BOOKS_KEY}
+`
+    );
+    return res.status(200).json(response.data);
+  } catch (err) {
+    console.log(err.response.data);
+    return res
+      .status(err.response.data.error.code)
+      .json({ Msg: err.response.data.error.message });
+  }
+};
+
 const getBestSellers = async (req, res) => {
   try {
     let response = await axios.get(
@@ -158,4 +176,5 @@ module.exports = {
   searchBook,
   getBestSellers,
   getBookByIsbn,
+  booksByAuthor
 };

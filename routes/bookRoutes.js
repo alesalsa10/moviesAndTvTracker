@@ -11,6 +11,8 @@ router.get('/:bookId', booksControllers.getBookById);
 
 router.get('/genre/:genre', booksControllers.getBooksByGenre);
 
+router.get('/byAuthor/:author', booksControllers.booksByAuthor);
+
 router.get('/recommendation/:bookId', booksControllers.doesBookHaveMedia);
 
 
