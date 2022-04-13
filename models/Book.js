@@ -12,6 +12,10 @@ const bookSchema = new mongoose.Schema({
     ref: 'User',
   },
   _id: String,
+  name: {
+    type: String,
+    required: true
+  }
 });
 
 const Book = mongoose.model('Book', bookSchema);

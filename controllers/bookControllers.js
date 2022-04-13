@@ -16,7 +16,7 @@ const getBookById = async (req, res) => {
       res.status(200).json({ foundMedia, mediaDetails });
     }
   } else {
-    foundMedia = new Book({ _id: bookId });
+    foundMedia = new Book({ _id: bookId, name: mediaDetails.volumeInfo.title});
     await foundMedia.save();
     if (mediaDetails.error) {
       res.status(foundMedia.error.status).json({ Msg: foundMedia.error.Msg });
@@ -42,7 +42,10 @@ const getBookByIsbn = async (req, res) => {
         mediaDetails = mediaDetails.items[0];
         res.status(200).json({ foundMedia, mediaDetails });
       } else {
-        foundMedia = new Book({ _id: mediaDetails.items[0].id });
+        foundMedia = new Book({
+          _id: mediaDetails.items[0].id,
+          name: mediaDetails.items[0].volumeInfo.title,
+        });
         await foundMedia.save();
         mediaDetails = mediaDetails.items[0];
         res.status(200).json({ foundMedia, mediaDetails });

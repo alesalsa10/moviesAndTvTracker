@@ -16,6 +16,10 @@ const episodeSchema = new mongoose.Schema({
     },
   ],
   _id: String,
+  name: {
+    type: String,
+    required: true,
+  },
 });
 
 const Episode = mongoose.model('Episode', episodeSchema);

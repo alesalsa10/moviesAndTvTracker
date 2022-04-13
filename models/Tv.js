@@ -18,6 +18,10 @@ const TvSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     ref: 'User',
   },
+  name: {
+    type: String,
+    required: true,
+  },
 });
 
 const Tv = mongoose.model('Tv', TvSchema);

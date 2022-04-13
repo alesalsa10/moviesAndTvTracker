@@ -45,8 +45,11 @@ const getMediaById = async (req, res) => {
         .json({ Msg: mediaDetails.error.Msg });
     } else {
       let foundMedia;
+      //movie = title; tv = name
+      let name = mediaType === 'movie' ? mediaDetails.title : mediaDetails.name
       foundMedia = new model({
         _id: id, //mediaDetails.id
+        name: name
       });
       await foundMedia.save();
       res.status(200).json({ mediaDetails, foundMedia });
@@ -194,6 +197,12 @@ const getSeason = async (req, res) => {
     );
     //let mediaDetails = response.data
     season = season.data;
+    let parentTV = await apiCalls.externalGetMediaById('tv', id);
+    if(parentTV.error){
+      return res
+        .status(mediaDetails.error.status)
+        .json({ Msg: mediaDetails.error.Msg });
+    }
     try {
       let media = await Tv.findById(id);
       if (media) {
@@ -211,6 +220,7 @@ const getSeason = async (req, res) => {
               seasonNumber,
               _id: season.id,
               media: id,
+              name: season.name
             });
             await foundSeason.save();
             await media.seasons.push(foundSeason);
@@ -227,12 +237,14 @@ const getSeason = async (req, res) => {
       } else {
         let media = new Tv({
           _id: id,
+          name: parentTV.data.name
         });
         await media.save();
         let foundSeason = new Season({
           seasonNumber,
           _id: season.id,
           media: id,
+          name: season.name
         });
         console.log(seasonNumber, season.id, id);
         await foundSeason.save();
@@ -257,6 +269,12 @@ const getSeason = async (req, res) => {
 
 const getEpisode = async (req, res) => {
   const { id, seasonNumber, episodeNumber } = req.params;
+  let parentTV = await apiCalls.externalGetMediaById('tv', id);
+  if (parentTV.error) {
+    return res
+      .status(mediaDetails.error.status)
+      .json({ Msg: mediaDetails.error.Msg });
+  }
   try {
     const episode = await axios.get(
       `${process.env.TMDB_BASE_URL}/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${process.env.TMDB_KEY}&append_to_response=videos,credits,release_dates`
@@ -290,6 +308,7 @@ const getEpisode = async (req, res) => {
                     _id: mediaDetails.id,
                     season: foundSeason._id,
                     episodeNumber: episodeNumber,
+                    name: mediaDetails.name
                   });
                   await foundEpisode.save();
                   await foundSeason.episodes.push(foundEpisode);
@@ -308,6 +327,7 @@ const getEpisode = async (req, res) => {
                 seasonNumber,
                 _id: season.data.id,
                 media: id,
+                name: season.data.name
               });
               await foundSeason.save();
               console.log(foundSeason)
@@ -318,6 +338,7 @@ const getEpisode = async (req, res) => {
                 _id: mediaDetails.id,
                 season: foundSeason._id,
                 episodeNumber: episodeNumber,
+                name: mediaDetails.name
               });
               await foundEpisode.save();
               await foundSeason.episodes.push(foundEpisode);
@@ -334,12 +355,14 @@ const getEpisode = async (req, res) => {
           console.log('everything has to be created')
           let media = new Tv({
             _id: id,
+            name: parentTV.data.name
           });
           await media.save();
           let foundSeason = new Season({
             seasonNumber,
             _id: season.data.id,
             media: id,
+            name: season.data.name
           });
           await foundSeason.save();
           await media.seasons.push(foundSeason);
@@ -348,6 +371,7 @@ const getEpisode = async (req, res) => {
             _id: mediaDetails.id,
             season: foundSeason._id,
             episodeNumber: episodeNumber,
+            name: mediaDetails.name
           });
           await foundEpisode.save();
           await foundSeason.episodes.push(foundEpisode);

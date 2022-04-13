@@ -12,7 +12,10 @@ const movieSchema = new mongoose.Schema({
     ref: 'User',
   },
   _id: String,
-
+  name: {
+    type: String,
+    required: true,
+  },
 });
 
 const Movie = mongoose.model('Movie', movieSchema);
