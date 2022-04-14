@@ -16,9 +16,12 @@ const getUser = async (req, res) => {
       )
       .populate({
         path: 'comments',
+        // populate: {
+        //   path: 'parentComment',
+        //   populate: 'postedBy',
+        // },
         populate: {
-          path: 'parentComment',
-          populate: 'postedBy'
+          path: 'parentMovie parentTv parentSeason parentEpisode parentBook',
         },
       });
     if (!user) {

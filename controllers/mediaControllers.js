@@ -220,7 +220,8 @@ const getSeason = async (req, res) => {
               seasonNumber,
               _id: season.id,
               media: id,
-              name: season.name
+              name: season.name,
+              mediaName: media.name
             });
             await foundSeason.save();
             await media.seasons.push(foundSeason);
@@ -244,7 +245,8 @@ const getSeason = async (req, res) => {
           seasonNumber,
           _id: season.id,
           media: id,
-          name: season.name
+          name: season.name,
+          mediaName: media.name
         });
         console.log(seasonNumber, season.id, id);
         await foundSeason.save();
@@ -308,7 +310,10 @@ const getEpisode = async (req, res) => {
                     _id: mediaDetails.id,
                     season: foundSeason._id,
                     episodeNumber: episodeNumber,
-                    name: mediaDetails.name
+                    name: mediaDetails.name,
+                    mediaName: media.name,
+                    mediaId: media._id,
+                    seasonNumber: foundSeason.seasonNumber,
                   });
                   await foundEpisode.save();
                   await foundSeason.episodes.push(foundEpisode);
@@ -327,7 +332,8 @@ const getEpisode = async (req, res) => {
                 seasonNumber,
                 _id: season.data.id,
                 media: id,
-                name: season.data.name
+                name: season.data.name,
+                mediaName: media.name,
               });
               await foundSeason.save();
               console.log(foundSeason)
@@ -338,7 +344,10 @@ const getEpisode = async (req, res) => {
                 _id: mediaDetails.id,
                 season: foundSeason._id,
                 episodeNumber: episodeNumber,
-                name: mediaDetails.name
+                name: mediaDetails.name,
+                mediaName: media.name,
+                mediaId: media._id,
+                seasonNumber: foundSeason.seasonNumber
               });
               await foundEpisode.save();
               await foundSeason.episodes.push(foundEpisode);
@@ -362,7 +371,8 @@ const getEpisode = async (req, res) => {
             seasonNumber,
             _id: season.data.id,
             media: id,
-            name: season.data.name
+            name: season.data.name,
+            mediaName: media.name,
           });
           await foundSeason.save();
           await media.seasons.push(foundSeason);
@@ -371,7 +381,10 @@ const getEpisode = async (req, res) => {
             _id: mediaDetails.id,
             season: foundSeason._id,
             episodeNumber: episodeNumber,
-            name: mediaDetails.name
+            name: mediaDetails.name,
+            mediaName: media.name,
+            mediaId: media._id,
+            seasonNumber: foundSeason.seasonNumber,
           });
           await foundEpisode.save();
           await foundSeason.episodes.push(foundEpisode);

@@ -9,6 +9,21 @@ const episodeSchema = new mongoose.Schema({
     type: String,
     ref: 'Season',
   },
+  seasonNumber:{
+    type: Number,
+    required: true,
+  },
+  
+  mediaName:{
+    type: String,
+    required: true
+  },
+  mediaId:{
+    type: String,
+    required: true
+  },
+
+
   comments: [
     {
       type: mongoose.Types.ObjectId,

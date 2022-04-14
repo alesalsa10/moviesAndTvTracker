@@ -37,7 +37,7 @@ const CommentSchema = new mongoose.Schema(
     },
     parentTv: {
       type: String,
-      ref: 'Season',
+      ref: 'Tv',
     },
     parentSeason: {
       type: String,
