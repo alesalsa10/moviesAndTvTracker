@@ -86,12 +86,11 @@ const deleteUser = async (req, res) => {
 };
 
 const uploadProfileImage = async (req, res) => {
-  const { userId } = req.params;
   //look up the user's profile pic first
   //if it is null, then do singleupload
   //else delete user's picture from s3, and add the new one
   try {
-    let foundUser = await User.findById(userId);
+    let foundUser = await User.findById(req.user);
     if (foundUser) {
       let profilePicture = foundUser.profilePicture;
       if (!profilePicture) {
