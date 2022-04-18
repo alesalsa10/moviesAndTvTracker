@@ -6,12 +6,14 @@ const userController = require('../controllers/userControllers');
 const auth = require('../middlewares/auth');
 const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser');
 
+router.get('/self', auth, userController.getSelf);
+
 router.get('/:username', userController.getUser);
+
 
 router.put(
   '/:id',
   auth,
-  isLoggedInSameUser,
   [
     oneOf([
       check('username').notEmpty().withMessage('Username cannot be empty'),

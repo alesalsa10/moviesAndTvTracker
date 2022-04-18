@@ -16,16 +16,28 @@ const getUser = async (req, res) => {
       )
       .populate({
         path: 'comments',
-        // populate: {
-        //   path: 'parentComment',
-        //   populate: 'postedBy',
-        // },
         populate: {
           path: 'parentMovie parentTv parentSeason parentEpisode parentBook',
         },
       });
     if (!user) {
-      
+      res.status(404).json({ Msg: 'User not found!' });
+    } else {
+      res.status(200).json(user);
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ Msg: 'Something went wrong' });
+  }
+};
+
+const getSelf = async (req, res) => {
+  try {
+    let user = await User.findById(req.user)
+      .select(
+        '-password -refreshToken -favoriteBooks -favoriteTv -favoriteMovies -comments'
+      )
+    if (!user) {
       res.status(404).json({ Msg: 'User not found!' });
     } else {
       res.status(200).json(user);
@@ -39,33 +51,24 @@ const getUser = async (req, res) => {
 const editUser = async (req, res) => {
   //only the username and name can be changed on the profile for now,  password will be able to be changed in later versions
   const { username, name } = req.body;
-  const { id } = req.params;
-  const user = req.user; //this is set on authentication middleware after decoding user
-  //only a profile owner can edit the page
-  if (id == user) {
-    try {
-      let fieldsToUpdate = { username, name };
-      const userWithProposedUsername = await User.findOne({ username });
+  
+  try {
+    let fieldsToUpdate = { username, name };
+    const userWithProposedUsername = await User.findOne({ username });
 
-      //check that no user with this username already exists
-      if (!userWithProposedUsername) {
-        const user = await User.findByIdAndUpdate(req.user, fieldsToUpdate, {
-          returnOriginal: false,
-        });
-        console.log(user);
-        res.status(200).json({ Msg: 'User updated' });
-      } else {
-        res.status(409).json({ Msg: 'Username already exists' });
-      }
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ Msg: 'Something went wrong' });
+    //check that no user with this username already exists
+    if (!userWithProposedUsername) {
+      const user = await User.findByIdAndUpdate(req.user, fieldsToUpdate, {
+        returnOriginal: false,
+      });
+      console.log(user);
+      res.status(200).json({ Msg: 'User updated' });
+    } else {
+      res.status(409).json({ Msg: 'Username already exists' });
     }
-  } else {
-    console.log('user unathorized');
-    res
-      .status(409)
-      .json({ Msg: 'You are not authorized to change this profile' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ Msg: 'Something went wrong' });
   }
 };
 
@@ -172,4 +175,5 @@ module.exports = {
   editUser,
   deleteUser,
   uploadProfileImage,
+  getSelf
 };
