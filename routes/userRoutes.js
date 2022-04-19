@@ -29,6 +29,6 @@ router.get('/:username', userController.getUser);
 
 router.delete('/:id', auth, isLoggedInSameUser, userController.deleteUser);
 
-router.put('/upload/:userId', auth, userController.uploadProfileImage);
+//router.put('/upload/:userId', auth, userController.uploadProfileImage);
 
 module.exports = router;
