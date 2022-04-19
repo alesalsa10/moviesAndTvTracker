@@ -12,7 +12,7 @@ router.get('/self', auth, userController.getSelf);
 router.put(
   '/username/:id',
   auth,
-  [check('username').notEmpty().withMessage('Username cannot be empty')],
+  [check('username').notEmpty().isLength({min: 3, max: 25}).withMessage('Username must be between 3 and 25 characters')],
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
