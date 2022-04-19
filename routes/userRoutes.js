@@ -8,18 +8,11 @@ const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser');
 
 router.get('/self', auth, userController.getSelf);
 
-router.get('/:username', userController.getUser);
-
 
 router.put(
-  '/:id',
+  '/username/:id',
   auth,
-  [
-    oneOf([
-      check('username').notEmpty().withMessage('Username cannot be empty'),
-      check('name').notEmpty().withMessage('Name cannot be empty'),
-    ]),
-  ],
+  [check('username').notEmpty().withMessage('Username cannot be empty')],
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -28,15 +21,14 @@ router.put(
       next();
     }
   },
-  userController.editUser
+  userController.editUsername
 );
+
+router.get('/:username', userController.getUser);
+
 
 router.delete('/:id', auth, isLoggedInSameUser, userController.deleteUser);
 
-router.put(
-  '/upload/:userId',
-  auth,
-  userController.uploadProfileImage
-);
+router.put('/upload/:userId', auth, userController.uploadProfileImage);
 
 module.exports = router;

@@ -33,10 +33,9 @@ const getUser = async (req, res) => {
 
 const getSelf = async (req, res) => {
   try {
-    let user = await User.findById(req.user)
-      .select(
-        '-password -refreshToken -favoriteBooks -favoriteTv -favoriteMovies -comments'
-      )
+    let user = await User.findById(req.user).select(
+      '-password -refreshToken -favoriteBooks -favoriteTv -favoriteMovies -comments'
+    );
     if (!user) {
       res.status(404).json({ Msg: 'User not found!' });
     } else {
@@ -48,21 +47,23 @@ const getSelf = async (req, res) => {
   }
 };
 
-const editUser = async (req, res) => {
+const editUsername = async (req, res) => {
   //only the username and name can be changed on the profile for now,  password will be able to be changed in later versions
-  const { username, name } = req.body;
-  
+  const { username } = req.body;
+
   try {
-    let fieldsToUpdate = { username, name };
+    const update = {
+      username: username
+    };
     const userWithProposedUsername = await User.findOne({ username });
 
     //check that no user with this username already exists
     if (!userWithProposedUsername) {
-      const user = await User.findByIdAndUpdate(req.user, fieldsToUpdate, {
-        returnOriginal: false,
+      const user = await User.findByIdAndUpdate(req.user, update, {
+        new: true,
       });
       console.log(user);
-      res.status(200).json({ Msg: 'User updated' });
+      res.status(200).json({Msg: 'Success'});
     } else {
       res.status(409).json({ Msg: 'Username already exists' });
     }
@@ -172,8 +173,8 @@ const uploadProfileImage = async (req, res) => {
 
 module.exports = {
   getUser,
-  editUser,
+  editUsername,
   deleteUser,
   uploadProfileImage,
-  getSelf
+  getSelf,
 };
