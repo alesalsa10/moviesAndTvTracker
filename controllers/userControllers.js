@@ -16,6 +16,7 @@ const getUser = async (req, res) => {
       )
       .populate({
         path: 'comments',
+        match: {text: {$ne: '[Deleted]'}},
         populate: {
           path: 'parentMovie parentTv parentSeason parentEpisode parentBook',
         },
