@@ -13,7 +13,7 @@ const register = async (req, res) => {
 
   try {
     //check user by username and by email
-    let foundUser = await User.findOne({ email });
+    let foundUser = await User.findOne({ email: email.toLowerCase() });
     let userByUsername = await User.findOne({ username });
 
     if (foundUser && userByUsername) {
@@ -89,7 +89,7 @@ const signIn = async (req, res) => {
   //if no user exist send error invalid crednetial error
   //if user users exist, compared hashed password, if it mataches create jwt token to send back to client
   try {
-    let foundUser = await User.findOne({ email });
+    let foundUser = await User.findOne({ email: email.toLowerCase() });
     if (foundUser) {
       //if user is found with given email or username, compare password with hashed password
       let match = await bcrypt.compare(password, foundUser.password);
@@ -313,6 +313,41 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const changeEmail = async (req, res) => {
+  //this is for the user is already logged in
+  //previous password check, then new
+  const { currentPassword, email } = req.body;
+  try {
+    let foundUser = await User.findById(req.user);
+    if (foundUser) {
+      let match = await bcrypt.compare(currentPassword, foundUser.password);
+      console.log(match)
+      if (match) {
+        //check if user with that given email exists
+
+        let userByEmail = await User.findOne({email: email.toLowerCase()});
+        if(userByEmail){
+          return res.status(401).json({Msg: 'Email already in use'})
+        }else {
+          let updated = await User.findByIdAndUpdate(req.user,{
+            email: email.toLowerCase()
+          })
+          console.log(updated);
+          return res.status(200).json({Msg: 'Email updated successfully'})
+        }
+
+      } else {
+        return res.status(401).json({ Msg: 'Current password is invalid' });
+      }
+    } else {
+      return res.status(404).json({ Msg: 'User not found' });
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({Msg: 'Something went wrong'})
+  }
+};
+
 const changePassword = async (req, res) => {
   //this is for the user is already logged in
   //previous password check, then new
@@ -321,20 +356,25 @@ const changePassword = async (req, res) => {
     let foundUser = await User.findById(req.user);
     if (foundUser) {
       let match = await bcrypt.compare(currentPassword, foundUser.password);
+      console.log(match);
       if (match) {
         const salt = await bcrypt.genSalt(10);
         const encryptedPassword = await bcrypt.hash(newPassword, salt);
-        const updatedUser = await User.findByIdAndUpdate(token.user, {
+        const updatedUser = await User.findByIdAndUpdate(req.user, {
           password: encryptedPassword,
         });
+        console.log(updatedUser);
         return res.status(200).json({ Msg: 'Password updated successfully' });
       } else {
-        return res.status(401).json({ Msg: 'Invalid current password' });
+        return res.status(401).json({ Msg: 'Current password is invalid' });
       }
     } else {
       return res.status(404).json({ Msg: 'User not found' });
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ Msg: 'Something went wrong' });
+  }
 };
 
 const refreshToken = async (req, res) => {
@@ -379,4 +419,5 @@ module.exports = {
   changePassword,
   signout,
   refreshToken,
+  changeEmail
 };

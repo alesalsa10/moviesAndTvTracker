@@ -8,11 +8,15 @@ const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser');
 
 router.get('/self', auth, userController.getSelf);
 
-
 router.put(
   '/username/:id',
   auth,
-  [check('username').notEmpty().isLength({min: 3, max: 25}).withMessage('Username must be between 3 and 25 characters')],
+  [
+    check('username')
+      //.notEmpty()
+      .isLength({ min: 3, max: 25 })
+      .withMessage('Username must be between 3 and 25 characters'),
+  ],
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -24,8 +28,27 @@ router.put(
   userController.editUsername
 );
 
-router.get('/:username', userController.getUser);
+router.put(
+  '/name/:id',
+  auth,
+  [
+    check('name')
+      //.notEmpty()
+      .isLength({ min: 3, max: 25 })
+      .withMessage('Name must be between 3 and 25 characters'),
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    } else {
+      next();
+    }
+  },
+  userController.editName
+);
 
+router.get('/:username', userController.getUser);
 
 router.delete('/:id', auth, isLoggedInSameUser, userController.deleteUser);
 

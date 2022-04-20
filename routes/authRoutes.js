@@ -54,21 +54,56 @@ router.post(
   authController.signIn
 );
 
-router.get('/signout', authController.signout)
+router.get('/signout', authController.signout);
 
-router.post('/changePassword', auth, [
-  check('currentPassword').notEmpty().withMessage('Current password required'),
-  check('password')
-    .isStrongPassword({
-      minLength: 8,
-      minLowercase: 1,
-      minUppercase: 1,
-      minNumbers: 1,
-    })
-    .withMessage(
-      'Password must be 8 or more characters, contain at least 1 uppercase letter, a lowercase letter, and a number'
-    ),
-], authController.changePassword);
+router.post(
+  '/changePassword',
+  auth,
+  [
+    check('currentPassword')
+      .notEmpty()
+      .withMessage('Current password required'),
+    check('newPassword')
+      .isStrongPassword({
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+      })
+      .withMessage(
+        'Password must be 8 or more characters, contain at least 1 uppercase letter, a lowercase letter, and a number'
+      ),
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    } else {
+      next();
+    }
+  },
+  authController.changePassword
+);
+
+router.post(
+  '/changeEmail',
+  auth,
+  [
+    check('currentPassword')
+      .notEmpty()
+      .withMessage('Current password required'),
+    check('email').isEmail().withMessage('Enter a valid email'),
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    } else {
+      next();
+    }
+  },
+  authController.changeEmail
+);
 
 router.post('/verifyEmail/:token', authController.verifyEmail);
 

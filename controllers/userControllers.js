@@ -16,7 +16,7 @@ const getUser = async (req, res) => {
       )
       .populate({
         path: 'comments',
-        match: {text: {$ne: '[Deleted]'}},
+        match: { text: { $ne: '[Deleted]' } },
         populate: {
           path: 'parentMovie parentTv parentSeason parentEpisode parentBook',
         },
@@ -54,7 +54,7 @@ const editUsername = async (req, res) => {
 
   try {
     const update = {
-      username: username
+      username: username,
     };
     const userWithProposedUsername = await User.findOne({ username });
 
@@ -64,10 +64,29 @@ const editUsername = async (req, res) => {
         new: true,
       });
       console.log(user);
-      res.status(200).json({Msg: 'Success'});
+      res.status(200).json({ Msg: 'Success' });
     } else {
       res.status(409).json({ Msg: 'Username already exists' });
     }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ Msg: 'Something went wrong' });
+  }
+};
+
+const editName = async (req, res) => {
+  //only the username and name can be changed on the profile for now,  password will be able to be changed in later versions
+  const { name } = req.body;
+
+  try {
+    const update = {
+      name: name,
+    };
+    const user = await User.findByIdAndUpdate(req.user, update, {
+      new: true,
+    });
+    console.log(user);
+    res.status(200).json({ Msg: 'Success' });
   } catch (error) {
     console.log(error);
     res.status(500).json({ Msg: 'Something went wrong' });
@@ -178,4 +197,5 @@ module.exports = {
   deleteUser,
   //uploadProfileImage,
   getSelf,
+  editName
 };
