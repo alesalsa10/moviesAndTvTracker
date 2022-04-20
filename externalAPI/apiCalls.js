@@ -24,9 +24,33 @@ const getBook = async (id) => {
       `https://www.googleapis.com/books/v1/volumes/${id}?key=${process.env.GOOGLE_BOOKS_KEY}`
     );
     response.data.Err = null;
-    console.log(response.data);
+    //console.log(response.data);
     return response.data;
   } catch (err) {
+    return {
+      error: {
+        status: err.response.data.error.code,
+        Msg: err.response.data.error.message,
+      },
+    };
+  }
+};
+
+const searchByTitleAndAuthor = async (title, author) => {
+  console.log('sdfdsf', title, author)
+  title = title.split(' ').join('+');
+  let some = `https://www.googleapis.com/books/v1/volumes?q=intitle:${title}+inauthor:${author}&maxResults=1&key=${process.env.GOOGLE_BOOKS_KEY}`;
+  console.log(some)
+  try {
+    const response = await axios.get(
+      `https://www.googleapis.com/books/v1/volumes?q=intitle:${title}+inauthor:${author}&maxResults=1&key=${process.env.GOOGLE_BOOKS_KEY}
+`
+    );
+    response.data.Err = null;
+    //console.log(response.data);
+    return response.data;
+  } catch (err) {
+    console.log(err.response.data);
     return {
       error: {
         status: err.response.data.error.code,
@@ -94,4 +118,5 @@ module.exports = {
   booksByGenre,
   searchMedia,
   getBookByIsbn,
+  searchByTitleAndAuthor
 };

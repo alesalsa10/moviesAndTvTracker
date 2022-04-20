@@ -5,6 +5,8 @@ const mediaControllers = require('../controllers/mediaControllers');
 const auth = require('../middlewares/auth'); //auth is not needed to view media only to interact with them such as adding to bookmarks or commenting on them
 
 //no need to be signed in to get media
+router.post('/recommendation', mediaControllers.isMediaBasedOnBook);
+
 router.get('/getById/:mediaType/:id', mediaControllers.getMediaById);
 router.get('/search/all', mediaControllers.searchMedia);
 router.get('/discover/:mediaType', mediaControllers.filterByGenre);

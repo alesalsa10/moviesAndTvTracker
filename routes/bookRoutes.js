@@ -7,14 +7,13 @@ const booksControllers = require('../controllers/bookControllers');
 
 router.get('/search', booksControllers.searchBook);
 
+router.post('/recommendation', booksControllers.moviesBasedOnBook);
+
 router.get('/:bookId', booksControllers.getBookById);
 
 router.get('/genre/:genre', booksControllers.getBooksByGenre);
 
 router.get('/byAuthor/:author', booksControllers.booksByAuthor);
-
-router.get('/recommendation/:bookId', booksControllers.doesBookHaveMedia);
-
 
 router.get('/newYorkTimes/bestSellers', booksControllers.getBestSellers);
 

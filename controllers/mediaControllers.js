@@ -428,6 +428,40 @@ const filterByGenre = async (req, res) => {
   }
 };
 
+const isMediaBasedOnBook = async (req, res) => {
+  const { media_name, release_year } = req.body;
+  console.log(media_name, release_year);
+  try{
+    let basedBook = await BasedOnBook.findOne({
+      media_name: media_name,
+      release_year: new Date(release_year).getFullYear(),
+    }).lean();
+    console.log(basedBook);
+
+    if(basedBook){
+       let book = await apiCalls.searchByTitleAndAuthor(
+         basedBook.book_name,
+         basedBook.book_author
+       );
+       if (book.error) {
+         res
+           .status(foundMedia.error.status)
+           .json({ Msg: foundMedia.error.Msg });
+       }else {
+         console.log(book)
+         return res.status(200).json(book.items[0])
+       }
+    }else {
+      return res.status(404).json({Msg: 'No book found'})
+    }
+
+  }catch(error){
+    console.log(error);
+    return res.status(500).json({Msg: 'Something went wrong'})
+  }
+}
+
+
 module.exports = {
   getMediaById,
   getMediaByCategories,
@@ -438,4 +472,5 @@ module.exports = {
   getEpisode,
   getTrending,
   filterByGenre,
+  isMediaBasedOnBook,
 };

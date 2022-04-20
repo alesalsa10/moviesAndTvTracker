@@ -8,15 +8,17 @@ const getBookById = async (req, res) => {
   console.log(bookId);
   let foundMedia = await Book.findById(bookId);
   let mediaDetails = await apiCalls.getBook(bookId);
-  console.log(mediaDetails, '44');
+  //console.log(mediaDetails, '44');
   if (foundMedia) {
     if (mediaDetails.error) {
-      res.status(mediaDetails.error.status).json({ Msg: mediaDetails.error.Msg });
+      res
+        .status(mediaDetails.error.status)
+        .json({ Msg: mediaDetails.error.Msg });
     } else {
       res.status(200).json({ foundMedia, mediaDetails });
     }
   } else {
-    foundMedia = new Book({ _id: bookId, name: mediaDetails.volumeInfo.title});
+    foundMedia = new Book({ _id: bookId, name: mediaDetails.volumeInfo.title });
     await foundMedia.save();
     if (mediaDetails.error) {
       res.status(foundMedia.error.status).json({ Msg: foundMedia.error.Msg });
@@ -67,59 +69,71 @@ const getBooksByGenre = async (req, res) => {
   }
 };
 
-const doesBookHaveMedia = async (req, res) => {
-  //THIS STILL NEEDS TO BE TESTED
-  //tells if there are any movies or tv shows based on the book
-  let { bookId } = req.params;
-  let mediaDetails = await apiCalls.getBook(bookId);
-  console.log(mediaDetails);
-  if (mediaDetails.error) {
-    res.status(mediaDetails.error.status).json({ Msg: mediaDetails.error.Msg });
-  } else {
-    //res.status(200).json({ foundMedia, mediaDetails });
-    //search basedOnBook model for a mediaDetails name and author last name
-
-    let authorLastName = mediaDetails.volumeInfo.authors[0].split(' ');
-    authorLastName = authorLastName[authorLastName.length - 1].replace('"', '');
-    let basedBook = await BasedOnBook.findOne({
-      book_name: mediaDetails.volumeInfo.title,
-      book_author: authorLastName,
+const moviesBasedOnBook = async (req, res) => {
+  const { book_name, book_author } = req.body;
+  console.log(book_name, book_author);
+  try {
+    let basedMedia = await BasedOnBook.findOne({
+      book_name: book_name,
+      book_author: book_author,
     }).lean();
-    if (basedBook) {
-      let mediaType = basedBook.media_type.toLowerCase();
+    console.log(basedMedia);
+    if (basedMedia) {
+      let mediaType = basedMedia.media_type.toLowerCase();
       if (mediaType == 'movie') {
         let mediaDetails = await apiCalls.searchMedia(
           'movie',
-          basedBook.media_name
+          basedMedia.media_name
         );
         if (mediaDetails.err) {
           res
             .status(foundMedia.error.status)
             .json({ Msg: foundMedia.error.Msg });
         } else {
-          res.status(200).json(mediaDetails.results[0]);
+          if (mediaDetails.results.length > 0) {
+            for (let movie of mediaDetails.results) {
+              console.log(new Date(movie.release_date).getFullYear());
+              if (
+                new Date(movie.release_date).getFullYear() ==
+                basedMedia.release_year
+              ) {
+                movie.media_type = 'movie';
+                return res.status(200).json(movie);
+              }
+            }
+          }
+          return res.status(404).json({ Msg: 'Nothing found' });
         }
       } else if ((mediaType = 'tv')) {
         let mediaDetails = await apiCalls.searchMedia(
           'tv',
-          basedBook.media_name
+          basedMedia.media_name
         );
         if (mediaDetails.error) {
           res
             .status(foundMedia.error.status)
             .json({ Msg: foundMedia.error.Msg });
         } else {
-          res.status(200).json(mediaDetails.results[0]);
+          if (mediaDetails.results.length > 0) {
+            for (let movie of mediaDetails.results) {
+              if (
+                movie.first_air_date.getFullYear() ===
+                parseInt(basedMedia.release_year)
+              ) {
+                movie.media_type = 'tv';
+                return res.status(200).json(movie);
+              }
+            }
+          }
+          return res.status(404).json({ Msg: 'Nothing found' });
         }
       }
-      //if one is found call tmbd api for a search with those paraments
-      //if result is found search to make sure it doesn't exist on our db
-      //it it exists, just return the media from tmdb and the model in my db
     } else {
-      res
-        .status(404)
-        .json({ Msg: 'This book has no media associated with it' });
+      return res.status(404).json({ Msg: 'No media made based on this book' });
     }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ Msg: 'Something went wrong' });
   }
 };
 
@@ -140,9 +154,9 @@ const searchBook = async (req, res) => {
 };
 
 const booksByAuthor = async (req, res) => {
-  console.log(req.params)
+  console.log(req.params);
   let author = req.params.author.split(' ').join('+');
-  console.log(author)
+  console.log(author);
   try {
     const response = await axios.get(
       `https://www.googleapis.com/books/v1/volumes?q=inauthor:${author}&maxResults=10&key=${process.env.GOOGLE_BOOKS_KEY}
@@ -175,9 +189,9 @@ const getBestSellers = async (req, res) => {
 module.exports = {
   getBookById,
   getBooksByGenre,
-  doesBookHaveMedia,
   searchBook,
   getBestSellers,
   getBookByIsbn,
-  booksByAuthor
+  booksByAuthor,
+  moviesBasedOnBook,
 };
