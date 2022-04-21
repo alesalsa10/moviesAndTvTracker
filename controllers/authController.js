@@ -98,13 +98,13 @@ const signIn = async (req, res) => {
         const accessToken = jwt.sign(
           { user: foundUser._id },
           process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: '1d' } //15m
+          { expiresIn: '10s' } //15m
         );
 
         const refreshToken = jwt.sign(
           { user: foundUser._id },
           process.env.REFRESH_TOKEN_SECRET,
-          { expiresIn: '30d' }
+          { expiresIn: '30s' }
         );
 
         foundUser.refreshToken = refreshToken;
@@ -321,21 +321,20 @@ const changeEmail = async (req, res) => {
     let foundUser = await User.findById(req.user);
     if (foundUser) {
       let match = await bcrypt.compare(currentPassword, foundUser.password);
-      console.log(match)
+      console.log(match);
       if (match) {
         //check if user with that given email exists
 
-        let userByEmail = await User.findOne({email: email.toLowerCase()});
-        if(userByEmail){
-          return res.status(401).json({Msg: 'Email already in use'})
-        }else {
-          let updated = await User.findByIdAndUpdate(req.user,{
-            email: email.toLowerCase()
-          })
+        let userByEmail = await User.findOne({ email: email.toLowerCase() });
+        if (userByEmail) {
+          return res.status(401).json({ Msg: 'Email already in use' });
+        } else {
+          let updated = await User.findByIdAndUpdate(req.user, {
+            email: email.toLowerCase(),
+          });
           console.log(updated);
-          return res.status(200).json({Msg: 'Email updated successfully'})
+          return res.status(200).json({ Msg: 'Email updated successfully' });
         }
-
       } else {
         return res.status(401).json({ Msg: 'Current password is invalid' });
       }
@@ -343,8 +342,8 @@ const changeEmail = async (req, res) => {
       return res.status(404).json({ Msg: 'User not found' });
     }
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({Msg: 'Something went wrong'})
+    console.log(error);
+    return res.status(500).json({ Msg: 'Something went wrong' });
   }
 };
 
@@ -379,13 +378,16 @@ const changePassword = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   const cookies = req.cookies;
-  console.log(cookies, 'cook');
-  if (!cookies?.jwt) return res.status(401);
+  console.log(cookies);
+  if (!cookies.jwt) {
+    return res.status(403).json({Msg:'unathorized'});
+  }
   const refreshToken = cookies.jwt;
 
   const foundUser = await User.findOne({ refreshToken }).exec();
   if (!foundUser) {
-    return res.status(403); //Forbidden
+    console.log('not found');
+    return res.status(401).json({ Msg: 'unathorized' }); //Forbidden
   }
   // evaluate jwt
   else {
@@ -394,16 +396,16 @@ const refreshToken = async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET,
       (err, decoded) => {
         console.log(decoded, err);
-        if (err || foundUser._id.toString() !== decoded.user) {
-          console.log('made it here');
-          return res.status(403);
+        if (err || foundUser._id.toString() !== decoded.user || !decoded) {
+          return res.status(403).json({Msg:'unathorized'});
         }
         const accessToken = jwt.sign(
           { user: foundUser._id },
           process.env.ACCESS_TOKEN_SECRET,
           { expiresIn: '15m' } //15m
         );
-        res.status(200).json({ accessToken });
+        
+        return res.status(200).json(accessToken);
       }
     );
   }
@@ -419,5 +421,5 @@ module.exports = {
   changePassword,
   signout,
   refreshToken,
-  changeEmail
+  changeEmail,
 };

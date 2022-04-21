@@ -10,7 +10,7 @@ const auth = (req, res, next) => {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded)=>{
       if(err){
         console.log(err)
-        return res.status(401).json({Msg: 'Unathorized'})
+        return res.status(401).json({Msg: 'Unathorized, please log in again'})
       }
       req.user = decoded.user;
       next()
