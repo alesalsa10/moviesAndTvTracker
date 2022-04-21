@@ -380,7 +380,7 @@ const refreshToken = async (req, res) => {
   const cookies = req.cookies;
   console.log(cookies);
   if (!cookies.jwt) {
-    return res.status(403).json({Msg:'unathorized'});
+    return res.status(403).json({ Msg: 'unathorized' });
   }
   const refreshToken = cookies.jwt;
 
@@ -391,23 +391,53 @@ const refreshToken = async (req, res) => {
   }
   // evaluate jwt
   else {
-    jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET,
-      (err, decoded) => {
-        console.log(decoded, err);
-        if (err || foundUser._id.toString() !== decoded.user || !decoded) {
-          return res.status(403).json({Msg:'unathorized'});
-        }
-        const accessToken = jwt.sign(
-          { user: foundUser._id },
-          process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: '15m' } //15m
-        );
-        
-        return res.status(200).json(accessToken);
+    // jwt.verify(
+    //   refreshToken,
+    //   process.env.REFRESH_TOKEN_SECRET,
+    //   (err, decoded) => {
+    //     console.log(decoded, err);
+    //     if (err || foundUser._id.toString() !== decoded.user || !decoded) {
+    //       return res.status(403).json({Msg:'unathorized'});
+    //     }
+    //     const accessToken = jwt.sign(
+    //       { user: foundUser._id },
+    //       process.env.ACCESS_TOKEN_SECRET,
+    //       { expiresIn: '15m' } //15m
+    //     );
+
+    //     return res.status(200).json(accessToken);
+    //   }
+    // );
+
+    try {
+      const {user} = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+      console.log(user)
+      if (!user || user !== foundUser._id.toString()) {
+        return res.status(401).json({ Msg: 'Unathorized' });
       }
-    );
+      const accessToken = jwt.sign(
+        { user: foundUser._id },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: '10s' } //15m
+      );
+
+      const newRefreshToken = jwt.sign(
+        { user: foundUser._id },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: '30s' }
+      );
+
+      foundUser.refreshToken = newRefreshToken;
+      await foundUser.save();
+
+      res.cookie('jwt', newRefreshToken, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 60,
+      });
+      return res.status(200).json(accessToken);
+    } catch (err) {
+      return res.status(401).json({ Msg: 'Not authorized' });
+    }
   }
 };
 
