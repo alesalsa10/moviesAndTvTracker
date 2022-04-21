@@ -62,7 +62,9 @@ const register = async (req, res) => {
 
         res.cookie('jwt', refreshToken, {
           httpOnly: true,
-          maxAge: 24 * 60 * 60 * 60,
+          maxAge: 30 * 24 * 60 * 60 * 60,
+          secure: true,
+          sameSite: 'None',
         });
         foundUser = await User.findById(foundUser._id)
           .select('-password')
@@ -98,13 +100,13 @@ const signIn = async (req, res) => {
         const accessToken = jwt.sign(
           { user: foundUser._id },
           process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: '10s' } //15m
+          { expiresIn: '15m' } //15m
         );
 
         const refreshToken = jwt.sign(
           { user: foundUser._id },
           process.env.REFRESH_TOKEN_SECRET,
-          { expiresIn: '30s' }
+          { expiresIn: '30d' }
         );
 
         foundUser.refreshToken = refreshToken;
@@ -114,7 +116,9 @@ const signIn = async (req, res) => {
 
         res.cookie('jwt', refreshToken, {
           httpOnly: true,
-          maxAge: 24 * 60 * 60 * 60,
+          maxAge: 30 * 24 * 60 * 60 * 60,
+          secure: true,
+          sameSite: 'None',
         });
         res.status(201).json({ accessToken, foundUser });
       } else {
@@ -400,13 +404,13 @@ const refreshToken = async (req, res) => {
       const accessToken = jwt.sign(
         { user: foundUser._id },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '10s' } //15m
+        { expiresIn: '15m' } //15m
       );
 
       const newRefreshToken = jwt.sign(
         { user: foundUser._id },
         process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '30s' }
+        { expiresIn: '30d' }
       );
 
       foundUser.refreshToken = newRefreshToken;
@@ -414,7 +418,7 @@ const refreshToken = async (req, res) => {
 
       res.cookie('jwt', newRefreshToken, {
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 60,
+        maxAge: 30 * 24 * 60 * 60 * 60,
       });
       return res.status(200).json(accessToken);
     } catch (err) {
