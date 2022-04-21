@@ -125,7 +125,7 @@ const signIn = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ Error: 'Something went wrong' });
+    res.status(500).json({ Msg: 'Something went wrong' });
   }
 };
 
@@ -391,24 +391,6 @@ const refreshToken = async (req, res) => {
   }
   // evaluate jwt
   else {
-    // jwt.verify(
-    //   refreshToken,
-    //   process.env.REFRESH_TOKEN_SECRET,
-    //   (err, decoded) => {
-    //     console.log(decoded, err);
-    //     if (err || foundUser._id.toString() !== decoded.user || !decoded) {
-    //       return res.status(403).json({Msg:'unathorized'});
-    //     }
-    //     const accessToken = jwt.sign(
-    //       { user: foundUser._id },
-    //       process.env.ACCESS_TOKEN_SECRET,
-    //       { expiresIn: '15m' } //15m
-    //     );
-
-    //     return res.status(200).json(accessToken);
-    //   }
-    // );
-
     try {
       const {user} = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
       console.log(user)
