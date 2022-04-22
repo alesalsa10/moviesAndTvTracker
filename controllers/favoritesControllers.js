@@ -69,11 +69,9 @@ const toggleBookFavorite = async (req, res) => {
   try {
     let foundUser = await User.findById(req.user).select('-password');
     if (foundUser) {
-      let existingBook = await Book.findOne({ externalId });
-
       let favoriteExist = foundUser.favoriteBooks.includes(externalId);
       if (!favoriteExist) {
-        await foundUser.favoriteBooks.push(existingBook);
+        await foundUser.favoriteBooks.push(externalId);
         await foundUser.save();
         res.status(201).json({ Msg: 'Bookmark created' });
       } else {

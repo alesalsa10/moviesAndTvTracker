@@ -35,7 +35,7 @@ const getUser = async (req, res) => {
 const getSelf = async (req, res) => {
   try {
     let user = await User.findById(req.user).select(
-      '-password -refreshToken -favoriteBooks -favoriteTv -favoriteMovies -comments'
+      '-password -refreshToken -comments'
     );
     if (!user) {
       res.status(404).json({ Msg: 'User not found!' });

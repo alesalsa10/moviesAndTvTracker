@@ -4,7 +4,6 @@ const { check, validationResult, oneOf } = require('express-validator');
 
 const userController = require('../controllers/userControllers');
 const auth = require('../middlewares/auth');
-const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser');
 
 router.get('/self', auth, userController.getSelf);
 
@@ -50,7 +49,7 @@ router.put(
 
 router.get('/:username', userController.getUser);
 
-router.delete('/:id', auth, isLoggedInSameUser, userController.deleteUser);
+router.delete('/:id', auth, userController.deleteUser);
 
 //router.put('/upload/:userId', auth, userController.uploadProfileImage);
 
