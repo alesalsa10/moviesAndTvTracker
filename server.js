@@ -20,9 +20,14 @@ const app = express();
 
 //app.use(cors());
 
+let origin =
+  process.env.NODE_ENV === 'production'
+    ? 'placeholder'
+    : 'http://localhost:3001';
+
 app.use(
   cors({
-    origin: ['http://localhost:3001'],
+    origin: [origin],
     credentials: true,
   })
 );
