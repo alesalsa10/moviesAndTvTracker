@@ -22,7 +22,7 @@ const app = express();
 
 let origin =
   process.env.NODE_ENV === 'production'
-    ? 'www.broadmediacenter.com'
+    ? 'https://www.broadmediacenter.com'
     : 'http://localhost:3001';
 
 app.use(
