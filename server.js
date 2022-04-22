@@ -22,7 +22,7 @@ const app = express();
 
 let origin =
   process.env.NODE_ENV === 'production'
-    ? 'https://www.broadmediacenter.com'
+    ? 'www.broadmediacenter.com'
     : 'http://localhost:3001';
 
 app.use(
@@ -37,18 +37,18 @@ app.use(express.json());
 app.use(cookieParser());
 connectDb();
 
-app.get('/api', (req, res) => {
+app.get('/', (req, res) => {
   res.send('it is working!');
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRouter);
-app.use('/api/comments', commentsRouter);
-app.use('/api/media', mediaRouter);
-app.use('/api/favorites', favoriteRouter);
-app.use('/api/book', bookRouter);
-app.use('/api/people', peopleRouter);
-app.use('/api/configuration', configRouter);
-app.use('/api/genre', genreRouter);
+app.use('/auth', authRoutes);
+app.use('/users', userRouter);
+app.use('/comments', commentsRouter);
+app.use('/media', mediaRouter);
+app.use('/favorites', favoriteRouter);
+app.use('/book', bookRouter);
+app.use('/people', peopleRouter);
+app.use('/configuration', configRouter);
+app.use('/genre', genreRouter);
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
