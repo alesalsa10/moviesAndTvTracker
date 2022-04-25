@@ -22,3 +22,9 @@ AWS lambda <br/>
 AWS cloudwatch <br/>
 React <br/>
 Redux <br/>
+
+## Acknowledgment
+<a href='https://developers.themoviedb.org/4/getting-started/authorization' >TMDB</a> <br/>
+<a href='https://developer.nytimes.com/docs/books-product/1/overview' >New Rork Times API</a> <br/>
+<a href='https://developers.google.com/books' >Google Books API</a> <br/>
+
