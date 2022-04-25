@@ -22,13 +22,14 @@ const app = express();
 
 let origin =
   process.env.NODE_ENV === 'production'
-    ? 'https://www.broadmediacenter.com'
+    ? 'https://broadmediacenter.com'
     : 'http://localhost:3001';
 
 app.use(
   cors({
     origin: origin,
     credentials: true,
+    optionsSuccessStatus: 200,
   })
 );
 
@@ -52,5 +53,5 @@ app.use('/configuration', configRouter);
 app.use('/genre', genreRouter);
 
 app.listen(PORT, () =>
-  console.log(`Server started on port ${PORT}`, origin)
+  console.log(`Server started on port ${PORT}`)
 );
