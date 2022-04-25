@@ -27,7 +27,7 @@ let origin =
 
 app.use(
   cors({
-    origin: [origin],
+    origin: origin,
     credentials: true,
   })
 );
@@ -51,4 +51,6 @@ app.use('/people', peopleRouter);
 app.use('/configuration', configRouter);
 app.use('/genre', genreRouter);
 
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Server started on port ${PORT}`, origin)
+);
