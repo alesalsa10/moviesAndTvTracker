@@ -318,9 +318,10 @@ const resetPassword = async (req, res) => {
         const encryptedPassword = await bcrypt.hash(newPassword, salt);
         const updatedUser = await User.findByIdAndUpdate(token.user, {
           password: encryptedPassword,
+          refreshTokens: []
         });
 
-        updatedUser.refreshTokens = []; //new
+        //updatedUser.refreshTokens = []; //new
         await updatedUser.save();
         res.clearCookie('jwt', {
           httpOnly: true,
@@ -383,12 +384,12 @@ const changePassword = async (req, res) => {
         const encryptedPassword = await bcrypt.hash(newPassword, salt);
         const updatedUser = await User.findByIdAndUpdate(req.user, {
           password: encryptedPassword,
+          refreshTokens: [] //new
         });
-        console.log(updatedUser);
 
         //newly added
         //foundUser.refreshToken = '';
-        updatedUser.refreshTokens = []; //new
+       // updatedUser.refreshTokens = []; //new
         await updatedUser.save();
         res.clearCookie('jwt', {
           httpOnly: true,
