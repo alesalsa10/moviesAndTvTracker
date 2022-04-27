@@ -8,7 +8,7 @@ const getBookById = async (req, res) => {
   console.log(bookId);
   let foundMedia = await Book.findById(bookId);
   let mediaDetails = await apiCalls.getBook(bookId);
-  //console.log(mediaDetails, '44');
+  console.log(mediaDetails, '44');
   if (foundMedia) {
     if (mediaDetails.error) {
       res
