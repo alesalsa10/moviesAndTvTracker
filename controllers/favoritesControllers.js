@@ -28,7 +28,7 @@ const toggleMovieFavorite = async (req, res) => {
     console.log(error);
     res
       .status(500)
-      .json({ Msg: 'Something went wrong while trying to find this user' });
+      .json({ Msg: 'Something went wrong' });
   }
 };
 
