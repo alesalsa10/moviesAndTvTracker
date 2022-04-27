@@ -12,7 +12,7 @@ const getUser = async (req, res) => {
   try {
     let user = await User.findOne({ username: username })
       .select(
-        '-password -refreshToken -email -favoriteBooks -favoriteTv -favoriteMovies'
+        '-password -refreshToken -refreshTokens -email -favoriteBooks -favoriteTv -favoriteMovies'
       )
       .populate({
         path: 'comments',
@@ -35,7 +35,7 @@ const getUser = async (req, res) => {
 const getSelf = async (req, res) => {
   try {
     let user = await User.findById(req.user).select(
-      '-password -refreshToken -comments'
+      '-password -refreshToken  -refreshTokens -comments'
     );
     if (!user) {
       res.status(404).json({ Msg: 'User not found!' });

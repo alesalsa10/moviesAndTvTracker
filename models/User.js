@@ -41,14 +41,14 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 3,
-    maxlength:25
+    maxlength: 25,
   },
-  username:{
+  username: {
     type: String,
-    required: true, 
+    required: true,
     unique: true,
     minlength: 3,
-    maxlength: 25
+    maxlength: 25,
   },
   passwordToken: {
     type: mongoose.Types.ObjectId,
@@ -66,9 +66,10 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  refreshToken: {
-    type: String,
-  },
+  // refreshToken: {
+  //   type: String,
+  // },
+  refreshTokens: [{ type: String, unique: true }],
   createdAt: {
     type: Date,
     default: Date.now,

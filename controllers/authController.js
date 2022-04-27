@@ -57,7 +57,8 @@ const register = async (req, res) => {
           { expiresIn: '30d' }
         );
 
-        foundUser.refreshToken = refreshToken;
+        //foundUser.refreshToken = refreshToken; //old
+        foundUser.refreshTokens.push(refreshToken); //new
         await foundUser.save();
 
         res.cookie('jwt', refreshToken, {
@@ -109,7 +110,8 @@ const signIn = async (req, res) => {
           { expiresIn: '30d' }
         );
 
-        foundUser.refreshToken = refreshToken;
+        //foundUser.refreshToken = refreshToken; //old
+        foundUser.refreshTokens.push(refreshToken); //new
         await foundUser.save();
 
         foundUser = await User.findById(foundUser._id).select('-password');
@@ -140,14 +142,21 @@ const signout = async (req, res) => {
   const refreshToken = cookies.jwt;
 
   // Is refreshToken in db?
-  const foundUser = await User.findOne({ refreshToken }).exec();
+  const foundUser = await User.findOne({ refreshTokens: refreshToken }).exec();
   if (!foundUser) {
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
     return res.sendStatus(204);
   }
 
   // Delete refreshToken in db
-  foundUser.refreshToken = '';
+  //foundUser.refreshToken = ''; //old
+  //foundUser.refreshTokens = []; //new
+
+  await User.updateOne(
+    { _id: req.user },
+    { $pull: { refreshTokens: refreshToken } },
+    { multi: true }
+  ); //new
   const result = await foundUser.save();
   console.log(result);
 
@@ -310,6 +319,15 @@ const resetPassword = async (req, res) => {
         const updatedUser = await User.findByIdAndUpdate(token.user, {
           password: encryptedPassword,
         });
+
+        updatedUser.refreshTokens = []; //new
+        await updatedUser.save();
+        res.clearCookie('jwt', {
+          httpOnly: true,
+          sameSite: 'None',
+          secure: true,
+        }); //new
+
         await PasswordToken.findByIdAndDelete(token._id);
         return res.status(200).json({ Msg: 'Password changed successfully' });
       }
@@ -367,6 +385,17 @@ const changePassword = async (req, res) => {
           password: encryptedPassword,
         });
         console.log(updatedUser);
+
+        //newly added
+        //foundUser.refreshToken = '';
+        updatedUser.refreshTokens = []; //new
+        await updatedUser.save();
+        res.clearCookie('jwt', {
+          httpOnly: true,
+          sameSite: 'None',
+          secure: true,
+        }); //new
+  
         return res.status(200).json({ Msg: 'Password updated successfully' });
       } else {
         return res.status(401).json({ Msg: 'Current password is invalid' });
@@ -388,7 +417,7 @@ const refreshToken = async (req, res) => {
   }
   const refreshToken = cookies.jwt;
 
-  const foundUser = await User.findOne({ refreshToken }).exec();
+  const foundUser = await User.findOne({ refreshTokens: refreshToken }).exec();
   if (!foundUser) {
     console.log('not found');
     return res.status(401).json({ Msg: 'unathorized' }); //Forbidden
@@ -396,8 +425,11 @@ const refreshToken = async (req, res) => {
   // evaluate jwt
   else {
     try {
-      const {user} = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-      console.log(user)
+      const { user } = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+      );
+      console.log(user);
       if (!user || user !== foundUser._id.toString()) {
         return res.status(401).json({ Msg: 'Unathorized' });
       }
