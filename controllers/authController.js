@@ -318,7 +318,7 @@ const resetPassword = async (req, res) => {
         const encryptedPassword = await bcrypt.hash(newPassword, salt);
         const updatedUser = await User.findByIdAndUpdate(token.user, {
           password: encryptedPassword,
-          refreshTokens: []
+          refreshTokens: [],
         });
 
         //updatedUser.refreshTokens = []; //new
@@ -384,19 +384,19 @@ const changePassword = async (req, res) => {
         const encryptedPassword = await bcrypt.hash(newPassword, salt);
         const updatedUser = await User.findByIdAndUpdate(req.user, {
           password: encryptedPassword,
-          refreshTokens: [] //new
+          refreshTokens: [], //new
         });
 
         //newly added
         //foundUser.refreshToken = '';
-       // updatedUser.refreshTokens = []; //new
+        // updatedUser.refreshTokens = []; //new
         await updatedUser.save();
         res.clearCookie('jwt', {
           httpOnly: true,
           sameSite: 'None',
           secure: true,
         }); //new
-  
+
         return res.status(200).json({ Msg: 'Password updated successfully' });
       } else {
         return res.status(401).json({ Msg: 'Current password is invalid' });
@@ -446,8 +446,18 @@ const refreshToken = async (req, res) => {
         { expiresIn: '30d' }
       );
 
-      foundUser.refreshToken = newRefreshToken;
-      await foundUser.save();
+      //foundUser.refreshToken = newRefreshToken;
+      //await foundUser.save();
+
+      //remove old token
+      //add the new one
+      User.findOneAndDelete({ refreshTokens: refreshToken });
+      User.findOneAndUpdate(
+        { refreshTokens: refreshToken },
+        {
+          $push: { refreshTokens: newRefreshToken },
+        }
+      );
 
       res.cookie('jwt', newRefreshToken, {
         httpOnly: true,
