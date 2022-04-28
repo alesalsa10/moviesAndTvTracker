@@ -22,6 +22,10 @@ const TvSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  commentCount: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const Tv = mongoose.model('Tv', TvSchema);

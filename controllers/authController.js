@@ -198,7 +198,7 @@ const verifyEmail = async (req, res) => {
           await EmailToken.findByIdAndDelete(token._id);
 
           //verify account
-          await findByIdAndUpdate(token.user, { isVerified: true });
+          await User.findByIdAndUpdate(token.user, { isVerified: true });
           await EmailToken.findByIdAndDelete(token._id);
           res
             .status(200)

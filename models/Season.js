@@ -24,13 +24,16 @@ const SeasonSchema = new mongoose.Schema({
   },
   mediaName: {
     type: String,
-    required: true
+    required: true,
   },
   name: {
     type: String,
     required: true,
   },
-
+  commentCount: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const Season = mongoose.model('Season', SeasonSchema);

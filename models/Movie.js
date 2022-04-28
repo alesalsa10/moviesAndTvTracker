@@ -16,6 +16,10 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  commentCount: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const Movie = mongoose.model('Movie', movieSchema);

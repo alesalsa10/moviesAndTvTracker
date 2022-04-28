@@ -9,20 +9,19 @@ const episodeSchema = new mongoose.Schema({
     type: String,
     ref: 'Season',
   },
-  seasonNumber:{
+  seasonNumber: {
     type: Number,
     required: true,
   },
-  
-  mediaName:{
-    type: String,
-    required: true
-  },
-  mediaId:{
-    type: String,
-    required: true
-  },
 
+  mediaName: {
+    type: String,
+    required: true,
+  },
+  mediaId: {
+    type: String,
+    required: true,
+  },
 
   comments: [
     {
@@ -34,6 +33,10 @@ const episodeSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+  },
+  commentCount: {
+    type: Number,
+    default: 0,
   },
 });
 

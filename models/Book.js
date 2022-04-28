@@ -15,6 +15,10 @@ const bookSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
+  },
+  commentCount: {
+    type: Number,
+    default: 0
   }
 });
 
