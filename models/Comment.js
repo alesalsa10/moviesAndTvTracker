@@ -72,70 +72,75 @@ CommentSchema.pre('findOne', autoPopulateReplies).pre(
   autoPopulateReplies
 );
 
-CommentSchema.pre('remove', async function (next) {
-  //before removing remove comment from user, and from media, and decrement reply count
-  const selectModel = () => {
-    if (this.parentTv) {
-      return mongoose.model('Tv');
-    } else if (this.parentSeason) {
-      return mongoose.model('Season');
-    } else if (this.parentEpisode) {
-      return mongoose.model('Episode');
-    } else if (this.parentMovie) {
-      return mongoose.model('Movie');
-    } else if (this.parentBook) {
-      return mongoose.model('Book');
-    } else {
-      const err = new Error('Something went wrong');
-      //next(err);
-      return err;
-    }
-  };
+// CommentSchema.pre('findOneAndDelete', async function (next) {
+//   try {
+//     //remove reference from the user
+//     await User.findByIdAndUpdate(this.postedBy, {
+//       $pull: {
+//         comments: this._id,
+//       },
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     return next(error);
+//   }
+// });
 
-  const selectParentMedia = () => {
-    if (this.parentTv) {
-      return this.parentTv;
-    } else if (this.parentSeason) {
-      return this.parentSeason;
-    } else if (this.parentEpisode) {
-      return this.parentEpisode;
-    } else if (this.parentMovie) {
-      return this.parentMovie;
-    } else if (this.parentBook) {
-      return this.parentBook;
-    } else {
-      const err = new Error('Something went wrong');
-      //next(err);
-      return err;
-    }
-  };
-  let mongoModel = selectModel();
-  let parentMediaType = selectParentMedia();
+// CommentSchema.pre('findOneAndDelete', async function (next) {
+//   //before removing remove comment from user, and from media, and decrement reply count
+//   console.log(this.schema.obj.parentBook)
+//   const selectModel = () => {
+//     if (this.parentTv) {
+//       return mongoose.model('Tv');
+//     } else if (this.parentSeason) {
+//       return mongoose.model('Season');
+//     } else if (this.parentEpisode) {
+//       return mongoose.model('Episode');
+//     } else if (this.parentMovie) {
+//       return mongoose.model('Movie');
+//     } else if (this.parentBook) {
+//       return mongoose.model('Book');
+//     } else {
+//       const err = new Error('Something went wrong');
+//       //next(err);
+//       return err;
+//     }
+//   };
 
-  if (mongoModel) {
-    try {
-      //remove reference from the user
-      await User.findByIdAndUpdate(this.postedBy, {
-        $pull: {
-          comments: this._id,
-        },
-      });
-      try {
-        //remove reference from the media and decrement count
-        await mongoModel.findByIdAndUpdate(parentMediaType, {
-          $pull: { comments: this._id },
-          $inc: {commentCount: -1}
-        });
-      } catch (error) {
-        console.log(error);
-        return next(error);
-      }
-    } catch (error) {
-      console.log(error);
-      return next(error);
-    }
-  }
-});
+//   const selectParentMedia = () => {
+//     if (this.parentTv) {
+//       return this.parentTv;
+//     } else if (this.parentSeason) {
+//       return this.parentSeason;
+//     } else if (this.parentEpisode) {
+//       return this.parentEpisode;
+//     } else if (this.parentMovie) {
+//       return this.parentMovie;
+//     } else if (this.parentBook) {
+//       return this.parentBook;
+//     } else {
+//       const err = new Error('Something went wrong');
+//       //next(err);
+//       return err;
+//     }
+//   };
+//   let mongoModel = selectModel();
+//   let parentMediaType = selectParentMedia();
+//   console.log(mongoModel, parentMediaType);
+//   if (mongoModel) {
+//     try {
+//       //remove reference from the media and decrement count
+//       console.log('decrementing count');
+//       await Book.findByIdAndUpdate(parentMediaType, {
+//         $pull: { comments: this._id },
+//         $inc: { commentCount: -1 },
+//       });
+//     } catch (error) {
+//       console.log(error);
+//       return next(error);
+//     }
+//   }
+// });
 
 CommentSchema.pre('save', async function (next) {
   //add to reply count before saving
@@ -177,14 +182,11 @@ CommentSchema.pre('save', async function (next) {
 
   let mongoModel = selectModel();
   let parentMediaType = selectParentMedia();
-  console.log(mongoModel, parentMediaType);
   if (mongoModel) {
     try {
       //add to count
-      const some = await mongoModel.findById(parentMediaType);
-      console.log(some);
       await mongoModel.findByIdAndUpdate(parentMediaType, {
-        $inc: {commentCount: 1}
+        $inc: { commentCount: 1 },
       });
     } catch (error) {
       console.log(error);

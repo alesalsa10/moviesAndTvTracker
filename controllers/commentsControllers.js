@@ -2,6 +2,8 @@ const User = require('../models/User');
 const Comment = require('../models/Comment');
 const chooseCommentParent = require('../utils/chooseCommentParent');
 const Selector = require('../utils/selector');
+const mongoose = require('mongoose');
+
 
 //make it so if comment value == '[Deleted]' this type of comment cannot be deleted since this is only used a reference key
 
@@ -152,12 +154,12 @@ const editComment = async (req, res) => {
       try {
         const update = {
           text,
-          editedAt: Date.now()
+          editedAt: Date.now(),
         };
         let foundComment = await Comment.findByIdAndUpdate(commentId, update, {
           new: true,
         });
-        res.status(202).json(foundComment );
+        res.status(202).json(foundComment);
       } catch (error) {
         console.log(error);
         res.status(500).json({ Msg: 'Something went wrong' });
@@ -191,6 +193,44 @@ const deleteComment = async (req, res) => {
         res.status(200).json(comment);
       } else {
         try {
+          const selectModel = () => {
+            if (comment.parentTv) {
+              return mongoose.model('Tv');
+            } else if (comment.parentSeason) {
+              return mongoose.model('Season');
+            } else if (comment.parentEpisode) {
+              return mongoose.model('Episode');
+            } else if (comment.parentMovie) {
+              return mongoose.model('Movie');
+            } else if (comment.parentBook) {
+              return mongoose.model('Book');
+            }
+          };
+
+          const selectParentMedia = () => {
+            if (comment.parentTv) {
+              return comment.parentTv;
+            } else if (comment.parentSeason) {
+              return comment.parentSeason;
+            } else if (comment.parentEpisode) {
+              return comment.parentEpisode;
+            } else if (comment.parentMovie) {
+              return comment.parentMovie;
+            } else if (comment.parentBook) {
+              return comment.parentBook;
+            }
+          };
+          let mongoModel = selectModel();
+          let parentMediaType = selectParentMedia();
+          await mongoModel.findByIdAndUpdate(parentMediaType, {
+            $pull: { comments: comment._id },
+            $inc: { commentCount: -1 },
+          });
+          await User.findByIdAndUpdate(comment.postedBy, {
+            $pull: {
+              comments: comment._id,
+            },
+          });
           await Comment.findByIdAndDelete(comment._id); //IMPORTANT
           console.log('was deleted');
 
@@ -241,8 +281,7 @@ const getComments = async (req, res) => {
     return res.status(400).json({ Msg: 'Not a valid media type' });
   } else {
     try {
-
-      if(sort === 'replies'){
+      if (sort === 'replies') {
         let comments = await Comment.find({
           [parent]: id,
           parentComment: null,
@@ -259,7 +298,6 @@ const getComments = async (req, res) => {
         .sort({ datePosted: -1 })
         .lean();
       return res.status(200).json(comments);
-
     } catch (e) {
       console.log(e);
       return res
