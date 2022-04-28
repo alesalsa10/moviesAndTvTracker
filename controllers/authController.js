@@ -58,8 +58,11 @@ const register = async (req, res) => {
         );
 
         //foundUser.refreshToken = refreshToken; //old
-        foundUser.refreshTokens.push(refreshToken); //new
-        await foundUser.save();
+        //foundUser.refreshTokens.push(refreshToken); //new
+        //await foundUser.save();
+        await User.findByIdAndUpdate(foundUser._id, {
+          $push: { refreshTokens: refreshToken },
+        });
 
         res.cookie('jwt', refreshToken, {
           httpOnly: true,
@@ -111,8 +114,11 @@ const signIn = async (req, res) => {
         );
 
         //foundUser.refreshToken = refreshToken; //old
-        foundUser.refreshTokens.push(refreshToken); //new
-        await foundUser.save();
+        //foundUser.refreshTokens.push(refreshToken); //new
+        //await foundUser.save();
+        await User.findByIdAndUpdate(foundUser._id, {
+          $push: { refreshTokens: refreshToken },
+        });
 
         foundUser = await User.findById(foundUser._id).select('-password');
 
@@ -417,8 +423,10 @@ const refreshToken = async (req, res) => {
     return res.status(403).json({ Msg: 'unathorized' });
   }
   const refreshToken = cookies.jwt;
+  console.log(refreshToken, 'skfd');
 
   const foundUser = await User.findOne({ refreshTokens: refreshToken }).exec();
+  console.log(foundUser);
   if (!foundUser) {
     console.log('not found');
     return res.status(401).json({ Msg: 'unathorized' }); //Forbidden
@@ -451,12 +459,16 @@ const refreshToken = async (req, res) => {
 
       //remove old token
       //add the new one
-      User.findOneAndDelete({ refreshTokens: refreshToken });
-      User.findOneAndUpdate(
+      await User.findOneAndUpdate(
         { refreshTokens: refreshToken },
         {
           $push: { refreshTokens: newRefreshToken },
         }
+      );
+      await User.findOneAndUpdate(
+        { refreshTokens: refreshToken },
+        { $pull: { refreshTokens: refreshToken } },
+        { multi: true }
       );
 
       res.cookie('jwt', newRefreshToken, {
