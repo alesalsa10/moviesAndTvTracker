@@ -14,11 +14,13 @@ const toggleMovieFavorite = async (req, res) => {
         await foundUser.save();
         res.status(200).json({ Msg: 'Bookmark created' });
       } else {
-        await User.updateOne(
-          { _id: req.user },
-          { $pull: { favoriteMovies: externalId } },
-          { multi: true }
-        );
+        // await User.updateOne(
+        //   { _id: req.user },
+        //   { $pull: { favoriteMovies: externalId } },
+        //   { multi: true }
+        // );
+        foundUser.favoriteMovies.pull(externalId);
+        await foundUser.save();
         res.status(200).json({ Msg: 'Bookmark deleted' });
       }
     } else {
@@ -45,11 +47,13 @@ const toggleTvFavorite = async (req, res) => {
         res.status(201).json({ Msg: 'Bookmark created' });
       } else {
         //res.status(409).json({ Msg: 'Already exist' });
-        await User.updateOne(
-          { _id: req.user },
-          { $pull: { favoriteTv: externalId } },
-          { multi: true }
-        );
+        // await User.updateOne(
+        //   { _id: req.user },
+        //   { $pull: { favoriteTv: externalId } },
+        //   { multi: true }
+        // );
+        foundUser.favoriteTv.pull(externalId);
+        await foundUser.save();
         res.status(200).json({ Msg: 'Bookmark deleted' });
       }
     } else {
@@ -75,11 +79,13 @@ const toggleBookFavorite = async (req, res) => {
         await foundUser.save();
         res.status(201).json({ Msg: 'Bookmark created' });
       } else {
-        await User.updateOne(
-          { _id: req.user },
-          { $pull: { favoriteBooks: externalId } },
-          { multi: true }
-        );
+        // await User.updateOne(
+        //   { _id: req.user },
+        //   { $pull: { favoriteBooks: externalId } },
+        //   { multi: true }
+        // );
+        foundUser.favoriteBooks.pull(externalId);
+        await foundUser.save();
         res.status(200).json({ Msg: 'Bookmark deleted' });
       }
     } else {

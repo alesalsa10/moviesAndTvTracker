@@ -154,17 +154,9 @@ const signout = async (req, res) => {
     return res.sendStatus(204);
   }
 
-  // Delete refreshToken in db
-  //foundUser.refreshToken = ''; //old
-  //foundUser.refreshTokens = []; //new
-
-  await User.updateOne(
-    { _id: req.user },
-    { $pull: { refreshTokens: refreshToken } },
-    { multi: true }
-  ); //new
-  const result = await foundUser.save();
-  console.log(result);
+  console.log(refreshToken, foundUser.refreshTokens); //check tomorrow
+  foundUser.refreshTokens.pull(refreshToken)
+  await foundUser.save()
 
   res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
   res.sendStatus(204);
@@ -454,23 +446,28 @@ const refreshToken = async (req, res) => {
         { expiresIn: '30d' }
       );
 
-      //foundUser.refreshToken = newRefreshToken;
-      //await foundUser.save();
+      //remove old token and add the one one
+      // await User.findOneAndUpdate(
+      //   { refreshTokens: refreshToken },
+      //   {
+      //     $pull: { refreshTokens: refreshToken },
+      //   },
+      //   {
+      //     $push: { refreshTokens: newRefreshToken },
+      //   }
+      // );
+      foundUser.refreshTokens.pull(refreshToken);
+      foundUser.refreshTokens.push(newRefreshToken);
+      await foundUser.save();
 
-      //remove old token
-      //add the new one
-      await User.findOneAndUpdate(
-        { refreshTokens: refreshToken },
-        {
-          $push: { refreshTokens: newRefreshToken },
-        }
-      );
-      await User.findOneAndUpdate(
-        { refreshTokens: refreshToken },
-        { $pull: { refreshTokens: refreshToken } },
-        { multi: true }
-      );
+      //clear old cookies
+      res.clearCookie('jwt', {
+        httpOnly: true,
+        sameSite: 'None',
+        secure: true,
+      });
 
+      //save a  new one
       res.cookie('jwt', newRefreshToken, {
         httpOnly: true,
         maxAge: 30 * 24 * 60 * 60 * 60,

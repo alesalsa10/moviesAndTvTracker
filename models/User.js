@@ -20,21 +20,18 @@ const UserSchema = new mongoose.Schema({
     {
       type: String,
       ref: 'Book',
-      unique: true,
     },
   ],
   favoriteMovies: [
     {
       type: String,
       ref: 'Movie',
-      unique: true,
     },
   ],
   favoriteTv: [
     {
       type: String,
       ref: 'Tv',
-      unique: true,
     },
   ],
   name: {
@@ -66,10 +63,7 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  // refreshToken: {
-  //   type: String,
-  // },
-  refreshTokens: [{ type: String, unique: true }],
+  refreshTokens: [{ type: String }],
   createdAt: {
     type: Date,
     default: Date.now,
