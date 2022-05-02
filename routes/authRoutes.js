@@ -4,7 +4,6 @@ const { check, validationResult, oneOf } = require('express-validator');
 
 const authController = require('../controllers/authController');
 const auth = require('../middlewares/auth');
-const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser');
 
 router.post(
   '/register',
@@ -15,14 +14,9 @@ router.post(
       .isLength({ min: 3, max: 25 })
       .withMessage('Username must be between 3 and 25 characters'),
     check('password')
-      .isStrongPassword({
-        minLength: 8,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-      })
+      .isStrongPassword()
       .withMessage(
-        'Password must be 8 or more characters, contain at least 1 uppercase letter, a lowercase letter, and a number'
+        'Password must be 8 or more characters, contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol'
       ),
     check('name').notEmpty().withMessage('Name is required'),
   ],
@@ -64,14 +58,9 @@ router.post(
       .notEmpty()
       .withMessage('Current password required'),
     check('newPassword')
-      .isStrongPassword({
-        minLength: 8,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-      })
+      .isStrongPassword()
       .withMessage(
-        'Password must be 8 or more characters, contain at least 1 uppercase letter, a lowercase letter, and a number'
+        'Password must be 8 or more characters, contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol'
       ),
   ],
   (req, res, next) => {
@@ -140,14 +129,9 @@ router.post(
   '/resetPassword/:token',
   [
     check('password')
-      .isStrongPassword({
-        minLength: 8,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-      })
+      .isStrongPassword()
       .withMessage(
-        'Password must be 8 or more characters, contain at least 1 uppercase letter, a lowercase letter, and a number'
+        'Password must be 8 or more characters, contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol'
       ),
   ],
   (req, res, next) => {
