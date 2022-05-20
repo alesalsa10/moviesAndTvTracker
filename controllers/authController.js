@@ -155,8 +155,8 @@ const signout = async (req, res) => {
   }
 
   console.log(refreshToken, foundUser.refreshTokens); //check tomorrow
-  foundUser.refreshTokens.pull(refreshToken)
-  await foundUser.save()
+  foundUser.refreshTokens.pull(refreshToken);
+  await foundUser.save();
 
   res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
   res.sendStatus(204);
@@ -471,6 +471,8 @@ const refreshToken = async (req, res) => {
       res.cookie('jwt', newRefreshToken, {
         httpOnly: true,
         maxAge: 30 * 24 * 60 * 60 * 60,
+        secure: true,
+        sameSite: 'None',
       });
       return res.status(200).json(accessToken);
     } catch (err) {
