@@ -1,5 +1,5 @@
-const nodemailer = require('nodemailer')
-const sgTransport = require('nodemailer-sendgrid-transport');
+import nodemailer from 'nodemailer';
+import sgTransport from 'nodemailer-sendgrid-transport';
 
 //use mailgun to send email in the future
 //enable less secure apps again
@@ -15,9 +15,9 @@ const baseUrl =
     : 'http://localhost:3001';
 
 const sendEmail = async (
-  email,
-  token,
-  emailType
+  email: string,
+  token:string,
+  emailType:string
 ) => {
   try {
     const transporter = nodemailer.createTransport(sgTransport(options))
@@ -51,4 +51,4 @@ const sendEmail = async (
     };
   }
 };
-module.exports = sendEmail
+export default sendEmail;

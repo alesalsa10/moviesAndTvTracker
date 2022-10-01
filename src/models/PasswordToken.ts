@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const moment = require('moment');
+import mongoose from 'mongoose';
+import moment from 'moment';
 
 const hourFromNow = function () {
   return moment().add(1, 'hour');
@@ -23,4 +23,4 @@ const PasswordTokenSchema = new mongoose.Schema({
 
 const PasswordToken = mongoose.model('PasswordToken', PasswordTokenSchema);
 
-module.exports = PasswordToken;
+export default PasswordToken;

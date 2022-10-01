@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 const BasedOnBookSchema = new mongoose.Schema({}, { strict: false });
 const BasedOnBook = mongoose.model(
   'BasedOnBook',
@@ -6,4 +6,4 @@ const BasedOnBook = mongoose.model(
   'basedOnBook'
 );
 
-module.exports = BasedOnBook
+export default BasedOnBook;

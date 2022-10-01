@@ -2,13 +2,16 @@
   "name": "moviesbe",
   "version": "1.0.0",
   "description": "api for movies and show tracker",
-  "main": "server.js",
+  "main": "src/server.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/server.ts"
   },
   "author": "Alexander Medina",
   "license": "ISC",
   "dependencies": {
+    "@types/cookie-parser": "^1.4.3",
+    "@types/cors": "^2.8.12",
     "aws-sdk": "^2.1045.0",
     "axios": "^0.24.0",
     "bcrypt": "^5.0.1",
@@ -21,11 +24,22 @@
     "http-errors": "^1.8.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.1",
-    "mongoose": "^6.0.8",
+    "mongoose": "^6.6.3",
     "multer": "^1.4.4",
     "multer-s3": "^2.10.0",
     "nodemailer": "^6.7.0",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemon": "^2.0.15"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/express": "^4.17.14",
+    "@types/jsonwebtoken": "^8.5.9",
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "^18.7.23",
+    "@types/nodemailer": "^6.4.6",
+    "@types/nodemailer-sendgrid": "^1.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4"
   }
 }

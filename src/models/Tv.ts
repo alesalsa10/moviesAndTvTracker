@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const TvSchema = new mongoose.Schema({
   comments: [
@@ -30,4 +30,4 @@ const TvSchema = new mongoose.Schema({
 
 const Tv = mongoose.model('Tv', TvSchema);
 
-module.exports = Tv;
+export default Tv;

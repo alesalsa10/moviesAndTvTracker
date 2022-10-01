@@ -1,9 +1,9 @@
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
-const sendEmail = require('../services/sendEmail');
+const sendEmail = require('../src/services/sendEmail');
 
-const uploadImage = require('../services/imageUpload');
-const deletePicture = require('../services/imageDeletion');
+const uploadImage = require('../src/services/imageUpload');
+const deletePicture = require('../src/services/imageDeletion');
 
 const User = require('../models/User');
 

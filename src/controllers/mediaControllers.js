@@ -4,10 +4,10 @@ const Season = require('../models/Season');
 const Episode = require('../models/Episode');
 const Movie = require('../models/Movie');
 const Tv = require('../models/Tv');
-const apiCalls = require('../externalAPI/apiCalls');
+const apiCalls = require('../src/externalAPI/apiCalls');
 const { default: axios } = require('axios');
 const BasedOnBook = require('../models/BasedOnBook');
-const Selector = require('../utils/selector');
+const Selector = require('../src/utils/selector');
 
 const getMediaById = async (req, res) => {
   //lookup media by id

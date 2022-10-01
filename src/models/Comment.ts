@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
-const User = require('../models/User');
-const Episode = require('../models/Episode');
-const Season = require('../models/Season');
-const Tv = require('../models/Tv');
-const Book = require('../models/Book');
-const Movie = require('../models/Movie');
+import mongoose from 'mongoose';
+import User from './User';
+import Episode from './Episode';
+import Season from './Season';
+import Tv from './Tv';
+import Book from './Book';
+import Movie from './Movie';
 //get topComment id and only inc count of the topComment to sort by it
 
 const CommentSchema = new mongoose.Schema({
@@ -59,6 +59,18 @@ const CommentSchema = new mongoose.Schema({
     type: String,
     ref: 'Book',
   },
+  upvote: {
+    type: Number,
+    default: 0,
+  },
+  downvote: {
+    type: Number,
+    default: 0,
+  },
+  balance:{
+    type: Number,
+    default:0
+  }
 });
 
 function autoPopulateReplies(next) {
@@ -66,6 +78,20 @@ function autoPopulateReplies(next) {
   this.populate('postedBy', 'username');
   next();
 }
+
+
+//look more into these later
+CommentSchema.pre('updateOne', function (next) {
+  this.set({ balance: this.get('upvote') - this.get('downvote') });
+
+  next();
+});
+
+CommentSchema.pre('save', function (next) {
+  this.set({ balance: this.get('upvote') - this.get('downvote') });
+
+  next();
+});
 
 CommentSchema.pre('findOne', autoPopulateReplies).pre(
   'find',
@@ -85,11 +111,12 @@ CommentSchema.pre('save', async function (next) {
       return mongoose.model('Movie');
     } else if (this.parentBook) {
       return mongoose.model('Book');
-    } else {
-      const err = new Error('Something went wrong');
-      //next(err);
-      return err;
-    }
+    } 
+    // else {
+    //   const err = new Error('Something went wrong');
+    //   //next(err);
+    //   return err;
+    // }
   };
 
   const selectParentMedia = () => {
@@ -103,11 +130,12 @@ CommentSchema.pre('save', async function (next) {
       return this.parentMovie;
     } else if (this.parentBook) {
       return this.parentBook;
-    } else {
-      const err = new Error('Something went wrong');
-      //next(err);
-      return err;
     }
+    // else {
+    //   const err = new Error('Something went wrong');
+    //   //next(err);
+    //   return err;
+    // }
   };
 
   let mongoModel = selectModel();
@@ -126,4 +154,4 @@ CommentSchema.pre('save', async function (next) {
 
 const Comment = mongoose.model('Comment', CommentSchema);
 
-module.exports = Comment;
+export default Comment;

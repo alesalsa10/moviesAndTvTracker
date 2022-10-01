@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const moment = require('moment');
+import mongoose from 'mongoose';
+import moment from 'moment';
 
 const hourFromNow = function () {
   return moment().add(1, 'hour');
@@ -25,4 +25,4 @@ const EmailTokenSchema = new mongoose.Schema({
 
 const EmailToken = mongoose.model('EmailToken', EmailTokenSchema);
 
-module.exports = EmailToken;
+export default EmailToken;

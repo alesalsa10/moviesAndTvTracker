@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const episodeSchema = new mongoose.Schema({
   episodeNumber: {
@@ -42,4 +42,4 @@ const episodeSchema = new mongoose.Schema({
 
 const Episode = mongoose.model('Episode', episodeSchema);
 
-module.exports = Episode;
+export default Episode;

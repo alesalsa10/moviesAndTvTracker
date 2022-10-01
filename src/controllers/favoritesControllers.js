@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const Book = require('../models/Book');
-const api = require('../externalAPI/apiCalls');
+const api = require('../src/externalAPI/apiCalls');
 
 const toggleMovieFavorite = async (req, res) => {
   const { externalId } = req.params;

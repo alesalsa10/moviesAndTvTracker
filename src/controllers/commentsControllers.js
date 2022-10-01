@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const Comment = require('../models/Comment');
-const chooseCommentParent = require('../utils/chooseCommentParent');
-const Selector = require('../utils/selector');
+const chooseCommentParent = require('../src/utils/chooseCommentParent');
+const Selector = require('../src/utils/selector');
 const mongoose = require('mongoose');
 
 //make it so if comment value == '[Deleted]' this type of comment cannot be deleted since this is only used a reference key

@@ -1,6 +1,6 @@
 const Book = require('../models/Book');
 const BasedOnBook = require('../models/BasedOnBook');
-const apiCalls = require('../externalAPI/apiCalls');
+const apiCalls = require('../src/externalAPI/apiCalls');
 const { default: axios } = require('axios');
 
 const getBookById = async (req, res) => {
