@@ -1,14 +1,19 @@
-const bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
-const sendEmail = require('../src/services/sendEmail');
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import sendEmail from '../services/sendEmail';
+import {Request, Response} from 'express';
 
-const uploadImage = require('../src/services/imageUpload');
-const deletePicture = require('../src/services/imageDeletion');
+// import uploadImage from '../src/services/imageUpload';
+// import deletePicture from '../src/services/imageDeletion';
 
-const User = require('../models/User');
+import User from '../models/User';
 
-const getUser = async (req, res) => {
-  const { username } = req.params;
+interface UserAuth extends Request {
+  user: string; // or any other type
+};
+
+const getUser = async (req: Request, res: Response) => {
+  const username: string  = req.params.username;
   try {
     let user = await User.findOne({ username: username })
       .select(
@@ -32,7 +37,7 @@ const getUser = async (req, res) => {
   }
 };
 
-const getSelf = async (req, res) => {
+const getSelf = async (req: UserAuth, res: Response) => {
   try {
     let user = await User.findById(req.user).select(
       '-password -refreshToken  -refreshTokens -comments'
@@ -48,9 +53,9 @@ const getSelf = async (req, res) => {
   }
 };
 
-const editUsername = async (req, res) => {
+const editUsername = async (req: UserAuth, res: Response) => {
   //only the username and name can be changed on the profile for now,  password will be able to be changed in later versions
-  const { username } = req.body;
+  const username: string = req.body.username;
 
   try {
     const update = {
@@ -74,9 +79,9 @@ const editUsername = async (req, res) => {
   }
 };
 
-const editName = async (req, res) => {
+const editName = async (req: UserAuth, res: Response) => {
   //only the username and name can be changed on the profile for now,  password will be able to be changed in later versions
-  const { name } = req.body;
+  const name: string = req.body.name;
 
   try {
     const update = {
@@ -93,9 +98,9 @@ const editName = async (req, res) => {
   }
 };
 
-const deleteUser = async (req, res) => {
-  const { id } = req.params;
-  const user = req.user;
+const deleteUser = async (req: UserAuth, res: Response) => {
+  const  id: string  = req.params.id;
+  const user: string = req.user;
   console.log(id, user);
   if (id == user) {
     try {
@@ -191,7 +196,7 @@ const deleteUser = async (req, res) => {
 //   }
 // };
 
-module.exports = {
+export = {
   getUser,
   editUsername,
   deleteUser,

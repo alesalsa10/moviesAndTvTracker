@@ -1,12 +1,12 @@
 require('dotenv').config();
-import express, {Request, Response} from 'express';
+import express, { Request, Response } from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import connectDb  from './config/mongooseConnection';
+import connectDb from './config/mongooseConnection';
 import helmet from 'helmet';
 
 import authRoutes from './routes/authRoutes';
-// const userRouter = require('./routes/userRoutes');
+import userRouter from './routes/userRoutes';
 // const commentsRouter = require('./routes/commentsRoutes');
 // const mediaRouter = require('./routes/mediaRoutes');
 // const favoriteRouter = require('./routes/favoriteRoutes');
@@ -43,7 +43,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/auth', authRoutes);
-// app.use('/users', userRouter);
+app.use('/users', userRouter);
 // app.use('/comments', commentsRouter);
 // app.use('/media', mediaRouter);
 // app.use('/favorites', favoriteRouter);
@@ -52,6 +52,4 @@ app.use('/auth', authRoutes);
 // app.use('/configuration', configRouter);
 // app.use('/genre', genreRouter);
 
-app.listen(PORT, () =>
-  console.log(`Server started on port ${PORT}`)
-);
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

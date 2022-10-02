@@ -1,9 +1,9 @@
-const express = require('express');
+import express, {Request, Response, NextFunction} from 'express';
 const router = express.Router();
-const { check, validationResult, oneOf } = require('express-validator');
+import { check, validationResult, oneOf } from 'express-validator';
 
-const userController = require('../controllers/userControllers');
-const auth = require('../middlewares/auth');
+import userController from '../controllers/userControllers';
+import auth from '../middlewares/auth';
 
 router.get('/self', auth, userController.getSelf);
 
@@ -16,7 +16,7 @@ router.put(
       .isLength({ min: 3, max: 25 })
       .withMessage('Username must be between 3 and 25 characters'),
   ],
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -36,7 +36,7 @@ router.put(
       .isLength({ min: 3, max: 25 })
       .withMessage('Name must be between 3 and 25 characters'),
   ],
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -53,4 +53,4 @@ router.delete('/:id', auth, userController.deleteUser);
 
 //router.put('/upload/:userId', auth, userController.uploadProfileImage);
 
-module.exports = router;
+export default router;
