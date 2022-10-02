@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const mediaControllers = require('../controllers/mediaControllers');
+const mediaControllers = require('../controllers/mediaControllers.jts');
 const auth = require('../middlewares/auth'); //auth is not needed to view media only to interact with them such as adding to bookmarks or commenting on them
 
 //no need to be signed in to get media

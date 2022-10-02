@@ -1,6 +1,6 @@
-const axios = require('axios');
+import axios from 'axios';
 
-const externalGetMediaById = async (mediaType, id) => {
+const externalGetMediaById = async (mediaType: string, id: string) => {
   try {
     const response = await axios.get(
       `${process.env.TMDB_BASE_URL}/${mediaType}/${id}?api_key=${process.env.TMDB_KEY}&append_to_response=videos,credits,release_dates,content_ratings,recommendations`
@@ -18,7 +18,7 @@ const externalGetMediaById = async (mediaType, id) => {
   }
 };
 
-const getBook = async (id) => {
+const getBook = async (id: string) => {
   try {
     const response = await axios.get(
       `https://www.googleapis.com/books/v1/volumes/${id}?key=${process.env.GOOGLE_BOOKS_KEY}`
@@ -36,7 +36,7 @@ const getBook = async (id) => {
   }
 };
 
-const searchByTitleAndAuthor = async (title, author) => {
+const searchByTitleAndAuthor = async (title:string, author: string) => {
   console.log('sdfdsf', title, author)
   title = title.split(' ').join('+');
   let some = `https://www.googleapis.com/books/v1/volumes?q=intitle:${title}+inauthor:${author}&maxResults=1&key=${process.env.GOOGLE_BOOKS_KEY}`;
@@ -60,7 +60,7 @@ const searchByTitleAndAuthor = async (title, author) => {
   }
 };
 
-const getBookByIsbn = async (isbn) => {
+const getBookByIsbn = async (isbn: string) => {
   try {
     const response = await axios.get(
       `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&key=${process.env.GOOGLE_BOOKS_KEY}`
@@ -76,7 +76,7 @@ const getBookByIsbn = async (isbn) => {
   }
 };
 
-const booksByGenre = async (genre) => {
+const booksByGenre = async (genre: string) => {
   try {
     const response = await axios.get(
       `https://www.googleapis.com/books/v1/volumes?q=subject:${genre}&maxResults=10&key=${process.env.GOOGLE_BOOKS_KEY}
@@ -95,7 +95,7 @@ const booksByGenre = async (genre) => {
   }
 };
 
-const searchMedia = async (mediaType, searchQuery) => {
+const searchMedia = async (mediaType:string, searchQuery: string) => {
   try {
     const response = await axios.get(
       `${process.env.TMDB_BASE_URL}/search/${mediaType}?api_key=${process.env.TMDB_KEY}&query=${searchQuery}&include_adult=false`
@@ -112,7 +112,7 @@ const searchMedia = async (mediaType, searchQuery) => {
   }
 };
 
-module.exports = {
+export default {
   getBook,
   externalGetMediaById,
   booksByGenre,

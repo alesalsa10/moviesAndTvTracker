@@ -1,7 +1,8 @@
-const { default: axios } = require('axios');
+import { default as axios } from 'axios';
+import {Request, Response} from 'express';
 
-const getPersonById = async (req, res) => {
-    const {personId} = req.params;
+const getPersonById = async (req: Request, res: Response) => {
+    const personId: string = req.params.personId;
     try{
         const response = await axios.get(
           `${process.env.TMDB_BASE_URL}/person/${personId}?api_key=${process.env.TMDB_KEY}&append_to_response=images,combined_credits`
@@ -14,8 +15,10 @@ const getPersonById = async (req, res) => {
     }
 };
 
-const getCredits = async(req, res) =>{
-    const {personId, mediaType} = req.params;
+const getCredits = async(req: Request, res: Response) =>{
+    //const {personId, mediaType} = req.params;
+    const personId: string = req.params.personId;
+    const mediaType: string = req.params.mediaType;
     try{
         const response = await axios.get(
           `${process.env.TMDB_BASE_URL}/person/${personId}/${mediaType}?api_key=${process.env.TMDB_KEY}`
@@ -28,7 +31,7 @@ const getCredits = async(req, res) =>{
     }
 }
 
-const getPopular = async (req, res) => {
+const getPopular = async (req: Request, res: Response) => {
   let page = req.query.page;
   try {
     const response = await axios.get(
@@ -42,7 +45,7 @@ const getPopular = async (req, res) => {
   }
 };
 
-module.exports = {
+exports = {
   getPersonById,
   getCredits,
   getPopular

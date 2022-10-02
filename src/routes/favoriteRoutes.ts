@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const favoriteControllers = require('../controllers/favoritesControllers');
-const auth = require('../middlewares/auth');
-const checkVerification = require('../middlewares/checkVerification');
+import favoriteControllers from '../controllers/favoritesControllers';
+import auth from '../middlewares/auth';
+import checkVerification from '../middlewares/checkVerification';
 
 router.put(
   '/movie/:externalId',
@@ -32,4 +32,4 @@ router.get(
   favoriteControllers.getAllFavorites
 );
 
-module.exports = router;
+export default router;

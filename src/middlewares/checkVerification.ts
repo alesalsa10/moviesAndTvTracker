@@ -1,6 +1,10 @@
-const User = require('../models/User');
+import User from '../models/User';
+import {Request, Response, NextFunction} from 'express';
 
-const checkVerification = async (req, res, next) => {
+interface UserAuth extends Request {
+  user: string; // or any other type
+}
+const checkVerification = async (req: UserAuth, res: Response, next: NextFunction) => {
   //this middleware will run before making any post, put, and delete
   //without email verification users willl only be able to view data
   const user = await User.findById(req.user);
@@ -14,5 +18,4 @@ const checkVerification = async (req, res, next) => {
     next();
   }
 };
-
-module.exports = checkVerification;
+export default checkVerification;

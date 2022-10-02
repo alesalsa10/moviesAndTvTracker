@@ -1,21 +1,24 @@
 //only need to get the media as creating will only happen when the user tries to interact with it
 //it is created with the api key when the user goes to click on given media from the movie database api
-const Season = require('../models/Season');
-const Episode = require('../models/Episode');
-const Movie = require('../models/Movie');
-const Tv = require('../models/Tv');
-const apiCalls = require('../src/externalAPI/apiCalls');
-const { default: axios } = require('axios');
-const BasedOnBook = require('../models/BasedOnBook');
-const Selector = require('../src/utils/selector');
+import Season from '../models/Season';
+import Episode from '../models/Episode';
+import Movie from '../models/Movie';
+import Tv from '../models/Tv';
+import apiCalls from '../externalAPI/apiCalls';
+import { default as axios } from 'axios';
+import BasedOnBook from '../models/BasedOnBook';
+import Selector from '../utils/selector.js';
+import {Request, Response} from 'express';
 
-const getMediaById = async (req, res) => {
+const getMediaById = async (req: Request, res: Response) => {
   //lookup media by id
   //if media is found
   //call external api, get response
   //merge response with my own database,
-  const { mediaType, id } = req.params;
-  let foundMedia;
+  //const { mediaType, id } = req.params;
+  const mediaType: string = req.params.mediaType;
+  const id: string = req.params.id;
+  let foundMedia: any;
   const selector = new Selector();
   let model = selector.chooseModel(mediaType);
   if (!model) {
@@ -57,8 +60,10 @@ const getMediaById = async (req, res) => {
   }
 };
 
-const getMediaByCategories = async (req, res) => {
-  const { mediaType, category } = req.params;
+const getMediaByCategories = async (req: Request, res: Response) => {
+  //const { mediaType, category } = req.params;
+  const mediaType: string = req.params.mediaType;
+  const category: string = req.params.category;
   try {
     const response = await axios.get(
       `${process.env.TMDB_BASE_URL}/${mediaType}/${category}?api_key=${process.env.TMDB_KEY}`
@@ -72,11 +77,11 @@ const getMediaByCategories = async (req, res) => {
   }
 };
 
-const searchMedia = async (req, res) => {
+const searchMedia = async (req: Request, res: Response) => {
   //from the front end a search will call this, and search book in the bookController
   //this allows for better error handling
   //const { searchQuery } = req.params;
-  let search_query = req.query.search_query.split(' ').join('+');
+  let search_query: string = (req.query.search_query as string).split(' ').join('+');
   console.log(search_query);
   try {
     const response = await axios.get(
@@ -91,7 +96,7 @@ const searchMedia = async (req, res) => {
   }
 };
 
-const getTrending = async (req, res) => {
+const getTrending = async (req: Request, res: Response) => {
   const { mediaType, timePeriod } = req.params;
   try {
     const response = await axios.get(
@@ -106,9 +111,9 @@ const getTrending = async (req, res) => {
   }
 };
 
-const getMediaLists = async (req, res) => {
+const getMediaLists = async (req: Request, res: Response) => {
   const { mediaType, listType } = req.params;
-  let page = req.query.page;
+  let page: string= req.query.page as string;
   try {
     const response = await axios.get(
       `${process.env.TMDB_BASE_URL}/${mediaType}/${listType}?api_key=${process.env.TMDB_KEY}&page=${page}`
@@ -123,7 +128,7 @@ const getMediaLists = async (req, res) => {
   }
 };
 
-const getRecommendations = async (req, res) => {
+const getRecommendations = async (req: Request, res: Response) => {
   const { mediaType, id } = req.params;
   try {
     const response = await axios.get(
@@ -182,7 +187,7 @@ const getRecommendations = async (req, res) => {
   }
 };
 
-const getSeason = async (req, res) => {
+const getSeason = async (req: Request, res: Response) => {
   //when an user get a season
   //check if season exists in array called seasons inside the media document
   //if it does not create a new season with the seasonNumber and the id from the external api
@@ -196,12 +201,12 @@ const getSeason = async (req, res) => {
       `${process.env.TMDB_BASE_URL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.TMDB_KEY}&append_to_response=videos,credits,release_dates`
     );
     //let mediaDetails = response.data
-    season = season.data;
+    //season = season.data;
     let parentTV = await apiCalls.externalGetMediaById('tv', id);
     if(parentTV.error){
       return res
-        .status(mediaDetails.error.status)
-        .json({ Msg: mediaDetails.error.Msg });
+        .status(parentTV.error.status)
+        .json({ Msg: parentTV.error.Msg });
     }
     try {
       let media = await Tv.findById(id);
@@ -215,16 +220,20 @@ const getSeason = async (req, res) => {
             let foundMedia = foundSeason;
             return res.status(200).json({ mediaDetails, foundMedia });
           } else {
-            console.log(seasonNumber, season.id, id);
+            //console.log(seasonNumber, season.id, id);
             let foundSeason = new Season({
               seasonNumber,
-              _id: season.id,
+              _id: season.data.id,
               media: id,
-              name: season.name,
+              name: season.data.name,
               mediaName: media.name
             });
             await foundSeason.save();
-            await media.seasons.push(foundSeason);
+            //await media.seasons.push(foundSeason);
+            await Tv.findByIdAndUpdate(media._id, {
+              $push: {seasons: foundSeason._id}
+            })
+
             await media.save();
             //return res.status(200).json({ season, foundSeason });
             let mediaDetails = season;
@@ -243,14 +252,18 @@ const getSeason = async (req, res) => {
         await media.save();
         let foundSeason = new Season({
           seasonNumber,
-          _id: season.id,
+          _id: season.data.id,
           media: id,
-          name: season.name,
+          name: season.data.name,
           mediaName: media.name
         });
-        console.log(seasonNumber, season.id, id);
+        console.log(seasonNumber, season.data.id, id);
         await foundSeason.save();
-        await media.seasons.push(foundSeason);
+        //await media.seasons.push(foundSeason);
+        await Tv.findByIdAndUpdate(media._id, {
+          $push: { seasons: foundSeason._id },
+        });
+
         await media.save();
         //return res.status(200).json({ season, foundSeason });
         let mediaDetails = season;
@@ -269,13 +282,13 @@ const getSeason = async (req, res) => {
   }
 };
 
-const getEpisode = async (req, res) => {
+const getEpisode = async (req: Request, res: Response) => {
   const { id, seasonNumber, episodeNumber } = req.params;
   let parentTV = await apiCalls.externalGetMediaById('tv', id);
   if (parentTV.error) {
     return res
-      .status(mediaDetails.error.status)
-      .json({ Msg: mediaDetails.error.Msg });
+      .status(parentTV.error.status)
+      .json({ Msg: parentTV.error.Msg });
   }
   try {
     const episode = await axios.get(
@@ -316,7 +329,11 @@ const getEpisode = async (req, res) => {
                     seasonNumber: foundSeason.seasonNumber,
                   });
                   await foundEpisode.save();
-                  await foundSeason.episodes.push(foundEpisode);
+                  //await foundSeason.episodes.push(foundEpisode);
+                  await Season.findByIdAndUpdate(foundSeason._id, {
+                    $push: { episodes: foundSeason._id },
+                  });
+
                   await foundSeason.save();
                   //res.status(200).json({ mediaDetails, foundEpisode });
                   let foundMedia = foundEpisode;
@@ -337,7 +354,10 @@ const getEpisode = async (req, res) => {
               });
               await foundSeason.save();
               console.log(foundSeason)
-              await media.seasons.push(foundSeason);
+              //await media.seasons.push(foundSeason);
+              await Tv.findByIdAndUpdate(media._id, {
+                $push: { seasons: foundSeason._id },
+              });
               await media.save();
               //search for episode
               let foundEpisode = new Episode({
@@ -350,7 +370,10 @@ const getEpisode = async (req, res) => {
                 seasonNumber: foundSeason.seasonNumber
               });
               await foundEpisode.save();
-              await foundSeason.episodes.push(foundEpisode);
+              //await foundSeason.episodes.push(foundEpisode);
+              await Season.findByIdAndUpdate(foundSeason._id, {
+                $push: { episodes: foundEpisode._id },
+              });
               await foundSeason.save();
               let foundMedia = foundEpisode;
               return res.status(200).json({ mediaDetails, foundMedia });
@@ -375,7 +398,10 @@ const getEpisode = async (req, res) => {
             mediaName: media.name,
           });
           await foundSeason.save();
-          await media.seasons.push(foundSeason);
+          //await media.seasons.push(foundSeason);
+          await Tv.findByIdAndUpdate(media._id, {
+            $push: { seasons: foundSeason._id },
+          });
           await media.save();
           let foundEpisode = new Episode({
             _id: mediaDetails.id,
@@ -387,7 +413,10 @@ const getEpisode = async (req, res) => {
             seasonNumber: foundSeason.seasonNumber,
           });
           await foundEpisode.save();
-          await foundSeason.episodes.push(foundEpisode);
+          //await foundSeason.episodes.push(foundEpisode);
+          await Season.findByIdAndUpdate(foundSeason._id, {
+            $push: { episodes: foundEpisode._id },
+          });
           await foundSeason.save();
           //res.status(200).json({ mediaDetails, foundEpisode });
           let foundMedia = foundEpisode;
@@ -411,7 +440,7 @@ const getEpisode = async (req, res) => {
   }
 };
 
-const filterByGenre = async (req, res) => {
+const filterByGenre = async (req: Request, res: Response) => {
   const { mediaType } = req.params;
   let with_genres = req.query.with_genres;
   console.log(mediaType, req.query);
@@ -428,7 +457,7 @@ const filterByGenre = async (req, res) => {
   }
 };
 
-const isMediaBasedOnBook = async (req, res) => {
+const isMediaBasedOnBook = async (req: Request, res: Response) => {
   const { media_name, release_year } = req.body;
   console.log(media_name, release_year);
   try{
@@ -445,8 +474,8 @@ const isMediaBasedOnBook = async (req, res) => {
        );
        if (book.error) {
          res
-           .status(foundMedia.error.status)
-           .json({ Msg: foundMedia.error.Msg });
+           .status(book.error.status)
+           .json({ Msg: book.error.Msg });
        }else {
          console.log(book)
          return res.status(200).json(book.items[0])
@@ -462,7 +491,7 @@ const isMediaBasedOnBook = async (req, res) => {
 }
 
 
-module.exports = {
+exports = {
   getMediaById,
   getMediaByCategories,
   searchMedia,

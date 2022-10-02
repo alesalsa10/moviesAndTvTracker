@@ -1,6 +1,7 @@
-const { default: axios } = require('axios');
+import { default as axios } from 'axios';
+import {Request, Response} from 'express';
 
-const getConfiguration = async (req, res) =>{
+const getConfiguration = async (req: Request, res: Response) =>{
     try{
         const response = await axios.get(
           `${process.env.baseUrl}/configuration?api_key=${process.env.TMDB_KEY}`
@@ -12,4 +13,4 @@ const getConfiguration = async (req, res) =>{
     }
 }
 
-module.exports = {getConfiguration}
+exports = {getConfiguration}

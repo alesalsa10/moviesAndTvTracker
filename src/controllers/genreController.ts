@@ -1,6 +1,7 @@
-const { default: axios } = require('axios');
+import { default as axios } from 'axios';
+import {Request, Response} from 'express';
 
-const getGenres = async (req, res) => {
+const getGenres = async (req: Request, res: Response) => {
   const { mediaType } = req.params;
   try {
     const response = await axios.get(
@@ -14,6 +15,6 @@ const getGenres = async (req, res) => {
   }
 };
 
-module.exports = {
+exports = {
     getGenres
 }
