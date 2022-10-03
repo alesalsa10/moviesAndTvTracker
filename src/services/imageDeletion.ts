@@ -1,4 +1,4 @@
-const aws = require('aws-sdk');
+import aws from 'aws-sdk';
 const s3 = new aws.S3();
 
 aws.config.update({
@@ -7,7 +7,7 @@ aws.config.update({
   region: 'us-east-2',
 });
 
-const deleteImage = (filename, callback) => {
+const deleteImage = (filename: string, callback: Function) => {
   let params = {
     Bucket: process.env.AWSBucketName,
     Key: filename,
@@ -22,4 +22,4 @@ const deleteImage = (filename, callback) => {
   });
 };
 
-module.exports = deleteImage;
+export default  deleteImage;

@@ -45,7 +45,7 @@ const getPopular = async (req: Request, res: Response) => {
   }
 };
 
-exports = {
+export = {
   getPersonById,
   getCredits,
   getPopular

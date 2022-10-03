@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
-const mediaControllers = require('../controllers/mediaControllers.jts');
-const auth = require('../middlewares/auth'); //auth is not needed to view media only to interact with them such as adding to bookmarks or commenting on them
+import mediaControllers from '../controllers/mediaControllers';
+
 
 //no need to be signed in to get media
 router.post('/recommendation', mediaControllers.isMediaBasedOnBook);
@@ -18,4 +18,4 @@ router.get('/tv/:id/season/:seasonNumber/episode/:episodeNumber', mediaControlle
 router.get('/trending/:mediaType/:timePeriod', mediaControllers.getTrending);
 
 
-module.exports = router;
+export default router;

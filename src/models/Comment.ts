@@ -59,18 +59,18 @@ const CommentSchema = new mongoose.Schema({
     type: String,
     ref: 'Book',
   },
-  // upvote: {
-  //   type: Number,
-  //   default: 0,
-  // },
-  // downvote: {
-  //   type: Number,
-  //   default: 0,
-  // },
-  // balance:{
-  //   type: Number,
-  //   default:0
-  // }
+  upvote: {
+    type: Number,
+    default: 0,
+  },
+  downvote: {
+    type: Number,
+    default: 0,
+  },
+  balance:{
+    type: Number,
+    default:0
+  }
 });
 
 function autoPopulateReplies(next) {

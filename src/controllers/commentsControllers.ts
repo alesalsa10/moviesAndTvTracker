@@ -1,13 +1,17 @@
-const User = require('../models/User');
-const Comment = require('../models/Comment');
-const chooseCommentParent = require('../src/utils/chooseCommentParent');
-const Selector = require('../src/utils/selector');
-const mongoose = require('mongoose');
+import User from '../models/User';
+import Comment from '../models/Comment';
+import chooseCommentParent from '../utils/chooseCommentParent';
+import Selector from '../utils/selector';
+import mongoose from 'mongoose';
+import { Request, Response } from 'express';
 
 //make it so if comment value == '[Deleted]' this type of comment cannot be deleted since this is only used a reference key
+interface UserAuth extends Request {
+  user: string; // or any other type
+}
 
-const createComment = async (req, res) => {
-  const { text } = req.body;
+const createComment = async (req: UserAuth, res: Response) => {
+  const text: string = req.body.text;
   const userId = req.user;
   const { id } = req.params;
 
@@ -23,7 +27,7 @@ const createComment = async (req, res) => {
         return res.status(500).json({ Msg: 'This model does not exist' });
       } else {
         try {
-          let existingMedia = await model.findById(id);
+          let existingMedia: any = await model.findById(id);
           if (existingMedia) {
             try {
               let commentParentMedia = chooseCommentParent(mediaType);
@@ -33,8 +37,11 @@ const createComment = async (req, res) => {
                 text,
               });
               await newComment.save();
-              await foundUser.comments.push(newComment);
-              await foundUser.save();
+              //await foundUser.comments.push(newComment);
+              //await foundUser.save();
+              await User.findByIdAndUpdate(req.user, {
+                $push: { comments: newComment },
+              });
               await existingMedia.comments.push(newComment);
               await existingMedia.save();
               newComment = await Comment.findById(newComment._id).populate(
@@ -69,8 +76,10 @@ const createComment = async (req, res) => {
   }
 };
 
-const replyToComment = async (req, res) => {
-  const { text, parentCommentId } = req.body;
+const replyToComment = async (req: UserAuth, res: Response) => {
+  //const { text, parentCommentId } = req.body;
+  const text: string = req.body.text;
+  const parentCommentId: string = req.body.parentCommentId;
   const userId = req.user;
   const { mediaType, id } = req.params;
   console.log(mediaType, id);
@@ -100,12 +109,11 @@ const replyToComment = async (req, res) => {
                   parentComment: parentCommentId,
                 });
                 await newComment.save();
-                await foundUser.comments.push(newComment);
-                await foundUser.save();
-                // await foundComment.replies.push(newComment);
-                // await foundComment.save();
 
-                //changed to this method because on pre hook on comments adding to comment count twice
+                await User.findByIdAndUpdate(req.user, {
+                  $push: { comments: newComment },
+                });
+
                 await Comment.findByIdAndUpdate(foundComment._id, {
                   $push: { replies: newComment },
                 });
@@ -145,7 +153,7 @@ const replyToComment = async (req, res) => {
   }
 };
 
-const editComment = async (req, res) => {
+const editComment = async (req: Request, res: Response) => {
   //unable to update if not test == 'detelete'
   const commentId = req.params.commentId;
   const { text } = req.body;
@@ -172,13 +180,12 @@ const editComment = async (req, res) => {
   } catch (err) {}
 };
 
-const deleteComment = async (req, res) => {
+const deleteComment = async (req: Request, res: Response) => {
   //to delete the comment, I will onyl delete the content and replace it with ['deleted']
   //this will be done so the threaded comment can still be looked up, how reddit works
   //only do the 'deleted' logic if the comment has replies
   //make sure to delete comment from user and media
-  const commentId = req.params.commentId;
-  console.log(commentId);
+  const commentId: string = req.params.commentId;
   try {
     const update = {
       text: '[Deleted]',
@@ -255,10 +262,10 @@ const deleteComment = async (req, res) => {
   }
 };
 
-const getComments = async (req, res) => {
+const getComments = async (req: Request, res: Response) => {
   //add option to sort by reply count, only first row
   const { mediaType, id } = req.params;
-  let sort = req.query.sort;
+  let sort: string = req.query.sort as string;
   let parent;
   switch (mediaType) {
     case 'movie':
@@ -311,7 +318,7 @@ const getComments = async (req, res) => {
   }
 };
 
-module.exports = {
+export = {
   createComment,
   replyToComment,
   editComment,

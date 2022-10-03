@@ -7,13 +7,13 @@ import helmet from 'helmet';
 
 import authRoutes from './routes/authRoutes';
 import userRouter from './routes/userRoutes';
-// const commentsRouter = require('./routes/commentsRoutes');
-// const mediaRouter = require('./routes/mediaRoutes');
+import commentsRouter from './routes/commentsRoutes';
+import mediaRouter from './routes/mediaRoutes';
 import favoriteRouter from './routes/favoriteRoutes';
-// const bookRouter = require('./routes/bookRoutes');
-// const peopleRouter = require('./routes/peopleRoutes');
-// const configRouter = require('./routes/mediaApiConfigRoute');
-// const genreRouter = require('./routes/genreRoutes');
+import bookRouter from './routes/bookRoutes';
+import peopleRouter from './routes/peopleRoutes';
+import configRouter from './routes/mediaApiConfigRoute';
+import genreRouter from './routes/genreRoutes';
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -44,12 +44,12 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/auth', authRoutes);
 app.use('/users', userRouter);
-// app.use('/comments', commentsRouter);
-// app.use('/media', mediaRouter);
+app.use('/comments', commentsRouter);
+app.use('/media', mediaRouter);
 app.use('/favorites', favoriteRouter);
-// app.use('/book', bookRouter);
-// app.use('/people', peopleRouter);
-// app.use('/configuration', configRouter);
-// app.use('/genre', genreRouter);
+app.use('/book', bookRouter);
+app.use('/people', peopleRouter);
+app.use('/configuration', configRouter);
+app.use('/genre', genreRouter);
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

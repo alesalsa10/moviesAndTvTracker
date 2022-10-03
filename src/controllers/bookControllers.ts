@@ -1,11 +1,11 @@
-const Book = require('../models/Book');
-const BasedOnBook = require('../models/BasedOnBook');
-const apiCalls = require('../src/externalAPI/apiCalls');
-const { default: axios } = require('axios');
+import Book from '../models/Book';
+import BasedOnBook from '../models/BasedOnBook';
+import apiCalls from '../externalAPI/apiCalls';
+import { default as axios } from 'axios';
+import { Request, Response } from 'express';
 
-const getBookById = async (req, res) => {
+const getBookById = async (req: Request, res: Response) => {
   let { bookId } = req.params;
-  console.log(bookId);
   let foundMedia = await Book.findById(bookId);
   let mediaDetails = await apiCalls.getBook(bookId);
   console.log(mediaDetails, '44');
@@ -21,14 +21,14 @@ const getBookById = async (req, res) => {
     foundMedia = new Book({ _id: bookId, name: mediaDetails.volumeInfo.title });
     await foundMedia.save();
     if (mediaDetails.error) {
-      res.status(foundMedia.error.status).json({ Msg: foundMedia.error.Msg });
+      res.status(mediaDetails.error.status).json({ Msg: mediaDetails.Msg });
     } else {
       res.status(200).json({ foundMedia, mediaDetails });
     }
   }
 };
 
-const getBookByIsbn = async (req, res) => {
+const getBookByIsbn = async (req: Request, res: Response) => {
   const { isbn } = req.params;
   //do something similar as id search
   //look up book by isbn, get and and save with google api id
@@ -59,7 +59,7 @@ const getBookByIsbn = async (req, res) => {
   }
 };
 
-const getBooksByGenre = async (req, res) => {
+const getBooksByGenre = async (req: Request, res: Response) => {
   let { genre } = req.params;
   let books = await apiCalls.booksByGenre(genre);
   if (books.error) {
@@ -69,9 +69,10 @@ const getBooksByGenre = async (req, res) => {
   }
 };
 
-const moviesBasedOnBook = async (req, res) => {
-  const { book_name, book_author } = req.body;
-  console.log(book_name, book_author);
+const moviesBasedOnBook = async (req: Request, res: Response) => {
+  //const { book_name, book_author } = req.body;
+  const book_name: string = req.body;
+  const book_author: string = req.body;
   try {
     let basedMedia = await BasedOnBook.findOne({
       book_name: book_name,
@@ -87,8 +88,8 @@ const moviesBasedOnBook = async (req, res) => {
         );
         if (mediaDetails.err) {
           res
-            .status(foundMedia.error.status)
-            .json({ Msg: foundMedia.error.Msg });
+            .status(mediaDetails.error.status)
+            .json({ Msg: mediaDetails.error.Msg });
         } else {
           if (mediaDetails.results.length > 0) {
             for (let movie of mediaDetails.results) {
@@ -111,14 +112,13 @@ const moviesBasedOnBook = async (req, res) => {
         );
         if (mediaDetails.error) {
           res
-            .status(foundMedia.error.status)
-            .json({ Msg: foundMedia.error.Msg });
+            .status(mediaDetails.error.status)
+            .json({ Msg: mediaDetails.error.Msg });
         } else {
           if (mediaDetails.results.length > 0) {
             for (let movie of mediaDetails.results) {
               if (
-                movie.first_air_date.getFullYear() ===
-                parseInt(basedMedia.release_year)
+                movie.first_air_date.getFullYear() === basedMedia.release_year
               ) {
                 movie.media_type = 'tv';
                 return res.status(200).json(movie);
@@ -137,8 +137,8 @@ const moviesBasedOnBook = async (req, res) => {
   }
 };
 
-const searchBook = async (req, res) => {
-  let search_query = req.query.search_query.split(' ').join('+');
+const searchBook = async (req: Request, res: Response) => {
+  let search_query = (req.query.search_query as string).split(' ').join('+');
   try {
     const response = await axios.get(
       `https://www.googleapis.com/books/v1/volumes?q=intitle:${search_query}&maxResults=40&key=${process.env.GOOGLE_BOOKS_KEY}
@@ -153,9 +153,8 @@ const searchBook = async (req, res) => {
   }
 };
 
-const booksByAuthor = async (req, res) => {
-  console.log(req.params);
-  let author = req.params.author.split(' ').join('+');
+const booksByAuthor = async (req: Request, res: Response) => {
+  let author: string = req.params.author.split(' ').join('+');
   console.log(author);
   try {
     const response = await axios.get(
@@ -171,7 +170,7 @@ const booksByAuthor = async (req, res) => {
   }
 };
 
-const getBestSellers = async (req, res) => {
+const getBestSellers = async (req: Request, res: Response) => {
   try {
     let response = await axios.get(
       `${process.env.NY_TIMES_URL}/lists/overview.json?api-key=${process.env.NY_TIMES_KEY}`
@@ -186,7 +185,7 @@ const getBestSellers = async (req, res) => {
   }
 };
 
-module.exports = {
+export = {
   getBookById,
   getBooksByGenre,
   searchBook,

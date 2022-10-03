@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
-const peopleRouter = require('../controllers/peopleControllers');
+import peopleRouter from '../controllers/peopleControllers';
 
 router.get('/:personId', peopleRouter.getPersonById);
 router.get('/lists/popular', peopleRouter.getPopular);
 router.get('/:personId/:mediaType', peopleRouter.getCredits);
 
-module.exports = router;
+export default router;

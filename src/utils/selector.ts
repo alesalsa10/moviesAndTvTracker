@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 class Selector {
-  chooseModel(mediaType) {
+  chooseModel(mediaType: string) {
     switch (mediaType) {
       case 'movie':
         return mongoose.model('Movie');
@@ -17,7 +17,7 @@ class Selector {
         return null;
     }
   }
-  chooseCommentParent(mediaType) {
+  chooseCommentParent(mediaType: string) {
     switch (mediaType) {
       case 'movie':
         return 'parentMovie';
@@ -35,5 +35,4 @@ class Selector {
   }
 }
 
-
-module.exports = Selector;
+export default Selector;

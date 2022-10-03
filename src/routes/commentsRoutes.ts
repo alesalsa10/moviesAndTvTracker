@@ -1,11 +1,13 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { check, validationResult } = require('express-validator');
+import { check, validationResult } from 'express-validator';
 
-const auth = require('../middlewares/auth');
-const checkVerification = require('../middlewares/checkVerification');
+import auth from '../middlewares/auth';
+import checkVerification from '../middlewares/checkVerification';
 
-const commentControllers = require('../controllers/commentsControllers');
+import commentControllers from '../controllers/commentsControllers';
+
+import {Request, Response, NextFunction} from 'express'
 
 router.post(
   '/:mediaType/:id',
@@ -14,7 +16,7 @@ router.post(
   [
     check('text').notEmpty().withMessage('Text must exist'),
   ],
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -35,7 +37,7 @@ router.post(
       .notEmpty()
       .withMessage('Parent Comment Id must exist'),
   ],
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -59,7 +61,7 @@ router.put(
       .equals('[Deleted]')
       .withMessage(`Text cannot be equal to [Deleted]`),
   ],
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -79,4 +81,4 @@ router.delete(
 
 router.get('/:mediaType/:id', commentControllers.getComments);
 
-module.exports = router;
+export default  router;

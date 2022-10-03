@@ -7,7 +7,7 @@ import Tv from '../models/Tv';
 import apiCalls from '../externalAPI/apiCalls';
 import { default as axios } from 'axios';
 import BasedOnBook from '../models/BasedOnBook';
-import Selector from '../utils/selector.js';
+import Selector from '../utils/selector';
 import {Request, Response} from 'express';
 
 const getMediaById = async (req: Request, res: Response) => {
@@ -491,7 +491,7 @@ const isMediaBasedOnBook = async (req: Request, res: Response) => {
 }
 
 
-exports = {
+export = {
   getMediaById,
   getMediaByCategories,
   searchMedia,

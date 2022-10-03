@@ -1,16 +1,16 @@
-const Movie = require('../models/Movie');
-const Tv = require('../models/Tv');
-const Season = require('../models/Season');
-const Episode = require('../models/Episode');
-const Book = require('../models/Book');
+import Movie from '../models/Movie';
+import Tv from '../models/Tv';
+import Season from '../models/Season';
+import Episode from '../models/Episode';
+import Book from '../models/Book';
 
 const getMedia = async (
-  externalId,
-  mediaType,
+  externalId: string,
+  mediaType: string,
   update = false,
   commentId = undefined
 ) => {
-  let existingMedia;
+  let existingMedia: any;
   if (mediaType == 'tv') {
     try {
       existingMedia = await Tv.findById(externalId);
@@ -153,4 +153,4 @@ const getMedia = async (
   }
 };
 
-module.exports = getMedia;
+export default getMedia;

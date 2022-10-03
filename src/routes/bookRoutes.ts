@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const auth = require('../middlewares/auth');
-const isLoggedInSameUser = require('../middlewares/isLoggedInSameUser.js');
-const booksControllers = require('../controllers/bookControllers');
+import auth from '../middlewares/auth';
+import isLoggedInSameUser from '../middlewares/isLoggedInSameUser.js';
+import booksControllers from '../controllers/bookControllers';
 
 
 router.get('/search', booksControllers.searchBook);
@@ -19,4 +19,4 @@ router.get('/newYorkTimes/bestSellers', booksControllers.getBestSellers);
 
 router.get('/isbn/:isbn', booksControllers.getBookByIsbn);
 
-module.exports = router;
+export default router;

@@ -15,6 +15,6 @@ const getGenres = async (req: Request, res: Response) => {
   }
 };
 
-exports = {
+export = {
     getGenres
 }
