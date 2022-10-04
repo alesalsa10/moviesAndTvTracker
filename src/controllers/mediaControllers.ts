@@ -48,7 +48,7 @@ const getMediaById = async (req: Request, res: Response) => {
         .status(mediaDetails.error.status)
         .json({ Msg: mediaDetails.error.Msg });
     } else {
-      let foundMedia;
+      //let foundMedia;
       //movie = title; tv = name
       let name = mediaType === 'movie' ? mediaDetails.title : mediaDetails.name
       foundMedia = new model({

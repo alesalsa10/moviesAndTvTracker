@@ -319,33 +319,45 @@ const getComments = async (req: Request, res: Response) => {
   }
 };
 
-// const vote = async (req: UserAuth, res: Response) => {
-//   const commentId: string = req.params.commentId;
-//   const isUpvote: boolean = req.body as boolean;
-//   try {
-//     let comment = await Comment.findById(commentId);
-//     if (comment) {
-//       let vote = await Vote.findOne({ postedBy: req.user, comment: commentId });
-//       if (vote) {
-//         // if upvote && existing vote value == 1, already upvoted, send message "cannot upvote again". No update happens.
-//         if(isUpvote && vote.value === 1){
-        
-//         // if upvote && existing vote value == -1, update vote value to 0 (zero).
-//         }else if(isUpvote && vote.value === -1){
-
-//         }
-//       } else {
-//         //create new vote and upvote or downvote
-//       }
-//     } else {
-//       return res.status(404).json({ Msg: 'Comment not found' });
-//     }
-//   } catch (err) {
-//     return res
-//       .status(500)
-//       .json({ Msg: 'Error finding this comment, try again later' });
-//   }
-// };
+const vote = async (req: UserAuth, res: Response) => {
+  const commentId: string = req.params.commentId;
+  const isUpvote: boolean = req.body as boolean;
+  try {
+    let comment = await Comment.findById(commentId);
+    if (comment) {
+      try {
+        let vote = await Vote.findOne(
+          { postedBy: req.user, comment: commentId },
+          { comment: commentId, postedBy: req.user },
+          { upsert: true, new: true, setDefaultsOnInsert: true}
+        );
+        if (vote) {
+          if (isUpvote && vote.value === 1) {
+            // if upvote && existing vote value == 1, already upvoted, send message "cannot upvote again". No update happens.
+          } else if (isUpvote && vote.value === -1) {
+            // if upvote && existing vote value == -1, update vote value to 0 (zero).
+          } else if (isUpvote && vote.value === 0) {
+            //if upvote && existing vote value == 0, update vote value to 1
+          } else if (!isUpvote && vote.value === 0) {
+            //if downvote && existing vote value == 1, update vote value to 0 (zero).
+          } else if (!isUpvote && vote.value === -1) {
+            //if downvote && existing vote value == -1, already downvoted, send message "cannot downvote again". No update happens.
+          } else {
+            //if downvote && existing vote value == 0, update vote value to -1
+          }
+        }
+      } catch (err) {
+        return res.status(500).json({ Msg: 'There was a problem voting' });
+      }
+    } else {
+      return res.status(404).json({ Msg: 'Comment not found' });
+    }
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ Msg: 'Error finding this comment, try again later' });
+  }
+};
 
 export = {
   createComment,

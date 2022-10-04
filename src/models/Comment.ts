@@ -59,10 +59,16 @@ const CommentSchema = new mongoose.Schema({
     type: String,
     ref: 'Book',
   },
-  votes: [{
-    type: mongoose.Types.ObjectId,
-    ref: 'Vote'
-  }],
+  votes: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'Vote',
+    },
+  ],
+  voteCount: {
+    type: Number,
+    default: 0,
+  },
 });
 
 function autoPopulateReplies(next: Function) {
