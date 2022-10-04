@@ -59,39 +59,30 @@ const CommentSchema = new mongoose.Schema({
     type: String,
     ref: 'Book',
   },
-  upvote: {
-    type: Number,
-    default: 0,
-  },
-  downvote: {
-    type: Number,
-    default: 0,
-  },
-  balance:{
-    type: Number,
-    default:0
-  }
+  votes: [{
+    type: mongoose.Types.ObjectId,
+    ref: 'Vote'
+  }],
 });
 
-function autoPopulateReplies(next) {
+function autoPopulateReplies(next: Function) {
   this.populate('replies');
   this.populate('postedBy', 'username');
   next();
 }
 
-
 //look more into these later
-CommentSchema.pre('updateOne', function (next) {
-  this.set({ balance: this.get('upvote') - this.get('downvote') });
+// CommentSchema.pre('updateOne', function (next) {
+//   this.set({ balance: this.get('upvote') - this.get('downvote') });
 
-  next();
-});
+//   next();
+// });
 
-CommentSchema.pre('save', function (next) {
-  this.set({ balance: this.get('upvote') - this.get('downvote') });
+// CommentSchema.pre('save', function (next) {
+//   this.set({ balance: this.get('upvote') - this.get('downvote') });
 
-  next();
-});
+//   next();
+// });
 
 CommentSchema.pre('findOne', autoPopulateReplies).pre(
   'find',
@@ -111,12 +102,7 @@ CommentSchema.pre('save', async function (next) {
       return mongoose.model('Movie');
     } else if (this.parentBook) {
       return mongoose.model('Book');
-    } 
-    // else {
-    //   const err = new Error('Something went wrong');
-    //   //next(err);
-    //   return err;
-    // }
+    }
   };
 
   const selectParentMedia = () => {
@@ -131,11 +117,6 @@ CommentSchema.pre('save', async function (next) {
     } else if (this.parentBook) {
       return this.parentBook;
     }
-    // else {
-    //   const err = new Error('Something went wrong');
-    //   //next(err);
-    //   return err;
-    // }
   };
 
   let mongoModel = selectModel();

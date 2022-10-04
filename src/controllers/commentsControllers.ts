@@ -4,6 +4,7 @@ import chooseCommentParent from '../utils/chooseCommentParent';
 import Selector from '../utils/selector';
 import mongoose from 'mongoose';
 import { Request, Response } from 'express';
+import Vote from '../models/Vote';
 
 //make it so if comment value == '[Deleted]' this type of comment cannot be deleted since this is only used a reference key
 interface UserAuth extends Request {
@@ -155,7 +156,7 @@ const replyToComment = async (req: UserAuth, res: Response) => {
 
 const editComment = async (req: Request, res: Response) => {
   //unable to update if not test == 'detelete'
-  const commentId = req.params.commentId;
+  const commentId: string = req.params.commentId;
   const { text } = req.body;
 
   try {
@@ -317,6 +318,34 @@ const getComments = async (req: Request, res: Response) => {
     }
   }
 };
+
+// const vote = async (req: UserAuth, res: Response) => {
+//   const commentId: string = req.params.commentId;
+//   const isUpvote: boolean = req.body as boolean;
+//   try {
+//     let comment = await Comment.findById(commentId);
+//     if (comment) {
+//       let vote = await Vote.findOne({ postedBy: req.user, comment: commentId });
+//       if (vote) {
+//         // if upvote && existing vote value == 1, already upvoted, send message "cannot upvote again". No update happens.
+//         if(isUpvote && vote.value === 1){
+        
+//         // if upvote && existing vote value == -1, update vote value to 0 (zero).
+//         }else if(isUpvote && vote.value === -1){
+
+//         }
+//       } else {
+//         //create new vote and upvote or downvote
+//       }
+//     } else {
+//       return res.status(404).json({ Msg: 'Comment not found' });
+//     }
+//   } catch (err) {
+//     return res
+//       .status(500)
+//       .json({ Msg: 'Error finding this comment, try again later' });
+//   }
+// };
 
 export = {
   createComment,

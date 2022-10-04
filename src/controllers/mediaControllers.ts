@@ -9,6 +9,7 @@ import { default as axios } from 'axios';
 import BasedOnBook from '../models/BasedOnBook';
 import Selector from '../utils/selector';
 import {Request, Response} from 'express';
+import mongoose from 'mongoose';
 
 const getMediaById = async (req: Request, res: Response) => {
   //lookup media by id
