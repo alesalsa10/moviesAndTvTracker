@@ -185,6 +185,8 @@ const getBestSellers = async (req: Request, res: Response) => {
   }
 };
 
+const getBooksWithMovies = async (req: Request, res: Response) => {};
+
 export = {
   getBookById,
   getBooksByGenre,
@@ -193,4 +195,5 @@ export = {
   getBookByIsbn,
   booksByAuthor,
   moviesBasedOnBook,
+  getBooksWithMovies,
 };

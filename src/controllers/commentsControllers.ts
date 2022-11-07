@@ -116,6 +116,7 @@ const replyToComment = async (req: UserAuth, res: Response) => {
 
                 await Comment.findByIdAndUpdate(foundComment._id, {
                   $push: { replies: newComment },
+                  $inc: { voteCount: 1 },
                 });
                 newComment = await Comment.findById(newComment._id).populate(
                   'postedBy',
@@ -186,6 +187,7 @@ const deleteComment = async (req: Request, res: Response) => {
   //only do the 'deleted' logic if the comment has replies
   //make sure to delete comment from user and media
   const commentId: string = req.params.commentId;
+  const parentCommentId: string = req.body.parentCommentId as string;
   try {
     const update = {
       text: '[Deleted]',
@@ -242,9 +244,32 @@ const deleteComment = async (req: Request, res: Response) => {
               comments: comment._id,
             },
           });
-          await Comment.findByIdAndDelete(comment._id); //IMPORTANT
-          console.log('was deleted');
 
+          
+          //if parentComment
+          if (comment.parentComment) {
+            try {
+              //find parentcomment and decrement repliesCount
+              await Comment.findByIdAndUpdate(comment.parentComment, {
+                $inc: { repliesCount: -1 },
+              });
+            } catch (error) {
+              console.log(error)
+            }
+          }
+
+          try {
+            await Comment.findByIdAndDelete(comment._id); //IMPORTANT
+            console.log('was deleted');
+          } catch (error) {
+            console.log(error);
+                          return res
+                            .status(500)
+                            .json({
+                              Msg: 'Something went wrong, try again later',
+                            });
+ 
+          }
           res.status(200).json({ Msg: 'Complete Deletion' });
         } catch (error) {
           console.log(error);
@@ -297,10 +322,10 @@ const getComments = async (req: Request, res: Response) => {
           [parent]: id,
           parentComment: null,
         })
-          .sort({ replies: -1 })
+          .sort({ repliesCount: -1 })
           .lean();
         return res.status(200).json(comments);
-      }else if(sort === 'popularity'){
+      } else if (sort === 'popularity') {
         let comments = await Comment.find({
           [parent]: id,
           parentComment: null,

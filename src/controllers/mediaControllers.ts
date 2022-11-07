@@ -491,6 +491,11 @@ const isMediaBasedOnBook = async (req: Request, res: Response) => {
   }
 }
 
+const getMoviesBasedOnBooks =async (req:Request, res: Response) => {
+  
+}
+
+
 
 export = {
   getMediaById,
@@ -503,4 +508,5 @@ export = {
   getTrending,
   filterByGenre,
   isMediaBasedOnBook,
+  getMoviesBasedOnBooks
 };

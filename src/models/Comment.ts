@@ -25,6 +25,10 @@ const CommentSchema = new mongoose.Schema({
       default: [],
     },
   ],
+  repliesCount: {
+    type: Number,
+    default: 0
+  },
   parentComment: {
     type: mongoose.Types.ObjectId,
     ref: 'Comment',
