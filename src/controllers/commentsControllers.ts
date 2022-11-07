@@ -2,10 +2,9 @@ import User from '../models/User';
 import Comment from '../models/Comment';
 import chooseCommentParent from '../utils/chooseCommentParent';
 import Selector from '../utils/selector';
-import mongoose from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 import { Request, Response } from 'express';
 import Vote from '../models/Vote';
-
 //make it so if comment value == '[Deleted]' this type of comment cannot be deleted since this is only used a reference key
 interface UserAuth extends Request {
   user: string; // or any other type
@@ -23,7 +22,7 @@ const createComment = async (req: UserAuth, res: Response) => {
     let foundUser = await User.findById(userId).select('-password');
     if (foundUser) {
       const selector = new Selector();
-      let model = selector.chooseModel(mediaType);
+      let model: any = selector.chooseModel(mediaType);
       if (!model) {
         return res.status(500).json({ Msg: 'This model does not exist' });
       } else {
@@ -89,14 +88,14 @@ const replyToComment = async (req: UserAuth, res: Response) => {
     if (foundUser) {
       //let model = chooseModel(mediaType);
       const selector = new Selector();
-      let model = selector.chooseModel(mediaType);
+      let model: any = selector.chooseModel(mediaType);
       if (!model) {
         return res
           .status(500)
           .json({ Msg: 'This media type does not exist our database' });
       } else {
         try {
-          let foundMedia = await model.findById(id);
+          let foundMedia: any = await model.findById(id);
           console.log(foundMedia);
           if (foundMedia) {
             try {
@@ -267,7 +266,7 @@ const getComments = async (req: Request, res: Response) => {
   //add option to sort by reply count, only first row
   const { mediaType, id } = req.params;
   let sort: string = req.query.sort as string;
-  let parent;
+  let parent: string;
   switch (mediaType) {
     case 'movie':
       parent = 'parentMovie';
@@ -301,6 +300,14 @@ const getComments = async (req: Request, res: Response) => {
           .sort({ replies: -1 })
           .lean();
         return res.status(200).json(comments);
+      }else if(sort === 'popularity'){
+        let comments = await Comment.find({
+          [parent]: id,
+          parentComment: null,
+        })
+          .sort({ voteCount: -1 })
+          .lean();
+        return res.status(200).json(comments);
       }
 
       let comments = await Comment.find({
@@ -321,32 +328,134 @@ const getComments = async (req: Request, res: Response) => {
 
 const vote = async (req: UserAuth, res: Response) => {
   const commentId: string = req.params.commentId;
-  const isUpvote: boolean = req.body as boolean;
+  const isUpvote: boolean = req.body.isUpvote as boolean;
+  //console.log(isUpvote);
   try {
     let comment = await Comment.findById(commentId);
+    //console.log(comment);
     if (comment) {
       try {
-        let vote = await Vote.findOne(
-          { postedBy: req.user, comment: commentId },
-          { comment: commentId, postedBy: req.user },
-          { upsert: true, new: true, setDefaultsOnInsert: true}
-        );
-        if (vote) {
-          if (isUpvote && vote.value === 1) {
-            // if upvote && existing vote value == 1, already upvoted, send message "cannot upvote again". No update happens.
-          } else if (isUpvote && vote.value === -1) {
-            // if upvote && existing vote value == -1, update vote value to 0 (zero).
-          } else if (isUpvote && vote.value === 0) {
-            //if upvote && existing vote value == 0, update vote value to 1
-          } else if (!isUpvote && vote.value === 0) {
-            //if downvote && existing vote value == 1, update vote value to 0 (zero).
-          } else if (!isUpvote && vote.value === -1) {
-            //if downvote && existing vote value == -1, already downvoted, send message "cannot downvote again". No update happens.
-          } else {
-            //if downvote && existing vote value == 0, update vote value to -1
+        let vote: any;
+        try {
+          vote = await Vote.findOne({ postedBy: req.user, comment: commentId });
+          if (!vote) {
+            try {
+              vote = new Vote({
+                comment: commentId,
+                postedBy: req.user,
+              });
+              await vote.save();
+            } catch (error) {
+              return res.status(500).json({
+                Msg: 'Something went wrong, try again later',
+              });
+            }
+          }
+        } catch (error) {
+          return res
+            .status(500)
+            .json({ Msg: 'Something went wrong, try again later' });
+        }
+        console.log({ vote: vote.value });
+        let voteVal: Number = parseInt(vote.value);
+        let updatedVoteVal: Number;
+
+        let newVote: any;
+        if (isUpvote && voteVal === 1) {
+          console.log('up and 1');
+          // if upvote && existing vote value == 1, already upvoted, just do -1 to reset
+          try {
+            updatedVoteVal = 0;
+            newVote = await Vote.findByIdAndUpdate(vote._id, {
+              value: 0,
+            });
+          } catch (error) {
+            return res.status(500).json({
+              Msg: 'Something went wrong while upvoting',
+            });
+          }
+        } else if (isUpvote && voteVal === -1) {
+          console.log('up and -1');
+          updatedVoteVal = 0;
+          // if upvote && existing vote value == -1, update vote value to 0 (zero).
+          try {
+            newVote = await Vote.findByIdAndUpdate(vote._id, {
+              value: 0,
+            });
+          } catch (error) {
+            return res.status(500).json({
+              Msg: 'Something went wrong while upvoting',
+            });
+          }
+        } else if (isUpvote && voteVal === 0) {
+          //if upvote && existing vote value == 0, update vote value to 1
+          updatedVoteVal = 1;
+          try {
+            newVote = await Vote.findByIdAndUpdate(vote._id, {
+              value: 1,
+            });
+            console.log('upvoted and value was 0');
+          } catch (error) {
+            return res.status(500).json({
+              Msg: 'Something went wrong while upvoting',
+            });
+          }
+        } else if (!isUpvote && voteVal === 0) {
+          console.log('down and 0');
+          updatedVoteVal = -1;
+          //if downvote && existing vote value == 1, update vote value to 0 (zero).
+          try {
+            newVote = await Vote.findByIdAndUpdate(vote._id, {
+              value: -1,
+            });
+          } catch (error) {
+            return res.status(500).json({
+              Msg: 'Something went wrong while downvoting',
+            });
+          }
+        } else if (!isUpvote && voteVal === -1) {
+          console.log('down and -1');
+          updatedVoteVal = 0;
+          //if downvote && existing vote value == -1, already downvoted, send message "cannot downvote again". No update happens.
+          try {
+            newVote = await Vote.findByIdAndUpdate(vote._id, {
+              value: 0,
+            });
+          } catch (error) {
+            return res
+              .status(500)
+              .json({ Msg: 'Something went wrong while downvoting' });
+          }
+        } else {
+          console.log('down and 1');
+          updatedVoteVal = 0;
+          //if downvote && existing vote value == 1, update vote value to 0
+          try {
+            newVote = await Vote.findByIdAndUpdate(vote._id, {
+              value: 0,
+            });
+          } catch (error) {
+            return res
+              .status(500)
+              .json({ Msg: 'Something went wrong while downvoting' });
           }
         }
+        //add the vote to the comment
+
+        try {
+          let updatedComment = await Comment.findByIdAndUpdate(commentId, {
+            $addToSet: { votes: newVote },
+            $inc: { voteCount: updatedVoteVal },
+          });
+          return res.status(200).json(updatedComment);
+        } catch (error) {
+          console.log(error);
+          return res
+            .status(500)
+            .json({ Msg: 'There was a problem, try again later' });
+        }
       } catch (err) {
+        console.log(err);
         return res.status(500).json({ Msg: 'There was a problem voting' });
       }
     } else {
@@ -365,4 +474,5 @@ export = {
   editComment,
   deleteComment,
   getComments,
+  vote,
 };

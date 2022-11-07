@@ -21,7 +21,7 @@ const getMediaById = async (req: Request, res: Response) => {
   const id: string = req.params.id;
   let foundMedia: any;
   const selector = new Selector();
-  let model = selector.chooseModel(mediaType);
+  let model: any = selector.chooseModel(mediaType);
   if (!model) {
     return res.status(500).json({ Msg: 'No media by this name' });
   }

@@ -1,18 +1,24 @@
 import mongoose from 'mongoose';
+import Movie from '../models/Movie';
+import Tv from '../models/Tv';
+import Book from '../models/Book';
+import Season from '../models/Season';
+import Episode from '../models/Episode';
+
 
 class Selector {
   chooseModel(mediaType: string) {
     switch (mediaType) {
       case 'movie':
-        return mongoose.model('Movie');
+        return Movie;
       case 'tv':
-        return mongoose.model('Tv');
+        return Tv;
       case 'season':
-        return mongoose.model('Season');
+        return Season;
       case 'episode':
-        return mongoose.model('Episode');
+        return Episode;
       case 'book':
-        return mongoose.model('Book');
+        return Book;
       default:
         return null;
     }

@@ -7,15 +7,13 @@ import checkVerification from '../middlewares/checkVerification';
 
 import commentControllers from '../controllers/commentsControllers';
 
-import {Request, Response, NextFunction} from 'express'
+import { Request, Response, NextFunction } from 'express';
 
 router.post(
   '/:mediaType/:id',
   auth,
   checkVerification,
-  [
-    check('text').notEmpty().withMessage('Text must exist'),
-  ],
+  [check('text').notEmpty().withMessage('Text must exist')],
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -72,6 +70,22 @@ router.put(
   commentControllers.editComment
 );
 
+router.put(
+  '/vote/:commentId',
+  auth,
+  checkVerification,
+  [check('isUpvote').isBoolean().withMessage('isUpvote must be true or false')],
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    } else {
+      next();
+    }
+  },
+  commentControllers.vote
+);
+
 router.delete(
   '/delete/:commentId',
   auth,
@@ -81,4 +95,4 @@ router.delete(
 
 router.get('/:mediaType/:id', commentControllers.getComments);
 
-export default  router;
+export default router;
