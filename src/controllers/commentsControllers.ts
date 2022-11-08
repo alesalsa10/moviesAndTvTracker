@@ -283,7 +283,7 @@ const deleteComment = async (req: Request, res: Response) => {
   }
 };
 
-const getComments = async (req: Request, res: Response) => {
+const getComments = async (req: UserAuth, res: Response) => {
   //add option to sort by reply count, only first row
   const { mediaType, id } = req.params;
   let sort: string = req.query.sort as string;
@@ -312,7 +312,7 @@ const getComments = async (req: Request, res: Response) => {
   //     break;
   // }
 
-  console.log(parent);
+  console.log(parent, 13);
   if (!mediaType) {
     return res.status(400).json({ Msg: 'Not a valid media type' });
   } else {
@@ -322,6 +322,7 @@ const getComments = async (req: Request, res: Response) => {
           [parent]: id,
           parentComment: null,
         })
+          .populate({ path: 'votes', match: { postedBy: req.user } }) //should only be one
           .sort({ repliesCount: -1 })
           .lean();
         return res.status(200).json(comments);
@@ -330,6 +331,7 @@ const getComments = async (req: Request, res: Response) => {
           [parent]: id,
           parentComment: null,
         })
+          .populate({ path: 'votes', match: { postedBy: req.user } }) //should only be one
           .sort({ voteCount: -1 })
           .lean();
         return res.status(200).json(comments);
@@ -339,6 +341,7 @@ const getComments = async (req: Request, res: Response) => {
         [parent]: id,
         parentComment: null,
       })
+        .populate({ path: 'votes', match: { postedBy: req.user } }) //should only be one
         .sort({ datePosted: -1 })
         .lean();
       return res.status(200).json(comments);
