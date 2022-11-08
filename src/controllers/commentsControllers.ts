@@ -245,7 +245,6 @@ const deleteComment = async (req: Request, res: Response) => {
             },
           });
 
-          
           //if parentComment
           if (comment.parentComment) {
             try {
@@ -254,7 +253,7 @@ const deleteComment = async (req: Request, res: Response) => {
                 $inc: { repliesCount: -1 },
               });
             } catch (error) {
-              console.log(error)
+              console.log(error);
             }
           }
 
@@ -263,12 +262,9 @@ const deleteComment = async (req: Request, res: Response) => {
             console.log('was deleted');
           } catch (error) {
             console.log(error);
-                          return res
-                            .status(500)
-                            .json({
-                              Msg: 'Something went wrong, try again later',
-                            });
- 
+            return res.status(500).json({
+              Msg: 'Something went wrong, try again later',
+            });
           }
           res.status(200).json({ Msg: 'Complete Deletion' });
         } catch (error) {
@@ -291,27 +287,31 @@ const getComments = async (req: Request, res: Response) => {
   //add option to sort by reply count, only first row
   const { mediaType, id } = req.params;
   let sort: string = req.query.sort as string;
-  let parent: string;
-  switch (mediaType) {
-    case 'movie':
-      parent = 'parentMovie';
-      break;
-    case 'tv':
-      parent = 'parentTv';
-      break;
-    case 'season':
-      parent = 'parentSeason';
-      break;
-    case 'episode':
-      parent = 'parentEpisode';
-      break;
-    case 'book':
-      parent = 'parentBook';
-      break;
-    default:
-      parent = null;
-      break;
+  let parent: string = chooseCommentParent(mediaType);
+  if (!parent) {
+    return res.status(404).json({ Msg: 'Invalid media type' });
   }
+  // switch (mediaType) {
+  //   case 'movie':
+  //     parent = 'parentMovie';
+  //     break;
+  //   case 'tv':
+  //     parent = 'parentTv';
+  //     break;
+  //   case 'season':
+  //     parent = 'parentSeason';
+  //     break;
+  //   case 'episode':
+  //     parent = 'parentEpisode';
+  //     break;
+  //   case 'book':
+  //     parent = 'parentBook';
+  //     break;
+  //   default:
+  //     parent = null;
+  //     break;
+  // }
+
   console.log(parent);
   if (!mediaType) {
     return res.status(400).json({ Msg: 'Not a valid media type' });

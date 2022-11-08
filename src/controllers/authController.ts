@@ -471,10 +471,6 @@ const refreshToken = async (req: Request, res: Response) => {
   // evaluate jwt
   else {
     try {
-      // const { user } = jwt.verify(
-      //   refreshToken,
-      //   process.env.REFRESH_TOKEN_SECRET
-      // );
       const { user } = jwt.verify(
         refreshToken,
         process.env.REFRESH_TOKEN_SECRET
@@ -494,20 +490,6 @@ const refreshToken = async (req: Request, res: Response) => {
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: '30d' }
       );
-
-      //remove old token and add the one one
-      // await User.findOneAndUpdate(
-      //   { refreshTokens: refreshToken },
-      //   {
-      //     $pull: { refreshTokens: refreshToken },
-      //   },
-      //   {
-      //     $push: { refreshTokens: newRefreshToken },
-      //   }
-      // );
-      // foundUser.refreshTokens.pull(refreshToken);
-      // foundUser.refreshTokens.push(newRefreshToken);
-      // await foundUser.save();
 
       await User.findByIdAndUpdate(foundUser._id, {
         $pull: { refreshTokens: refreshToken },
