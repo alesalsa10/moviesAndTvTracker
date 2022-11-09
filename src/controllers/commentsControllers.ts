@@ -284,7 +284,8 @@ const deleteComment = async (req: Request, res: Response) => {
 };
 
 const getComments = async (req: UserAuth, res: Response) => {
-  //add option to sort by reply count, only first row
+  //req.user is undefined since this is an open route and the middleware does not need to run
+  //need an laternative method
   const { mediaType, id } = req.params;
   let sort: string = req.query.sort as string;
   let parent: string = chooseCommentParent(mediaType);
@@ -474,7 +475,8 @@ const vote = async (req: UserAuth, res: Response) => {
           let updatedComment = await Comment.findByIdAndUpdate(commentId, {
             $addToSet: { votes: newVote },
             $inc: { voteCount: updatedVoteVal },
-          });
+          }).populate({ path: 'votes', match: { postedBy: req.user } }); 
+
           return res.status(200).json(updatedComment);
         } catch (error) {
           console.log(error);

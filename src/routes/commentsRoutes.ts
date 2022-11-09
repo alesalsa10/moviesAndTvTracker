@@ -8,6 +8,7 @@ import checkVerification from '../middlewares/checkVerification';
 import commentControllers from '../controllers/commentsControllers';
 
 import { Request, Response, NextFunction } from 'express';
+import getCommentsMiddleware from '../middlewares/getComments';
 
 router.post(
   '/:mediaType/:id',
@@ -93,6 +94,9 @@ router.delete(
   commentControllers.deleteComment
 );
 
-router.get('/:mediaType/:id', commentControllers.getComments);
+router.get(
+  '/:mediaType/:id',
+  getCommentsMiddleware,
+  commentControllers.getComments);
 
 export default router;
