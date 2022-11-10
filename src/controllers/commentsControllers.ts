@@ -394,7 +394,7 @@ const vote = async (req: UserAuth, res: Response) => {
           console.log('up and 1');
           // if upvote && existing vote value == 1, already upvoted, just do -1 to reset
           try {
-            updatedVoteVal = 0;
+            updatedVoteVal = -1;
             newVote = await Vote.findByIdAndUpdate(vote._id, {
               value: 0,
             });
@@ -405,11 +405,11 @@ const vote = async (req: UserAuth, res: Response) => {
           }
         } else if (isUpvote && voteVal === -1) {
           console.log('up and -1');
-          updatedVoteVal = 0;
+          updatedVoteVal = 2;
           // if upvote && existing vote value == -1, update vote value to 0 (zero).
           try {
             newVote = await Vote.findByIdAndUpdate(vote._id, {
-              value: 0,
+              value: 1,
             });
           } catch (error) {
             return res.status(500).json({
@@ -444,7 +444,7 @@ const vote = async (req: UserAuth, res: Response) => {
           }
         } else if (!isUpvote && voteVal === -1) {
           console.log('down and -1');
-          updatedVoteVal = 0;
+          updatedVoteVal = 1;
           //if downvote && existing vote value == -1, already downvoted, send message "cannot downvote again". No update happens.
           try {
             newVote = await Vote.findByIdAndUpdate(vote._id, {
@@ -457,11 +457,11 @@ const vote = async (req: UserAuth, res: Response) => {
           }
         } else {
           console.log('down and 1');
-          updatedVoteVal = 0;
+          updatedVoteVal = -2;
           //if downvote && existing vote value == 1, update vote value to 0
           try {
             newVote = await Vote.findByIdAndUpdate(vote._id, {
-              value: 0,
+              value: -1,
             });
           } catch (error) {
             return res
@@ -475,7 +475,11 @@ const vote = async (req: UserAuth, res: Response) => {
           let updatedComment = await Comment.findByIdAndUpdate(commentId, {
             $addToSet: { votes: newVote },
             $inc: { voteCount: updatedVoteVal },
-          }).populate({ path: 'votes', match: { postedBy: req.user } }); 
+          },
+          {
+            new: true,
+          }
+          ).populate({ path: 'votes', match: { postedBy: req.user } }); 
 
           return res.status(200).json(updatedComment);
         } catch (error) {
