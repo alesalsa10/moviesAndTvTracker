@@ -12,7 +12,7 @@ const checkVerification = async (req: UserAuth, res: Response, next: NextFunctio
     return res.status(404).json({ msg: 'User not found' });
   } else if (!user.isVerified) {
     return res
-      .status(401)
+      .status(403)
       .json({ Msg: 'Only verified users can complete this action' });
   } else {
     next();

@@ -162,19 +162,6 @@ const signout = async (req: UserAuth, res: Response) => {
   if (!cookies?.jwt) return res.sendStatus(204); //No content
   const refreshToken: string = cookies.jwt;
   console.log(refreshToken);
-
-  // Is refreshToken in db?
-  // const foundUser = await User.findOne({ refreshTokens: refreshToken }).exec();
-  // if (!foundUser) {
-  //   res.clearCookie('jwt', { httpOnly: true, secure: true });
-  //   return res.sendStatus(204);
-  // }
-
-  // foundUser.refreshTokens.pull(refreshToken);
-  // await foundUser.save();
-
-  // res.clearCookie('jwt', { httpOnly: true, secure: true });
-  // res.sendStatus(204);
   if (req.user) {
     await User.findByIdAndUpdate(req.user, {
       $pull: { refreshTokens: refreshToken },
@@ -388,6 +375,7 @@ const changeEmail = async (req: UserAuth, res: Response) => {
         } else {
           let updated = await User.findByIdAndUpdate(req.user, {
             email: form.email.toLowerCase(),
+            isVerified: false,
           });
           console.log(updated);
           return res.status(200).json({ Msg: 'Email updated successfully' });

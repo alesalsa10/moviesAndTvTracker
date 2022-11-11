@@ -63,7 +63,7 @@ router.post(
         'Password must be 8 or more characters, contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol'
       ),
   ],
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -83,7 +83,7 @@ router.post(
       .withMessage('Current password required'),
     check('email').isEmail().withMessage('Enter a valid email'),
   ],
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -99,7 +99,7 @@ router.post('/verifyEmail/:token', authController.verifyEmail);
 router.post(
   '/verify/resendEmail',
   [check('email').isEmail().withMessage('Must be a valid email')],
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -114,7 +114,7 @@ router.post(
 router.post(
   '/forgotPassword',
   [check('email').isEmail().withMessage('Must be a valid email')],
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -134,7 +134,7 @@ router.post(
         'Password must be 8 or more characters, contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol'
       ),
   ],
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
