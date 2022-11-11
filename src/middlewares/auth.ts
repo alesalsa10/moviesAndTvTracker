@@ -8,7 +8,6 @@ interface JwtPayload {
   user: string;
 }
 const auth = (req: UserAuth, res: Response, next: NextFunction) => {
-  console.log(req.header('Authorization'));
   const token: string = req.header('Authorization').split(' ')[1];
   if (!token) {
     return res
