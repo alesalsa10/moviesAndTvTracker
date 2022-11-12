@@ -452,8 +452,20 @@ const refreshToken = async (req: Request, res: Response) => {
   //console.log(foundUser);
   if (!foundUser) {
     //possible hacked user
-    console.log('not found');
-    return res.status(401).json({ Msg: 'unathorized' }); //Forbidden
+    try {
+      const { user } = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+      ) as JwtPayload;
+      const hackedUser = await User.findById(user);
+      hackedUser.refreshTokens = [];
+      await hackedUser.save();
+      console.log('not found');
+      return res.status(401).json({ Msg: 'unathorized' }); //Forbidden
+    } catch (err) {
+      console.log(err);
+      return res.status(401);
+    }
   }
   // evaluate jwt
   else {
@@ -467,7 +479,7 @@ const refreshToken = async (req: Request, res: Response) => {
       console.log('verified user', user);
 
       if (!user || user !== foundUser._id.toString()) {
-        console.log(user === foundUser.id.toString() )
+        console.log(user === foundUser.id.toString());
         return res.status(401).json({ Msg: 'Unathorized' });
       }
       const accessToken: string = jwt.sign(
@@ -507,7 +519,7 @@ const refreshToken = async (req: Request, res: Response) => {
       console.log('access token retuned', accessToken);
       return res.status(200).json(accessToken);
     } catch (err) {
-      console.log(err, 'ref')
+      console.log(err, 'ref');
       return res.status(401).json({ Msg: 'Not authorized' });
     }
   }
