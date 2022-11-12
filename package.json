@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node build/server.js",
     "postinstall": "tsc",
-    "dev": "tsc && node build/server.js"
+    "dev": "nodemon src/server.ts"
   },
   "author": "Alexander Medina",
   "license": "ISC",

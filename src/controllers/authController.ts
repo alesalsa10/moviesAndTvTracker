@@ -103,10 +103,6 @@ const signIn = async (req: Request, res: Response) => {
     password: string;
   }
   const form: Registration = req.body;
-  //const { password, email } = req.body;
-  //check if user exists
-  //if no user exist send error invalid crednetial error
-  //if user users exist, compared hashed password, if it mataches create jwt token to send back to client
   try {
     let foundUser = await User.findOne({ email: form.email.toLowerCase() });
     if (foundUser) {
@@ -128,10 +124,6 @@ const signIn = async (req: Request, res: Response) => {
           process.env.REFRESH_TOKEN_SECRET,
           { expiresIn: '30d' }
         );
-
-        //foundUser.refreshToken = refreshToken; //old
-        //foundUser.refreshTokens.push(refreshToken); //new
-        //await foundUser.save();
         await User.findByIdAndUpdate(foundUser._id, {
           $push: { refreshTokens: refreshToken },
         });
@@ -139,7 +131,7 @@ const signIn = async (req: Request, res: Response) => {
         foundUser = await User.findById(foundUser._id).select(
           '-password -refreshTokens'
         );
-        console.log(foundUser);
+        // console.log(foundUser);
         res.cookie('jwt', refreshToken, {
           httpOnly: true,
           maxAge: 30 * 24 * 60 * 60 * 60,
@@ -172,7 +164,7 @@ const signout = async (req: Request, res: Response) => {
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true });
     return res.status(204);
   }
-  let some = await User.findOneAndUpdate(
+  await User.findOneAndUpdate(
     { refreshTokens: refreshToken },
     {
       $pull: { refreshTokens: refreshToken },
@@ -452,26 +444,30 @@ const refreshToken = async (req: Request, res: Response) => {
     user: string;
   }
   const cookies = req.cookies;
-  console.log(cookies);
   if (!cookies.jwt) {
-    return res.status(403).json({ Msg: 'unathorized' });
+    return res.status(401).json({ Msg: 'unathorized' });
   }
   const refreshToken: string = cookies.jwt;
   const foundUser = await User.findOne({ refreshTokens: refreshToken }).exec();
   //console.log(foundUser);
   if (!foundUser) {
+    //possible hacked user
     console.log('not found');
     return res.status(401).json({ Msg: 'unathorized' }); //Forbidden
   }
   // evaluate jwt
   else {
+    console.log('refresh token', refreshToken);
     try {
       const { user } = jwt.verify(
         refreshToken,
         process.env.REFRESH_TOKEN_SECRET
       ) as JwtPayload;
 
+      console.log('verified user', user);
+
       if (!user || user !== foundUser._id.toString()) {
+        console.log(user === foundUser.id.toString() )
         return res.status(401).json({ Msg: 'Unathorized' });
       }
       const accessToken: string = jwt.sign(
@@ -488,6 +484,9 @@ const refreshToken = async (req: Request, res: Response) => {
 
       await User.findByIdAndUpdate(foundUser._id, {
         $pull: { refreshTokens: refreshToken },
+      });
+
+      await User.findByIdAndUpdate(foundUser._id, {
         $push: { refreshTokens: newRefreshToken },
       });
 
@@ -505,8 +504,10 @@ const refreshToken = async (req: Request, res: Response) => {
         secure: true,
         sameSite: 'none',
       });
+      console.log('access token retuned', accessToken);
       return res.status(200).json(accessToken);
     } catch (err) {
+      console.log(err, 'ref')
       return res.status(401).json({ Msg: 'Not authorized' });
     }
   }
