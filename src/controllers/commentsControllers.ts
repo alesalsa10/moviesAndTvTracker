@@ -5,6 +5,7 @@ import Selector from '../utils/selector';
 import mongoose, { ObjectId } from 'mongoose';
 import { Request, Response } from 'express';
 import Vote from '../models/Vote';
+import { VoteCount } from 'aws-sdk/clients/managedblockchain';
 //make it so if comment value == '[Deleted]' this type of comment cannot be deleted since this is only used a reference key
 interface UserAuth extends Request {
   user: string; // or any other type
@@ -385,8 +386,8 @@ const vote = async (req: UserAuth, res: Response) => {
             .status(500)
             .json({ Msg: 'Something went wrong, try again later' });
         }
-        console.log({ vote: vote.value });
-        let voteVal: Number = parseInt(vote.value);
+        console.log({ vote: vote });
+        let voteVal: Number = vote.value
         let updatedVoteVal: Number;
 
         let newVote: any;
@@ -472,14 +473,16 @@ const vote = async (req: UserAuth, res: Response) => {
         //add the vote to the comment
 
         try {
-          let updatedComment = await Comment.findByIdAndUpdate(commentId, {
-            $addToSet: { votes: newVote },
-            $inc: { voteCount: updatedVoteVal },
-          },
-          {
-            new: true,
-          }
-          ).populate({ path: 'votes', match: { postedBy: req.user } }); 
+          let updatedComment = await Comment.findByIdAndUpdate(
+            commentId,
+            {
+              $addToSet: { votes: newVote },
+              $inc: { voteCount: updatedVoteVal },
+            },
+            {
+              new: true,
+            }
+          ).populate({ path: 'votes', match: { postedBy: req.user } });
 
           return res.status(200).json(updatedComment);
         } catch (error) {

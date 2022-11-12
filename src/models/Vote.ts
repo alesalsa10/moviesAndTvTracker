@@ -6,7 +6,7 @@ const VoteSchema = new mongoose.Schema({
         required: true
     },
     value: {
-        Type: Number,
+        type: Number,
         default: 0  //upvote is +1 downvote -1 and 0 is no vote
     },
     postedBy: {
