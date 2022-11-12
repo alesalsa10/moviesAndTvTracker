@@ -75,9 +75,11 @@ const register = async (req: Request, res: Response) => {
           httpOnly: true,
           maxAge: 30 * 24 * 60 * 60 * 60,
           secure: true,
-          //sameSite: 'None',
+          sameSite: 'none',
         });
-        foundUser = await User.findById(foundUser._id).select('-password');
+        foundUser = await User.findById(foundUser._id).select(
+          '-password -refreshTokens'
+        );
         //.populate('comments');
         return res.status(200).json({
           accessToken,
@@ -134,13 +136,15 @@ const signIn = async (req: Request, res: Response) => {
           $push: { refreshTokens: refreshToken },
         });
 
-        foundUser = await User.findById(foundUser._id).select('-password');
-
+        foundUser = await User.findById(foundUser._id).select(
+          '-password -refreshTokens'
+        );
+        console.log(foundUser);
         res.cookie('jwt', refreshToken, {
           httpOnly: true,
           maxAge: 30 * 24 * 60 * 60 * 60,
           secure: true,
-          //sameSite: 'None',
+          sameSite: 'none',
         });
         res.status(201).json({ accessToken, foundUser });
       } else {
@@ -155,24 +159,27 @@ const signIn = async (req: Request, res: Response) => {
   }
 };
 
-const signout = async (req: UserAuth, res: Response) => {
+const signout = async (req: Request, res: Response) => {
   // On client, also delete the accessToken
   const cookies = req.cookies;
-  console.log(cookies)
-  if (!cookies?.jwt) return res.sendStatus(204); //No content
+  //console.log(cookies);
+  if (!cookies?.jwt) return res.status(204); //No content
   const refreshToken: string = cookies.jwt;
   console.log(refreshToken);
-  if (req.user) {
-    await User.findByIdAndUpdate(req.user, {
-      $pull: { refreshTokens: refreshToken },
-    });
-    res.clearCookie('jwt', { httpOnly: true, secure: true });
-    return res.status(204);
-  } else {
-    res.clearCookie('jwt', { httpOnly: true, secure: true });
-
+  // return res.status(204);
+  const foundUser = await User.findOne({ refreshTokens: refreshToken }).exec();
+  if (!foundUser) {
+    res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true });
     return res.status(204);
   }
+  let some = await User.findOneAndUpdate(
+    { refreshTokens: refreshToken },
+    {
+      $pull: { refreshTokens: refreshToken },
+    }
+  );
+  res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true });
+  res.sendStatus(204);
 };
 
 const verifyEmail = async (req: Request, res: Response) => {
@@ -336,7 +343,7 @@ const resetPassword = async (req: Request, res: Response) => {
         await updatedUser.save();
         res.clearCookie('jwt', {
           httpOnly: true,
-          //sameSite: 'None',
+          sameSite: 'none',
           secure: true,
         }); //new
 
@@ -423,7 +430,7 @@ const changePassword = async (req: UserAuth, res: Response) => {
         await updatedUser.save();
         res.clearCookie('jwt', {
           httpOnly: true,
-          // sameSite: 'None',
+          sameSite: 'none',
           secure: true,
         }); //new
 
@@ -451,7 +458,7 @@ const refreshToken = async (req: Request, res: Response) => {
   }
   const refreshToken: string = cookies.jwt;
   const foundUser = await User.findOne({ refreshTokens: refreshToken }).exec();
-  console.log(foundUser);
+  //console.log(foundUser);
   if (!foundUser) {
     console.log('not found');
     return res.status(401).json({ Msg: 'unathorized' }); //Forbidden
@@ -487,7 +494,7 @@ const refreshToken = async (req: Request, res: Response) => {
       //clear old cookies
       res.clearCookie('jwt', {
         httpOnly: true,
-        //sameSite: 'None',
+        sameSite: 'none',
         secure: true,
       });
 
@@ -496,7 +503,7 @@ const refreshToken = async (req: Request, res: Response) => {
         httpOnly: true,
         maxAge: 30 * 24 * 60 * 60 * 60,
         secure: true,
-        //sameSite: 'None',
+        sameSite: 'none',
       });
       return res.status(200).json(accessToken);
     } catch (err) {

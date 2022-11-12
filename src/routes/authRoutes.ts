@@ -48,7 +48,7 @@ router.post(
   authController.signIn
 );
 
-router.get('/signout', auth, authController.signout);
+router.get('/signout', authController.signout);
 
 router.post(
   '/changePassword',
