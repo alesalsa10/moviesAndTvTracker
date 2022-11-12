@@ -4,8 +4,9 @@
   "description": "api for movies and show tracker",
   "main": "src/server.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/server.ts"
+    "start": "node build/server.js",
+    "postinstall": "tsc",
+    "build": "tsc"
   },
   "author": "Alexander Medina",
   "license": "ISC",
