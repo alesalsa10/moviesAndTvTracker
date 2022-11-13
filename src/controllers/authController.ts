@@ -374,7 +374,6 @@ const changeEmail = async (req: UserAuth, res: Response) => {
         } else {
           let updated = await User.findByIdAndUpdate(req.user, {
             email: form.email.toLowerCase(),
-            isVerified: false,
           });
           console.log(updated);
           return res.status(200).json({ Msg: 'Email updated successfully' });
