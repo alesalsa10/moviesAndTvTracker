@@ -293,26 +293,6 @@ const getComments = async (req: UserAuth, res: Response) => {
   if (!parent) {
     return res.status(404).json({ Msg: 'Invalid media type' });
   }
-  // switch (mediaType) {
-  //   case 'movie':
-  //     parent = 'parentMovie';
-  //     break;
-  //   case 'tv':
-  //     parent = 'parentTv';
-  //     break;
-  //   case 'season':
-  //     parent = 'parentSeason';
-  //     break;
-  //   case 'episode':
-  //     parent = 'parentEpisode';
-  //     break;
-  //   case 'book':
-  //     parent = 'parentBook';
-  //     break;
-  //   default:
-  //     parent = null;
-  //     break;
-  // }
 
   console.log(parent, 13);
   if (!mediaType) {

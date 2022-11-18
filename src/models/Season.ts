@@ -17,7 +17,8 @@ const SeasonSchema = new mongoose.Schema({
       ref: 'Comment',
     },
   ],
-  _id: String, //id from external api simialr struc to the one on our own
+  //_id: String, //id from external api simialr struc to the one on our own
+  externalId: String,
   media: {
     type: String, //id of the parent medie which is an unique number
     ref: 'Tv',

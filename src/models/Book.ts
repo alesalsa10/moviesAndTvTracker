@@ -11,15 +11,15 @@ const bookSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     ref: 'User',
   },
-  _id: String,
+  externalId: String,
   name: {
     type: String,
-    required: true
+    required: true,
   },
   commentCount: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 });
 
 const Book = mongoose.model('Book', bookSchema);

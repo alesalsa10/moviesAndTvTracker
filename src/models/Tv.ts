@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const TvSchema = new mongoose.Schema({
+  externalId: String,
   comments: [
     {
       type: mongoose.Types.ObjectId,
@@ -13,7 +14,7 @@ const TvSchema = new mongoose.Schema({
       ref: 'Season',
     },
   ],
-  _id: String,
+  //_id: String,
   user: {
     type: mongoose.Types.ObjectId,
     ref: 'User',

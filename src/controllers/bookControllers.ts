@@ -18,7 +18,7 @@ const getBookById = async (req: Request, res: Response) => {
       res.status(200).json({ foundMedia, mediaDetails });
     }
   } else {
-    foundMedia = new Book({ _id: bookId, name: mediaDetails.volumeInfo.title });
+    foundMedia = new Book({ externalId: bookId, name: mediaDetails.volumeInfo.title });
     await foundMedia.save();
     if (mediaDetails.error) {
       res.status(mediaDetails.error.status).json({ Msg: mediaDetails.Msg });
@@ -39,13 +39,13 @@ const getBookByIsbn = async (req: Request, res: Response) => {
   } else {
     //res.status(400).json( book.items[0].id );
     try {
-      let foundMedia = await Book.findOne({ _id: mediaDetails.items[0].id });
+      let foundMedia = await Book.findOne({ externalId: mediaDetails.items[0].id });
       if (foundMedia) {
         mediaDetails = mediaDetails.items[0];
         res.status(200).json({ foundMedia, mediaDetails });
       } else {
         foundMedia = new Book({
-          _id: mediaDetails.items[0].id,
+          externalId: mediaDetails.items[0].id,
           name: mediaDetails.items[0].volumeInfo.title,
         });
         await foundMedia.save();

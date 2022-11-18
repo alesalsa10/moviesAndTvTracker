@@ -29,7 +29,8 @@ const episodeSchema = new mongoose.Schema({
       ref: 'Comment',
     },
   ],
-  _id: String,
+  //_id: String,
+  externalId: String,
   name: {
     type: String,
     required: true,

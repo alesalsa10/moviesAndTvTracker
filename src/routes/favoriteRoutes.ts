@@ -5,21 +5,21 @@ import auth from '../middlewares/auth';
 import checkVerification from '../middlewares/checkVerification';
 
 router.put(
-  '/movie/:externalId',
+  '/movie/:id',
   auth,
   checkVerification,
   favoriteControllers.toggleMovieFavorite
 );
 
 router.put(
-  '/tv/:externalId',
+  '/tv/:id',
   auth,
   checkVerification,
   favoriteControllers.toggleTvFavorite
 );
 
 router.put(
-  '/book/:externalId',
+  '/book/:id',
   auth,
   checkVerification,
   favoriteControllers.toggleBookFavorite

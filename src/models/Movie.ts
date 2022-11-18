@@ -11,7 +11,8 @@ const movieSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId, //for when the user creates a bookmark
     ref: 'User',
   },
-  _id: String,
+  //_id: String,
+  externalId: String,
   name: {
     type: String,
     required: true,
