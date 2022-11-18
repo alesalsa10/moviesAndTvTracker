@@ -217,7 +217,7 @@ const getSeason = async (req: Request, res: Response) => {
           if (foundSeason) {
             //mediaDetails
             //return res.status(200).json({ season, foundSeason });
-            let mediaDetails = season;
+            let mediaDetails = season.data;
             let foundMedia = foundSeason;
             return res.status(200).json({ mediaDetails, foundMedia });
           } else {
@@ -237,7 +237,7 @@ const getSeason = async (req: Request, res: Response) => {
 
             await media.save();
             //return res.status(200).json({ season, foundSeason });
-            let mediaDetails = season;
+            let mediaDetails = season.data;
             let foundMedia = foundSeason;
             return res.status(200).json({ mediaDetails, foundMedia });
           }
@@ -248,7 +248,7 @@ const getSeason = async (req: Request, res: Response) => {
       } else {
         let media = new Tv({
           _id: id,
-          name: parentTV.data.name
+          name: parentTV.name
         });
         await media.save();
         let foundSeason = new Season({
@@ -267,7 +267,7 @@ const getSeason = async (req: Request, res: Response) => {
 
         await media.save();
         //return res.status(200).json({ season, foundSeason });
-        let mediaDetails = season;
+        let mediaDetails = season.data;
         let foundMedia = foundSeason;
         return res.status(200).json({ mediaDetails, foundMedia });
       }

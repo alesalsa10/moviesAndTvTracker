@@ -6,6 +6,43 @@ const externalGetMediaById = async (mediaType: string, id: string) => {
       `${process.env.TMDB_BASE_URL}/${mediaType}/${id}?api_key=${process.env.TMDB_KEY}&append_to_response=videos,credits,release_dates,content_ratings,recommendations`
     );
     //response.data.error = null;
+    console.log(response.data)
+    return response.data;
+  } catch (err) {
+    console.log(err.response, '123456');
+    return {
+      error: {
+        status: err.response.status,
+        Msg: err.response.data.status_message,
+      },
+    };
+  }
+};
+
+const getSeasonInfo = async (seasonNumber: string, id: string) => {
+  try {
+    const response = await axios.get(
+      `${process.env.TMDB_BASE_URL}/tv/${id}/season/${seasonNumber}?api_key=${process.env.TMDB_KEY}&append_to_response=videos,credits,release_dates`
+    );
+    //response.data.error = null;
+    return response.data;
+  } catch (err) {
+    console.log(err.response, '123456');
+    return {
+      error: {
+        status: err.response.status,
+        Msg: err.response.data.status_message,
+      },
+    };
+  }
+};
+
+const getEpisodeInfo = async (seasonNumber: string, episodeNumber: string, id: string) => {
+  try {
+    const response = await axios.get(
+      `${process.env.TMDB_BASE_URL}/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${process.env.TMDB_KEY}&append_to_response=videos,credits,release_dates`
+    );
+    //response.data.error = null;
     return response.data;
   } catch (err) {
     console.log(err.response, '123456');
@@ -118,5 +155,7 @@ export default {
   booksByGenre,
   searchMedia,
   getBookByIsbn,
-  searchByTitleAndAuthor
+  searchByTitleAndAuthor,
+  getSeasonInfo,
+  getEpisodeInfo
 };
