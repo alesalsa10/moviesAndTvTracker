@@ -2,11 +2,12 @@
   "name": "moviesbe",
   "version": "1.0.0",
   "description": "api for movies and show tracker",
-  "main": "build/server.js",
+  "main": "server.ts",
   "scripts": {
     "start": "node build/server.js",
     "postinstall": "tsc",
-    "dev": "nodemon src/server.ts"
+    "dev": "nodemon src/server.ts",
+    "build": "tsc"
   },
   "author": "Alexander Medina",
   "license": "ISC",
