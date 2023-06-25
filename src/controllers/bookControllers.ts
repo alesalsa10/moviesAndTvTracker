@@ -8,7 +8,6 @@ const getBookById = async (req: Request, res: Response) => {
   let { bookId } = req.params;
   let foundMedia = await Book.findById(bookId);
   let mediaDetails = await apiCalls.getBook(bookId);
-  console.log(mediaDetails, '44');
   if (foundMedia) {
     if (mediaDetails.error) {
       res
@@ -18,7 +17,10 @@ const getBookById = async (req: Request, res: Response) => {
       res.status(200).json({ foundMedia, mediaDetails });
     }
   } else {
-    foundMedia = new Book({ externalId: bookId, name: mediaDetails.volumeInfo.title });
+    foundMedia = new Book({
+      externalId: bookId,
+      name: mediaDetails.volumeInfo.title,
+    });
     await foundMedia.save();
     if (mediaDetails.error) {
       res.status(mediaDetails.error.status).json({ Msg: mediaDetails.Msg });
@@ -39,7 +41,9 @@ const getBookByIsbn = async (req: Request, res: Response) => {
   } else {
     //res.status(400).json( book.items[0].id );
     try {
-      let foundMedia = await Book.findOne({ externalId: mediaDetails.items[0].id });
+      let foundMedia = await Book.findOne({
+        externalId: mediaDetails.items[0].id,
+      });
       if (foundMedia) {
         mediaDetails = mediaDetails.items[0];
         res.status(200).json({ foundMedia, mediaDetails });
@@ -70,15 +74,13 @@ const getBooksByGenre = async (req: Request, res: Response) => {
 };
 
 const moviesBasedOnBook = async (req: Request, res: Response) => {
-  //const { book_name, book_author } = req.body;
-  const book_name: string = req.body;
-  const book_author: string = req.body;
+  const book_name: string = req.body.book_name;
+  const book_author: string = req.body.book_author;
   try {
     let basedMedia = await BasedOnBook.findOne({
       book_name: book_name,
       book_author: book_author,
     }).lean();
-    console.log(basedMedia);
     if (basedMedia) {
       let mediaType = basedMedia.media_type.toLowerCase();
       if (mediaType == 'movie') {
@@ -93,7 +95,6 @@ const moviesBasedOnBook = async (req: Request, res: Response) => {
         } else {
           if (mediaDetails.results.length > 0) {
             for (let movie of mediaDetails.results) {
-              console.log(new Date(movie.release_date).getFullYear());
               if (
                 new Date(movie.release_date).getFullYear() ==
                 basedMedia.release_year
@@ -155,7 +156,6 @@ const searchBook = async (req: Request, res: Response) => {
 
 const booksByAuthor = async (req: Request, res: Response) => {
   let author: string = req.params.author.split(' ').join('+');
-  console.log(author);
   try {
     const response = await axios.get(
       `https://www.googleapis.com/books/v1/volumes?q=inauthor:${author}&maxResults=10&key=${process.env.GOOGLE_BOOKS_KEY}
@@ -175,7 +175,6 @@ const getBestSellers = async (req: Request, res: Response) => {
     let response = await axios.get(
       `${process.env.NY_TIMES_URL}/lists/overview.json?api-key=${process.env.NY_TIMES_KEY}`
     );
-    console.log(response.data.results.lists);
     res.status(200).json(response.data.results.lists);
     //best sellers uses googleapi image for theirs
     //use isbn to look up book on google api when I click on the book
